@@ -79,6 +79,8 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
 
                 Picasso.with(mContext)
                         .load(episode.image)
+                        .error(R.drawable.placeholder)
+                        .placeholder(R.drawable.placeholder)
                         .into(posterImg);
             }
 

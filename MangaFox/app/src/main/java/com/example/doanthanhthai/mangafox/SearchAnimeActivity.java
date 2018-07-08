@@ -10,14 +10,15 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
+import android.view.MenuItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.Toast;
 
-import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
-import com.example.doanthanhthai.mangafox.model.Episode;
+import com.example.doanthanhthai.mangafox.share.Constant;
+import com.example.doanthanhthai.mangafox.adapter.ResultAnimeAdapter;
+import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
 
@@ -31,38 +32,36 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 
-public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAdapter.OnLatestEpisodeAdapterListener, View.OnClickListener {
-
-    public static final String TAG = CrawlActivity.class.getSimpleName();
+public class SearchAnimeActivity extends AppCompatActivity implements SearchView.OnQueryTextListener,ResultAnimeAdapter.OnResultAnimeAdapterListener {
+    private static final String TAG = SearchAnimeActivity.class.getSimpleName();
     private WebView webView;
     private AppWebViewClients webViewClient;
-    private ImageView searchIconIv;
-    private static final String URL = "http://vuighe.net/tap-moi-nhat";
-    private static final String HARD_URL = "http://vuighe.net/otome-wa-boku-ni-koishiteru";
-    private RecyclerView latestEpisodeRV;
-    private LatestEpisodeAdapter mLatestEpisodeAdapter;
-    public static final String EPISODE_URL_ARG = "episodeUrlArg";
-    public static final String KEYWORD_ARG = "keywordArg";
+    private MenuItem searchMenu;
+    private SearchView searchView;
     private ProgressDialog progressDialog;
-
+    private RecyclerView resultAnimeRv;
+    private ResultAnimeAdapter mResultAnimeAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_crawl);
+        setContentView(R.layout.activity_search_anime);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
 
+        searchView = findViewById(R.id.anime_search_view);
+        resultAnimeRv = findViewById(R.id.result_anime_rv);
         webView = (WebView) findViewById(R.id.webView);
-        searchIconIv = findViewById(R.id.search_icon_iv);
-        searchIconIv.setOnClickListener(this);
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.clearHistory();
-        webView.getSettings().setJavaScriptEnabled(true);
         webViewClient = new AppWebViewClients();
         webView.setWebViewClient(webViewClient);
+
+        searchView.onActionViewExpanded();
+        searchView.requestFocus();
+        searchView.setOnQueryTextListener(this);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
@@ -70,44 +69,41 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setIndeterminate(true);
 
-
-        latestEpisodeRV = findViewById(R.id.latest_anime_rv);
-
         GridLayoutManager gridLayoutManager = new AutoFitGridLayoutManager(this, Utils.convertDpToPixel(this, 150));
-        mLatestEpisodeAdapter = new LatestEpisodeAdapter(this);
-        latestEpisodeRV.setLayoutManager(gridLayoutManager);
-        latestEpisodeRV.setAdapter(mLatestEpisodeAdapter);
+        mResultAnimeAdapter = new ResultAnimeAdapter(this);
+        resultAnimeRv.setLayoutManager(gridLayoutManager);
+        resultAnimeRv.setAdapter(mResultAnimeAdapter);
 
-        new GetListAnimeTask().execute(URL);
+    }
+
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        new GetListAnimeTask().execute(Constant.SEARCH_URL+query);
+        return false;
     }
 
     @Override
-    public void onItemClick(Episode item, int position) {
+    public boolean onQueryTextChange(String newText) {
+        return false;
+    }
+
+    @Override
+    public void onItemClick(Anime item, int position) {
         progressDialog.show();
         webViewClient.setRunGetSourceWeb(true);
         webView.loadUrl(item.url);
         Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show();
-
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.search_icon_iv:
-                Intent intent = new Intent(this, SearchAnimeActivity.class);
-                intent.putExtra(KEYWORD_ARG, "");
-                startActivity(intent);
-                break;
-        }
-    }
 
-    private class GetListAnimeTask extends AsyncTask<String, Void, ArrayList<Episode>> {
+    private class GetListAnimeTask extends AsyncTask<String, Void, ArrayList<Anime>> {
 
         private static final String TAG = "GetListAnimeTask";
 
         @Override
-        protected ArrayList<Episode> doInBackground(String... strings) {
-            ArrayList<Episode> listEpisode = new ArrayList<>();
+        protected ArrayList<Anime> doInBackground(String... strings) {
+            ArrayList<Anime> listEpisode = new ArrayList<>();
             Document document = null;
             try {
                 document = (Document) Jsoup.connect(strings[0]).get();
@@ -118,27 +114,23 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
                         for (Element element : subjectElements) {
                             Element infoElement = element.getElementsByTag("a").first();
                             Log.i(TAG, "Link: " + infoElement.attr("href"));
-                            Episode episode = new Episode();
-                            episode.url = "http://vuighe.net" + infoElement.attr("href");
+                            Anime anime = new Anime();
+                            anime.url = "http://vuighe.net" + infoElement.attr("href");
 
                             if (infoElement != null) {
                                 Element imageSubject = infoElement.getElementsByClass("tray-item-thumbnail").first();
                                 Element descripteSubject = infoElement.getElementsByClass("tray-item-description").first();
 
                                 if (imageSubject != null) {
-                                    episode.image = imageSubject.attr("src");
+                                    anime.image = imageSubject.attr("src");
                                 }
                                 if (descripteSubject != null) {
                                     Element titleSubject = descripteSubject.getElementsByClass("tray-item-title").first();
                                     if (titleSubject != null) {
-                                        episode.title = titleSubject.text();
-                                    }
-                                    Element nameSubject = descripteSubject.getElementsByClass("tray-item-meta-info").first().getElementsByTag("span").first();
-                                    if (nameSubject != null) {
-                                        episode.name = nameSubject.text();
+                                        anime.title = titleSubject.text();
                                     }
                                 }
-                                listEpisode.add(episode);
+                                listEpisode.add(anime);
                             }
                         }
                         Log.i(TAG, "List count: " + listEpisode.size());
@@ -154,9 +146,9 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
         }
 
         @Override
-        protected void onPostExecute(ArrayList<Episode> result) {
-            mLatestEpisodeAdapter.setEpisodeList(result);
-
+        protected void onPostExecute(ArrayList<Anime> result) {
+            mResultAnimeAdapter.setEpisodeList(result);
+            searchView.clearFocus();
             super.onPostExecute(result);
         }
     }
@@ -191,8 +183,8 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
                             if (videoSubject != null) {
                                 Log.d("Direct link: ", videoSubject.attr("src"));
                                 progressDialog.dismiss();
-                                Intent intent = new Intent(CrawlActivity.this, VideoPlayerActivity.class);
-                                intent.putExtra(EPISODE_URL_ARG, videoSubject.attr("src"));
+                                Intent intent = new Intent(SearchAnimeActivity.this, VideoPlayerActivity.class);
+                                intent.putExtra(CrawlActivity.EPISODE_URL_ARG, videoSubject.attr("src"));
                                 startActivity(intent);
                                 webView.stopLoading();
                             }
@@ -219,6 +211,4 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
             }
         }
     }
-
-
 }
