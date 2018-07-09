@@ -9,13 +9,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.doanthanhthai.mangafox.model.Episode;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.adapter.ResultAnimeAdapter;
 import com.example.doanthanhthai.mangafox.model.Anime;
@@ -32,7 +36,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 
-public class SearchAnimeActivity extends AppCompatActivity implements SearchView.OnQueryTextListener,ResultAnimeAdapter.OnResultAnimeAdapterListener {
+public class SearchAnimeActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, ResultAnimeAdapter.OnResultAnimeAdapterListener {
     private static final String TAG = SearchAnimeActivity.class.getSimpleName();
     private WebView webView;
     private AppWebViewClients webViewClient;
@@ -41,6 +45,8 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
     private ProgressDialog progressDialog;
     private RecyclerView resultAnimeRv;
     private ResultAnimeAdapter mResultAnimeAdapter;
+    private Anime mAnimeSelected = null;
+    private TextView emptyTv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
         searchView = findViewById(R.id.anime_search_view);
         resultAnimeRv = findViewById(R.id.result_anime_rv);
         webView = (WebView) findViewById(R.id.webView);
+        emptyTv = findViewById(R.id.empty_result_tv);
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.clearHistory();
@@ -79,7 +86,9 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        new GetListAnimeTask().execute(Constant.SEARCH_URL+query);
+        emptyTv.setVisibility(View.GONE);
+        progressDialog.show();
+        new GetListAnimeTask().execute(Constant.SEARCH_URL + query);
         return false;
     }
 
@@ -92,6 +101,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
     public void onItemClick(Anime item, int position) {
         progressDialog.show();
         webViewClient.setRunGetSourceWeb(true);
+        mAnimeSelected = item;
         webView.loadUrl(item.url);
         Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show();
     }
@@ -115,7 +125,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                             Element infoElement = element.getElementsByTag("a").first();
                             Log.i(TAG, "Link: " + infoElement.attr("href"));
                             Anime anime = new Anime();
-                            anime.url = "http://vuighe.net" + infoElement.attr("href");
+                            anime.url = Constant.HOME_URL + infoElement.attr("href");
 
                             if (infoElement != null) {
                                 Element imageSubject = infoElement.getElementsByClass("tray-item-thumbnail").first();
@@ -147,8 +157,13 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
 
         @Override
         protected void onPostExecute(ArrayList<Anime> result) {
-            mResultAnimeAdapter.setEpisodeList(result);
-            searchView.clearFocus();
+            progressDialog.dismiss();
+            if (result.isEmpty()) {
+                emptyTv.setVisibility(View.VISIBLE);
+            } else {
+                mResultAnimeAdapter.setEpisodeList(result);
+                searchView.clearFocus();
+            }
             super.onPostExecute(result);
         }
     }
@@ -177,27 +192,52 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
 
                     Document playerDocument = Jsoup.parse(html);
                     if (playerDocument != null) {
+                        Episode episode = new Episode();
                         Element playerSubject = playerDocument.select("div.player").first();
                         if (playerSubject != null) {
                             Element videoSubject = playerSubject.getElementsByClass("player-video").first();
                             if (videoSubject != null) {
                                 Log.d("Direct link: ", videoSubject.attr("src"));
-                                progressDialog.dismiss();
-                                Intent intent = new Intent(SearchAnimeActivity.this, VideoPlayerActivity.class);
-                                intent.putExtra(CrawlActivity.EPISODE_URL_ARG, videoSubject.attr("src"));
-                                startActivity(intent);
-                                webView.stopLoading();
+                                episode.url = videoSubject.attr("src");
+                            }
+
+                            Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
+                            if (titleSubject != null) {
+                                episode.name = titleSubject.text();
                             }
                         }
-                    }
 
+//                        Element titleSubject = playerDocument.selectFirst("h1.film-info-title");
+//                        if (titleSubject != null) {
+//                            episode.name = titleSubject.text();
+//                        }
+
+                        Element episodeSelectorSubject = playerDocument.select("div.episode-selector").first();
+                        if (episodeSelectorSubject != null) {
+                            Element inputEpisodeSubject = episodeSelectorSubject.getElementsByTag("input").first();
+                            if (inputEpisodeSubject != null) {
+                                mAnimeSelected.maxEpisode = Integer.parseInt(inputEpisodeSubject.attr("max"));
+                                mAnimeSelected.minEpisode = Integer.parseInt(inputEpisodeSubject.attr("min"));
+                            }
+                        }
+                        mAnimeSelected.episode = episode;
+                        if (!TextUtils.isEmpty(mAnimeSelected.episode.url)) {
+                            Intent intent = new Intent(SearchAnimeActivity.this, VideoPlayerActivity.class);
+                            intent.putExtra(CrawlActivity.ANIME_ARG, mAnimeSelected);
+                            startActivity(intent);
+                            progressDialog.dismiss();
+                        } else {
+                            Toast.makeText(SearchAnimeActivity.this, "Can not get link episode", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    webView.stopLoading();
                 } catch (UnsupportedEncodingException e) {
                     Log.e("example", "failed to decode source", e);
+                    Toast.makeText(SearchAnimeActivity.this, "Can not get link episode", Toast.LENGTH_LONG).show();
                 }
-                webView.getSettings().setJavaScriptEnabled(true);
+//                webView.getSettings().setJavaScriptEnabled(true);
                 return true;
             }
-            // For all other links, let the WebView do it's normal thing
             return false;
         }
 

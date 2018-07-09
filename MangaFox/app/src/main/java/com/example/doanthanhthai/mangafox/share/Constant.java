@@ -6,6 +6,6 @@ package com.example.doanthanhthai.mangafox.share;
 
 public class Constant {
     public static final String SEARCH_URL = "http://vuighe.net/tim-kiem/";
-    public static final String HOME_URL = "http://vuighe.net/";
-    public static final String LATEST_URL = "http://vuighe.net/";
+    public static final String HOME_URL = "http://vuighe.net";
+    public static final String LATEST_URL = "http://vuighe.net/hom-nay-xem-gi";
 }

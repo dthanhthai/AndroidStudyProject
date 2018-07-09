@@ -1,23 +1,33 @@
 package com.example.doanthanhthai.mangafox;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.doanthanhthai.mangafox.adapter.NumberEpisodeAdapter;
+import com.example.doanthanhthai.mangafox.model.Anime;
+import com.example.doanthanhthai.mangafox.share.Utils;
+import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -47,15 +57,24 @@ import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.ErrorMessageProvider;
 import com.google.android.exoplayer2.util.Util;
 
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
-import static com.example.doanthanhthai.mangafox.CrawlActivity.EPISODE_URL_ARG;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 
-public class VideoPlayerActivity extends AppCompatActivity {
+import static com.example.doanthanhthai.mangafox.CrawlActivity.ANIME_ARG;
+
+public class VideoPlayerActivity extends AppCompatActivity implements NumberEpisodeAdapter.OnNumberEpisodeAdapterListener {
     private static final String TAG = VideoPlayerActivity.class.getSimpleName();
-    private Document sourceDocument;
-    private String episodeUrl;
-    private String videoUrl;
+    private Anime mCurrentAnime;
+
+    private WebView webView;
+    private AppWebViewClients webViewClient;
+
     private SimpleExoPlayerView mExoPlayerView;
     private SimpleExoPlayer player;
     private DataSource.Factory mediaDataSourceFactory;
@@ -66,6 +85,10 @@ public class VideoPlayerActivity extends AppCompatActivity {
     private boolean mExoPlayerFullscreen = false;
     private FrameLayout mFullScreenButton;
     private ImageView mFullScreenIcon;
+    private TextView animeTitleTv;
+    private TextView episodeNameTv;
+    private RecyclerView numberEpisodeRv;
+    private NumberEpisodeAdapter mNumberEpisodeAdapter;
     private Dialog mFullScreenDialog;
     private int mResumeWindow;
     private long mResumePosition;
@@ -80,6 +103,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE); //Remove title bar
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); //Remove notification bar
+        this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_video_player);
 
         ActionBar actionBar = getSupportActionBar();
@@ -92,16 +116,41 @@ public class VideoPlayerActivity extends AppCompatActivity {
         }
 
         mExoPlayerView = findViewById(R.id.exoplayer);
-//        mExoPlayerView.setControllerVisibilityListener(this);
+        numberEpisodeRv = findViewById(R.id.number_episode_rv);
+        webView = (WebView) findViewById(R.id.webView);
+        animeTitleTv = findViewById(R.id.anime_title_tv);
+        episodeNameTv = findViewById(R.id.episode_name_tv);
+        findViewById(R.id.info_wrapper_layout).requestFocus();
+
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.clearHistory();
+        webViewClient = new AppWebViewClients();
+        webView.setWebViewClient(webViewClient);
+
+        GridLayoutManager gridLayoutManager = new AutoFitGridLayoutManager(this, Utils.convertDpToPixel(this, 60));
+        mNumberEpisodeAdapter = new NumberEpisodeAdapter(this);
+        numberEpisodeRv.setLayoutManager(gridLayoutManager);
+        numberEpisodeRv.setAdapter(mNumberEpisodeAdapter);
+        numberEpisodeRv.setNestedScrollingEnabled(false);
+
         mExoPlayerView.setErrorMessageProvider(new PlayerErrorMessageProvider());
         mExoPlayerView.requestFocus();
 
-
-        Bundle bundle = getIntent().getExtras();
-        episodeUrl = getIntent().getStringExtra(EPISODE_URL_ARG);
-        if (TextUtils.isEmpty(episodeUrl)) {
+        mCurrentAnime = (Anime) getIntent().getSerializableExtra(ANIME_ARG);
+        if (mCurrentAnime == null) {
             Toast.makeText(VideoPlayerActivity.this, "Get direct link error!!!", Toast.LENGTH_SHORT).show();
         } else {
+            animeTitleTv.setText(mCurrentAnime.episode.name);
+//            episodeNameTv.setText(mCurrentAnime.episode.name);
+
+            //Init list episode number
+            List<Integer> listEpisode = new ArrayList<>();
+            for (int i = mCurrentAnime.minEpisode; i <= mCurrentAnime.maxEpisode; i++) {
+                listEpisode.add(i);
+            }
+            mNumberEpisodeAdapter.setEpisodeList(listEpisode);
+
+            //Init player
             initializePlayer();
             if (mExoPlayerFullscreen) {
                 ((ViewGroup) mExoPlayerView.getParent()).removeView(mExoPlayerView);
@@ -140,8 +189,6 @@ public class VideoPlayerActivity extends AppCompatActivity {
         if (mExoPlayerView != null && mExoPlayerView.getPlayer() != null) {
             mResumeWindow = mExoPlayerView.getPlayer().getCurrentWindowIndex();
             mResumePosition = Math.max(0, mExoPlayerView.getPlayer().getContentPosition());
-
-            mExoPlayerView.getPlayer().release();
         }
 
         if (mFullScreenDialog != null)
@@ -151,7 +198,7 @@ public class VideoPlayerActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        player.stop();
+//        player.stop();
     }
 
     @Override
@@ -224,32 +271,32 @@ public class VideoPlayerActivity extends AppCompatActivity {
 
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
             LoadControl loadControl = new DefaultLoadControl();
-            player = ExoPlayerFactory.newSimpleInstance(this, trackSelector,loadControl);
+            player = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
 
             mExoPlayerView.setPlayer(player);
 
             prepareContentPlayer();
 
-            if (mExoPlayerFullscreen) {
-                ((ViewGroup) mExoPlayerView.getParent()).removeView(mExoPlayerView);
-                mFullScreenDialog.addContentView(mExoPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                mFullScreenIcon.setImageDrawable(VideoPlayerActivity.this.getResources().getDrawable(R.drawable.ic_fullscreen_skrink));
-                mFullScreenDialog.show();
-            }
+        }
+        if (mExoPlayerFullscreen) {
+            ((ViewGroup) mExoPlayerView.getParent()).removeView(mExoPlayerView);
+            mFullScreenDialog.addContentView(mExoPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            mFullScreenIcon.setImageDrawable(VideoPlayerActivity.this.getResources().getDrawable(R.drawable.ic_fullscreen_skrink));
+            mFullScreenDialog.show();
         }
     }
 
     private void prepareContentPlayer() {
         boolean haveResumePosition = mResumeWindow != C.INDEX_UNSET;
 
-        mediaSource = buildMediaSource(Uri.parse(episodeUrl), null);
+        mediaSource = buildMediaSource(Uri.parse(mCurrentAnime.episode.url), null);
         player.prepare(mediaSource);
         player.setPlayWhenReady(true);
 
         if (haveResumePosition) {
-            if(mResumePosition <= 1000){
+            if (mResumePosition <= 1000) {
                 mResumePosition = 0;
-            }else{
+            } else {
                 mResumePosition -= 1000;
             }
             mExoPlayerView.getPlayer().seekTo(mResumePosition);
@@ -321,6 +368,15 @@ public class VideoPlayerActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onItemClick(int item, int position) {
+//        progressDialog.show();
+        webViewClient.setRunGetSourceWeb(true);
+        mNumberEpisodeAdapter.setCurrentNum(item);
+        webView.loadUrl(mCurrentAnime.url + "/tap-" + item);
+        Toast.makeText(this, mCurrentAnime.title + "Episode: " + item, Toast.LENGTH_SHORT).show();
+    }
+
     private class PlayerErrorMessageProvider implements ErrorMessageProvider<ExoPlaybackException> {
 
         @Override
@@ -354,5 +410,69 @@ public class VideoPlayerActivity extends AppCompatActivity {
             return Pair.create(0, errorString);
         }
     }
+
+    private class AppWebViewClients extends WebViewClient {
+        boolean isRunGetSourceWeb = false;
+
+        public AppWebViewClients() {
+//            progress.setVisibility(View.VISIBLE);
+        }
+
+        public void setRunGetSourceWeb(boolean runGetSourceWeb) {
+            isRunGetSourceWeb = runGetSourceWeb;
+        }
+
+        @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            super.onPageStarted(view, url, favicon);
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            if (url.startsWith("source://")) {
+                try {
+                    String html = URLDecoder.decode(url, "UTF-8").substring(9);
+
+                    Document playerDocument = Jsoup.parse(html);
+                    if (playerDocument != null) {
+                        Element playerSubject = playerDocument.select("div.player").first();
+                        if (playerSubject != null) {
+                            Element videoSubject = playerSubject.getElementsByClass("player-video").first();
+                            if (videoSubject != null) {
+                                Log.d("Direct link: ", videoSubject.attr("src"));
+//                                progressDialog.dismiss();
+                                mCurrentAnime.episode.url = videoSubject.attr("src");
+                            }
+
+                            Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
+                            if(titleSubject != null){
+                                mCurrentAnime.episode.name = titleSubject.text();
+                                animeTitleTv.setText(mCurrentAnime.episode.name);
+                            }
+                                prepareContentPlayer();
+                        }
+                    }
+
+                    webView.stopLoading();
+                } catch (UnsupportedEncodingException e) {
+                    Log.e("example", "failed to decode source", e);
+                }
+                return true;
+            }
+            // For all other links, let the WebView do it's normal thing
+            return false;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            if (isRunGetSourceWeb) {
+                webView.loadUrl(
+                        "javascript:this.document.location.href = 'source://' + encodeURI(document.documentElement.outerHTML);");
+                isRunGetSourceWeb = false;
+            }
+        }
+    }
+
 
 }

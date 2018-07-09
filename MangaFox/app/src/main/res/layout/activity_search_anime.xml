@@ -75,5 +75,15 @@
         android:layout_below="@+id/toolbar_layout"
         android:background="@color/list_background" />
 
+    <TextView
+        android:id="@+id/empty_result_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Empty Result"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:layout_centerInParent="true"/>
+
 
 </RelativeLayout>

@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
@@ -17,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
+import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
@@ -41,10 +43,10 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
     private static final String HARD_URL = "http://vuighe.net/otome-wa-boku-ni-koishiteru";
     private RecyclerView latestEpisodeRV;
     private LatestEpisodeAdapter mLatestEpisodeAdapter;
-    public static final String EPISODE_URL_ARG = "episodeUrlArg";
+    public static final String ANIME_ARG = "episodeUrlArg";
     public static final String KEYWORD_ARG = "keywordArg";
     private ProgressDialog progressDialog;
-
+    private Anime mAnimeSelected = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +62,6 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.clearHistory();
-        webView.getSettings().setJavaScriptEnabled(true);
         webViewClient = new AppWebViewClients();
         webView.setWebViewClient(webViewClient);
 
@@ -82,9 +83,10 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
     }
 
     @Override
-    public void onItemClick(Episode item, int position) {
+    public void onItemClick(Anime item, int position) {
         progressDialog.show();
         webViewClient.setRunGetSourceWeb(true);
+        mAnimeSelected = item;
         webView.loadUrl(item.url);
         Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show();
 
@@ -101,13 +103,13 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
         }
     }
 
-    private class GetListAnimeTask extends AsyncTask<String, Void, ArrayList<Episode>> {
+    private class GetListAnimeTask extends AsyncTask<String, Void, ArrayList<Anime>> {
 
         private static final String TAG = "GetListAnimeTask";
 
         @Override
-        protected ArrayList<Episode> doInBackground(String... strings) {
-            ArrayList<Episode> listEpisode = new ArrayList<>();
+        protected ArrayList<Anime> doInBackground(String... strings) {
+            ArrayList<Anime> listEpisode = new ArrayList<>();
             Document document = null;
             try {
                 document = (Document) Jsoup.connect(strings[0]).get();
@@ -118,27 +120,29 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
                         for (Element element : subjectElements) {
                             Element infoElement = element.getElementsByTag("a").first();
                             Log.i(TAG, "Link: " + infoElement.attr("href"));
+                            Anime anime = new Anime();
                             Episode episode = new Episode();
-                            episode.url = "http://vuighe.net" + infoElement.attr("href");
+                            anime.episode = episode;
+                            anime.url = "http://vuighe.net" + infoElement.attr("href");
 
                             if (infoElement != null) {
                                 Element imageSubject = infoElement.getElementsByClass("tray-item-thumbnail").first();
-                                Element descripteSubject = infoElement.getElementsByClass("tray-item-description").first();
+                                Element descriptionSubject = infoElement.getElementsByClass("tray-item-description").first();
 
                                 if (imageSubject != null) {
-                                    episode.image = imageSubject.attr("src");
+                                    anime.image = imageSubject.attr("src");
                                 }
-                                if (descripteSubject != null) {
-                                    Element titleSubject = descripteSubject.getElementsByClass("tray-item-title").first();
+                                if (descriptionSubject != null) {
+                                    Element titleSubject = descriptionSubject.getElementsByClass("tray-item-title").first();
                                     if (titleSubject != null) {
-                                        episode.title = titleSubject.text();
+                                        anime.title = titleSubject.text();
                                     }
-                                    Element nameSubject = descripteSubject.getElementsByClass("tray-item-meta-info").first().getElementsByTag("span").first();
+                                    Element nameSubject = descriptionSubject.getElementsByClass("tray-item-meta-info").first().getElementsByTag("span").first();
                                     if (nameSubject != null) {
-                                        episode.name = nameSubject.text();
+                                        anime.episode.name = nameSubject.text();
                                     }
                                 }
-                                listEpisode.add(episode);
+                                listEpisode.add(anime);
                             }
                         }
                         Log.i(TAG, "List count: " + listEpisode.size());
@@ -154,7 +158,7 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
         }
 
         @Override
-        protected void onPostExecute(ArrayList<Episode> result) {
+        protected void onPostExecute(ArrayList<Anime> result) {
             mLatestEpisodeAdapter.setEpisodeList(result);
 
             super.onPostExecute(result);
@@ -185,27 +189,46 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
 
                     Document playerDocument = Jsoup.parse(html);
                     if (playerDocument != null) {
+                        Episode episode = new Episode();
                         Element playerSubject = playerDocument.select("div.player").first();
                         if (playerSubject != null) {
                             Element videoSubject = playerSubject.getElementsByClass("player-video").first();
                             if (videoSubject != null) {
                                 Log.d("Direct link: ", videoSubject.attr("src"));
-                                progressDialog.dismiss();
-                                Intent intent = new Intent(CrawlActivity.this, VideoPlayerActivity.class);
-                                intent.putExtra(EPISODE_URL_ARG, videoSubject.attr("src"));
-                                startActivity(intent);
-                                webView.stopLoading();
+                                episode.url = videoSubject.attr("src");
+                            }
+                            Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
+                            if (titleSubject != null) {
+                                episode.name = titleSubject.text();
                             }
                         }
-                    }
 
+                        Element episodeSelectorSubject = playerDocument.select("div.episode-selector").first();
+                        if (episodeSelectorSubject != null) {
+                            Element inputEpisodeSubject = episodeSelectorSubject.getElementsByTag("input").first();
+                            if (inputEpisodeSubject != null) {
+                                mAnimeSelected.maxEpisode = Integer.parseInt(inputEpisodeSubject.attr("max"));
+                                mAnimeSelected.minEpisode = Integer.parseInt(inputEpisodeSubject.attr("min"));
+                            }
+                        }
+
+                        mAnimeSelected.episode = episode;
+                        if (!TextUtils.isEmpty(mAnimeSelected.episode.url)) {
+                            Intent intent = new Intent(CrawlActivity.this, VideoPlayerActivity.class);
+                            intent.putExtra(CrawlActivity.ANIME_ARG, mAnimeSelected);
+                            startActivity(intent);
+                            progressDialog.dismiss();
+                        } else {
+                            Toast.makeText(CrawlActivity.this, "Can not get link episode", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    webView.stopLoading();
                 } catch (UnsupportedEncodingException e) {
                     Log.e("example", "failed to decode source", e);
+                    Toast.makeText(CrawlActivity.this, "Can not get link episode", Toast.LENGTH_LONG).show();
                 }
-                webView.getSettings().setJavaScriptEnabled(true);
                 return true;
             }
-            // For all other links, let the WebView do it's normal thing
             return false;
         }
 

@@ -1,15 +1,17 @@
 package com.example.doanthanhthai.mangafox.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by DOAN THANH THAI on 7/5/2018.
  */
 
-public class Anime {
+public class Anime implements Serializable {
     public String title;
     public String url;
     public String image;
-    public int viewCount;
-    public List<Episode> episodeList;
+    public int maxEpisode;
+    public int minEpisode;
+    public Episode episode;
 }
