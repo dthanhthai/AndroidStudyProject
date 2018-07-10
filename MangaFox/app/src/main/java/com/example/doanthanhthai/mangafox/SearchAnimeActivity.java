@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class SearchAnimeActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, ResultAnimeAdapter.OnResultAnimeAdapterListener {
     private static final String TAG = SearchAnimeActivity.class.getSimpleName();
@@ -125,17 +127,19 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                             Element infoElement = element.getElementsByTag("a").first();
                             Log.i(TAG, "Link: " + infoElement.attr("href"));
                             Anime anime = new Anime();
+                            anime.episode = new Episode();
                             anime.url = Constant.HOME_URL + infoElement.attr("href");
+                            anime.episode.url = Constant.HOME_URL + infoElement.attr("href");
 
                             if (infoElement != null) {
                                 Element imageSubject = infoElement.getElementsByClass("tray-item-thumbnail").first();
-                                Element descripteSubject = infoElement.getElementsByClass("tray-item-description").first();
+                                Element descriptionSubject = infoElement.getElementsByClass("tray-item-description").first();
 
                                 if (imageSubject != null) {
                                     anime.image = imageSubject.attr("src");
                                 }
-                                if (descripteSubject != null) {
-                                    Element titleSubject = descripteSubject.getElementsByClass("tray-item-title").first();
+                                if (descriptionSubject != null) {
+                                    Element titleSubject = descriptionSubject.getElementsByClass("tray-item-title").first();
                                     if (titleSubject != null) {
                                         anime.title = titleSubject.text();
                                     }
@@ -145,7 +149,6 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                         }
                         Log.i(TAG, "List count: " + listEpisode.size());
                     }
-
                 }
 
             } catch (IOException e) {
@@ -192,18 +195,17 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
 
                     Document playerDocument = Jsoup.parse(html);
                     if (playerDocument != null) {
-                        Episode episode = new Episode();
                         Element playerSubject = playerDocument.select("div.player").first();
                         if (playerSubject != null) {
                             Element videoSubject = playerSubject.getElementsByClass("player-video").first();
                             if (videoSubject != null) {
                                 Log.d("Direct link: ", videoSubject.attr("src"));
-                                episode.url = videoSubject.attr("src");
+                                mAnimeSelected.episode.directUrl = videoSubject.attr("src");
                             }
 
                             Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
                             if (titleSubject != null) {
-                                episode.name = titleSubject.text();
+                                mAnimeSelected.episode.name = titleSubject.text();
                             }
                         }
 
@@ -220,7 +222,6 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                                 mAnimeSelected.minEpisode = Integer.parseInt(inputEpisodeSubject.attr("min"));
                             }
                         }
-                        mAnimeSelected.episode = episode;
                         if (!TextUtils.isEmpty(mAnimeSelected.episode.url)) {
                             Intent intent = new Intent(SearchAnimeActivity.this, VideoPlayerActivity.class);
                             intent.putExtra(CrawlActivity.ANIME_ARG, mAnimeSelected);
@@ -233,7 +234,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                     webView.stopLoading();
                 } catch (UnsupportedEncodingException e) {
                     Log.e("example", "failed to decode source", e);
-                    Toast.makeText(SearchAnimeActivity.this, "Can not get link episode", Toast.LENGTH_LONG).show();
+                    Toast.makeText(SearchAnimeActivity.this, "[" + TAG + "] - " + "Can not get link episode", Toast.LENGTH_LONG).show();
                 }
 //                webView.getSettings().setJavaScriptEnabled(true);
                 return true;

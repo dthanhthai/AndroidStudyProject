@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
+import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
 
@@ -32,6 +33,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAdapter.OnLatestEpisodeAdapterListener, View.OnClickListener {
 
@@ -87,7 +90,7 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
         progressDialog.show();
         webViewClient.setRunGetSourceWeb(true);
         mAnimeSelected = item;
-        webView.loadUrl(item.url);
+        webView.loadUrl(item.episode.url);
         Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show();
 
     }
@@ -121,9 +124,16 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
                             Element infoElement = element.getElementsByTag("a").first();
                             Log.i(TAG, "Link: " + infoElement.attr("href"));
                             Anime anime = new Anime();
-                            Episode episode = new Episode();
-                            anime.episode = episode;
-                            anime.url = "http://vuighe.net" + infoElement.attr("href");
+                            anime.episode = new Episode();
+                            String rawUrl = Constant.HOME_URL + infoElement.attr("href");
+
+                            StringTokenizer st = new StringTokenizer(rawUrl, "/");
+                            List<String> partItems = new ArrayList<>();
+                            while (st.hasMoreTokens()) {
+                                partItems.add(st.nextToken());
+                            }
+                            anime.url = partItems.get(0) + "//" + partItems.get(1) + "/" + partItems.get(2);
+                            anime.episode.url = rawUrl;
 
                             if (infoElement != null) {
                                 Element imageSubject = infoElement.getElementsByClass("tray-item-thumbnail").first();
@@ -195,11 +205,11 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
                             Element videoSubject = playerSubject.getElementsByClass("player-video").first();
                             if (videoSubject != null) {
                                 Log.d("Direct link: ", videoSubject.attr("src"));
-                                episode.url = videoSubject.attr("src");
+                                mAnimeSelected.episode.directUrl = videoSubject.attr("src");
                             }
                             Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
                             if (titleSubject != null) {
-                                episode.name = titleSubject.text();
+                                mAnimeSelected.episode.name = titleSubject.text();
                             }
                         }
 
@@ -212,8 +222,8 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
                             }
                         }
 
-                        mAnimeSelected.episode = episode;
-                        if (!TextUtils.isEmpty(mAnimeSelected.episode.url)) {
+//                        mAnimeSelected.episode = episode;
+                        if (!TextUtils.isEmpty(mAnimeSelected.episode.directUrl)) {
                             Intent intent = new Intent(CrawlActivity.this, VideoPlayerActivity.class);
                             intent.putExtra(CrawlActivity.ANIME_ARG, mAnimeSelected);
                             startActivity(intent);
@@ -225,7 +235,7 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
                     webView.stopLoading();
                 } catch (UnsupportedEncodingException e) {
                     Log.e("example", "failed to decode source", e);
-                    Toast.makeText(CrawlActivity.this, "Can not get link episode", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CrawlActivity.this, "[" + TAG + "] - " + "Can not get link episode", Toast.LENGTH_LONG).show();
                 }
                 return true;
             }

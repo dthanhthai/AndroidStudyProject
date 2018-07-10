@@ -138,7 +138,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
         mCurrentAnime = (Anime) getIntent().getSerializableExtra(ANIME_ARG);
         if (mCurrentAnime == null) {
-            Toast.makeText(VideoPlayerActivity.this, "Get direct link error!!!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(VideoPlayerActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
         } else {
             animeTitleTv.setText(mCurrentAnime.episode.name);
 //            episodeNameTv.setText(mCurrentAnime.episode.name);
@@ -272,7 +272,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
             LoadControl loadControl = new DefaultLoadControl();
             player = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
-
+            
             mExoPlayerView.setPlayer(player);
 
             prepareContentPlayer();
@@ -289,7 +289,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private void prepareContentPlayer() {
         boolean haveResumePosition = mResumeWindow != C.INDEX_UNSET;
 
-        mediaSource = buildMediaSource(Uri.parse(mCurrentAnime.episode.url), null);
+        mediaSource = buildMediaSource(Uri.parse(mCurrentAnime.episode.directUrl), null);
         player.prepare(mediaSource);
         player.setPlayWhenReady(true);
 
@@ -441,21 +441,22 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                             if (videoSubject != null) {
                                 Log.d("Direct link: ", videoSubject.attr("src"));
 //                                progressDialog.dismiss();
-                                mCurrentAnime.episode.url = videoSubject.attr("src");
+                                mCurrentAnime.episode.directUrl = videoSubject.attr("src");
                             }
 
                             Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
-                            if(titleSubject != null){
+                            if (titleSubject != null) {
                                 mCurrentAnime.episode.name = titleSubject.text();
                                 animeTitleTv.setText(mCurrentAnime.episode.name);
                             }
-                                prepareContentPlayer();
+                            prepareContentPlayer();
                         }
                     }
 
                     webView.stopLoading();
                 } catch (UnsupportedEncodingException e) {
                     Log.e("example", "failed to decode source", e);
+                    Toast.makeText(VideoPlayerActivity.this, "[" + TAG + "] - " + "Can not get link episode", Toast.LENGTH_LONG).show();
                 }
                 return true;
             }

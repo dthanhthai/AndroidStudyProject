@@ -78,12 +78,14 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
 
         }
 
-        public void bindView(int anime) {
-            numnerEpisodeTv.setText(anime + "");
-            if(currentNum == anime){
+        public void bindView(int number) {
+            numnerEpisodeTv.setText(number + "");
+            if (currentNum == number) {
                 wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.cyan));
+            }else{
+                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.black_50));
             }
-            Log.i("Episode number: ", anime+"");
+            Log.i("Episode number: ", number + "");
         }
     }
 

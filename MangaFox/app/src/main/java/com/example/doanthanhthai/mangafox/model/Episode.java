@@ -11,6 +11,7 @@ public class Episode implements Serializable {
     public String name;
     public int curNum;
     public String url;
+    public String directUrl;
     public String image;
     public int viewCount;
     public VideoContent videoContent;
