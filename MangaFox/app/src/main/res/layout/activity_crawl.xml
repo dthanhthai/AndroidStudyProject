@@ -48,7 +48,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="15dp"
                 android:src="@drawable/ic_book_white"
-                android:visibility="gone"/>
+                android:visibility="visible"/>
 
 
             <ImageView
