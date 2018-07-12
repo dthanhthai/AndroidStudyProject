@@ -41,6 +41,17 @@
                 android:textSize="20sp" />
 
             <ImageView
+                android:id="@+id/manga_icon_iv"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_toStartOf="@+id/search_icon_iv"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="15dp"
+                android:src="@drawable/ic_book_white"
+                android:visibility="gone"/>
+
+
+            <ImageView
                 android:id="@+id/search_icon_iv"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
@@ -63,6 +74,11 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="30">
+
+            <ProgressBar
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerInParent="true"/>
 
             <android.support.v4.view.ViewPager
                 android:id="@+id/slide_view_pager"

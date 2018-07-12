@@ -49,6 +49,7 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
     private WebView webView;
     private AppWebViewClients webViewClient;
     private ImageView searchIconIv;
+    private ImageView mangaIconIv;
     private static final String URL = "http://vuighe.net/tap-moi-nhat";
     private static final String HARD_URL = "http://vuighe.net/otome-wa-boku-ni-koishiteru";
     private RecyclerView latestEpisodeRV;
@@ -73,6 +74,8 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
         webView = (WebView) findViewById(R.id.webView);
         searchIconIv = findViewById(R.id.search_icon_iv);
         mSlideViewPager = findViewById(R.id.slide_view_pager);
+        mangaIconIv = findViewById(R.id.manga_icon_iv);
+        mangaIconIv.setOnClickListener(this);
         searchIconIv.setOnClickListener(this);
 
         mSlideIndicator = findViewById(R.id.slide_indicator);
@@ -138,6 +141,10 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
             case R.id.search_icon_iv:
                 Intent intent = new Intent(this, SearchAnimeActivity.class);
                 intent.putExtra(KEYWORD_ARG, "");
+                startActivity(intent);
+                break;
+            case R.id.manga_icon_iv:
+                intent = new Intent(this, MangaFoxActivity.class);
                 startActivity(intent);
                 break;
         }

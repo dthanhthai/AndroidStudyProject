@@ -20,7 +20,8 @@ public class MangaFoxActivity extends AppCompatActivity {
     public static final String TAG = MangaFoxActivity.class.getSimpleName();
     private WebView webView;
     private FloatingActionButton fab;
-    private static final String URL = "http://m.mangafox.me/";
+//    private static final String URL = "http://m.mangafox.me/";
+    private static final String URL = "https://truyenqq.com/index.html";
     //    private static final String URL = "http://www.mangapanda.com/";
     private AlertDialog alertDialog;
     private ProgressBar progressBar;
@@ -58,8 +59,6 @@ public class MangaFoxActivity extends AppCompatActivity {
     }
 
     private void initData() {
-        alertDialog = new AlertDialog.Builder(this).create();
-
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
         progressDialog.setMessage("Data loading...");
