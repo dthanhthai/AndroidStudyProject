@@ -65,6 +65,7 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
     public class ResultAnimeViewHolder extends RecyclerView.ViewHolder {
         ImageView posterImg;
         TextView animeTitleTv;
+        TextView animeEpisodeInfoTv;
         Context mContext;
 
         public ResultAnimeViewHolder(View itemView) {
@@ -72,6 +73,7 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
             mContext = itemView.getContext();
             posterImg = itemView.findViewById(R.id.anime_poster);
             animeTitleTv = itemView.findViewById(R.id.anime_title);
+            animeEpisodeInfoTv = itemView.findViewById(R.id.episode_info);
         }
 
         public void bindView(Anime anime) {
@@ -85,6 +87,7 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
             }
 
             animeTitleTv.setText(anime.title);
+            animeEpisodeInfoTv.setText(anime.episodeInfo);
             Log.i("Anime result name: ", anime.title);
         }
     }

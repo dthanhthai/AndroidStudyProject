@@ -134,7 +134,6 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                             if (infoElement != null) {
                                 Element imageSubject = infoElement.getElementsByClass("tray-item-thumbnail").first();
                                 Element descriptionSubject = infoElement.getElementsByClass("tray-item-description").first();
-
                                 if (imageSubject != null) {
                                     anime.image = imageSubject.attr("src");
                                 }
@@ -142,6 +141,10 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                                     Element titleSubject = descriptionSubject.getElementsByClass("tray-item-title").first();
                                     if (titleSubject != null) {
                                         anime.title = titleSubject.text();
+                                    }
+                                    Element episodeInfoSubject = descriptionSubject.select("div.tray-film-update").first();
+                                    if (episodeInfoSubject != null) {
+                                        anime.episodeInfo = episodeInfoSubject.text();
                                     }
                                 }
                                 listEpisode.add(anime);
@@ -220,6 +223,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                             if (inputEpisodeSubject != null) {
                                 mAnimeSelected.maxEpisode = Integer.parseInt(inputEpisodeSubject.attr("max"));
                                 mAnimeSelected.minEpisode = Integer.parseInt(inputEpisodeSubject.attr("min"));
+                                mAnimeSelected.episode.curNum = mAnimeSelected.minEpisode;
                             }
                         }
                         if (!TextUtils.isEmpty(mAnimeSelected.episode.url)) {

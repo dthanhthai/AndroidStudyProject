@@ -4,6 +4,8 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
+import com.example.doanthanhthai.mangafox.adapter.SlideBannerAdapter;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
 import com.example.doanthanhthai.mangafox.share.Constant;
@@ -35,8 +38,12 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAdapter.OnLatestEpisodeAdapterListener, View.OnClickListener {
+import me.relex.circleindicator.CircleIndicator;
+
+public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAdapter.OnLatestEpisodeAdapterListener, View.OnClickListener, SlideBannerAdapter.OnSlideBannerAdapterListener {
 
     public static final String TAG = CrawlActivity.class.getSimpleName();
     private WebView webView;
@@ -48,8 +55,12 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
     private LatestEpisodeAdapter mLatestEpisodeAdapter;
     public static final String ANIME_ARG = "episodeUrlArg";
     public static final String KEYWORD_ARG = "keywordArg";
+    private ViewPager mSlideViewPager;
+    private CircleIndicator mSlideIndicator;
+    private static int mSlideCurrentPage = 0;
     private ProgressDialog progressDialog;
     private Anime mAnimeSelected = null;
+    private boolean isAutoChangeBanner = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +72,10 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
 
         webView = (WebView) findViewById(R.id.webView);
         searchIconIv = findViewById(R.id.search_icon_iv);
+        mSlideViewPager = findViewById(R.id.slide_view_pager);
         searchIconIv.setOnClickListener(this);
+
+        mSlideIndicator = findViewById(R.id.slide_indicator);
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.clearHistory();
@@ -82,7 +96,20 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
         latestEpisodeRV.setLayoutManager(gridLayoutManager);
         latestEpisodeRV.setAdapter(mLatestEpisodeAdapter);
 
-        new GetListAnimeTask().execute(URL);
+        new GetLatestListAnimeTask().execute(URL);
+        new GetBannerListAnimeTask().execute(Constant.HOME_URL);
+    }
+
+    @Override
+    protected void onResume() {
+        isAutoChangeBanner = true;
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        isAutoChangeBanner = false;
+        super.onPause();
     }
 
     @Override
@@ -96,6 +123,16 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
     }
 
     @Override
+    public void onBannerClick(Anime item, int position) {
+        isAutoChangeBanner = false;
+        progressDialog.show();
+        webViewClient.setRunGetSourceWeb(true);
+        mAnimeSelected = item;
+        webView.loadUrl(item.episode.url);
+        Toast.makeText(this, "Index: " + position, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.search_icon_iv:
@@ -106,13 +143,12 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
         }
     }
 
-    private class GetListAnimeTask extends AsyncTask<String, Void, ArrayList<Anime>> {
-
-        private static final String TAG = "GetListAnimeTask";
+    private class GetLatestListAnimeTask extends AsyncTask<String, Void, ArrayList<Anime>> {
+        private final String TAG = GetLatestListAnimeTask.class.getSimpleName();
 
         @Override
         protected ArrayList<Anime> doInBackground(String... strings) {
-            ArrayList<Anime> listEpisode = new ArrayList<>();
+            ArrayList<Anime> animeList = new ArrayList<>();
             Document document = null;
             try {
                 document = (Document) Jsoup.connect(strings[0]).get();
@@ -128,17 +164,35 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
                             String rawUrl = Constant.HOME_URL + infoElement.attr("href");
 
                             StringTokenizer st = new StringTokenizer(rawUrl, "/");
-                            List<String> partItems = new ArrayList<>();
+                            List<String> rawLinkItems = new ArrayList<>();
                             while (st.hasMoreTokens()) {
-                                partItems.add(st.nextToken());
+                                rawLinkItems.add(st.nextToken());
                             }
-                            anime.url = partItems.get(0) + "//" + partItems.get(1) + "/" + partItems.get(2);
+                            anime.url = rawLinkItems.get(0) + "//" + rawLinkItems.get(1) + "/" + rawLinkItems.get(2);
                             anime.episode.url = rawUrl;
+
+                            st = new StringTokenizer(rawLinkItems.get(3), "-");
+                            List<String> nameItems = new ArrayList<>();
+                            while (st.hasMoreTokens()) {
+                                nameItems.add(st.nextToken());
+                            }
+                            try {
+                                anime.episode.curNum = Integer.parseInt(nameItems.get(1));
+                            } catch (NumberFormatException ex) {
+                                anime.episode.curNum = -1;
+                                Log.e(TAG, ex.getMessage());
+                            }
+
 
                             if (infoElement != null) {
                                 Element imageSubject = infoElement.getElementsByClass("tray-item-thumbnail").first();
                                 Element descriptionSubject = infoElement.getElementsByClass("tray-item-description").first();
+                                Element upcomingSubject = infoElement.getElementsByClass("tray-item-upcoming").first();
 
+                                //Don't add upcoming episode into list
+                                if (upcomingSubject != null) {
+                                    continue;
+                                }
                                 if (imageSubject != null) {
                                     anime.image = imageSubject.attr("src");
                                 }
@@ -150,29 +204,129 @@ public class CrawlActivity extends AppCompatActivity implements LatestEpisodeAda
                                     Element nameSubject = descriptionSubject.getElementsByClass("tray-item-meta-info").first().getElementsByTag("span").first();
                                     if (nameSubject != null) {
                                         anime.episode.name = nameSubject.text();
+
+                                        //Get episode number
+//                                        if (anime.episode.name.contains("Tập")) {
+//                                            if (anime.episode.name.contains("-")) {
+//                                                String tmp = anime.episode.name.substring(0, anime.episode.name.indexOf("-")).trim();
+//                                                anime.episode.curNum = Integer.parseInt(tmp.toLowerCase().replace("tập", "").trim());
+//                                            }
+//                                        } else {
+//                                            anime.episode.curNum = -1;
+//                                        }
                                     }
                                 }
-                                listEpisode.add(anime);
+                                animeList.add(anime);
                             }
                         }
-                        Log.i(TAG, "List count: " + listEpisode.size());
+                        Log.i(TAG, "List count: " + animeList.size());
                     }
 
                 }
 
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e(TAG, e.getMessage());
+                Log.e(TAG, "Parse date fail: " + e.getMessage());
             }
-            return listEpisode;
+            return animeList;
         }
 
         @Override
-        protected void onPostExecute(ArrayList<Anime> result) {
+        protected void onPostExecute(final ArrayList<Anime> result) {
             mLatestEpisodeAdapter.setEpisodeList(result);
+            super.onPostExecute(result);
+        }
+    }
+
+    private class GetBannerListAnimeTask extends AsyncTask<String, Void, ArrayList<Anime>> {
+        private final String TAG = GetBannerListAnimeTask.class.getSimpleName();
+
+        @Override
+        protected ArrayList<Anime> doInBackground(String... strings) {
+            ArrayList<Anime> animeList = new ArrayList<>();
+            Document document = null;
+            try {
+                document = (Document) Jsoup.connect(strings[0]).get();
+
+                if (document != null) {
+                    Elements itemsSub = document.select("div.slider-item");
+                    if (itemsSub != null && itemsSub.size() > 0) {
+                        //Ignore first item
+                        for (int i = 1; i < itemsSub.size(); i++) {
+                            Anime anime = new Anime();
+                            anime.episode = new Episode();
+                            Element rawLinkSub = itemsSub.get(i).getElementsByTag("a").first();
+                            if (rawLinkSub != null) {
+                                String rawUrl = Constant.HOME_URL + rawLinkSub.attr("href");
+
+                                StringTokenizer st = new StringTokenizer(rawUrl, "/");
+                                List<String> rawLinkItems = new ArrayList<>();
+                                while (st.hasMoreTokens()) {
+                                    rawLinkItems.add(st.nextToken());
+                                }
+                                anime.url = rawLinkItems.get(0) + "//" + rawLinkItems.get(1) + "/" + rawLinkItems.get(2);
+                                anime.episode.url = rawUrl;
+
+                                st = new StringTokenizer(rawLinkItems.get(3), "-");
+                                List<String> nameItems = new ArrayList<>();
+                                while (st.hasMoreTokens()) {
+                                    nameItems.add(st.nextToken());
+                                }
+                                try {
+                                    anime.episode.curNum = Integer.parseInt(nameItems.get(1));
+                                } catch (NumberFormatException ex) {
+                                    anime.episode.curNum = -1;
+                                    Log.e(TAG, ex.getMessage());
+                                }
+
+                                Element imageSub = rawLinkSub.getElementsByTag("img").first();
+                                if (imageSub != null) {
+                                    anime.bannerImage = imageSub.attr("src");
+                                }
+                                animeList.add(anime);
+                            }
+                        }
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(TAG, "Parse date fail: " + e.getMessage());
+            }
+            return animeList;
+        }
+
+        @Override
+        protected void onPostExecute(final ArrayList<Anime> result) {
+            // Auto start of viewpager
+            startSlideBanner(result);
 
             super.onPostExecute(result);
         }
+    }
+
+    private void startSlideBanner(final ArrayList<Anime> result) {
+        mSlideViewPager.setAdapter(new SlideBannerAdapter(result, this));
+        mSlideIndicator.setViewPager(mSlideViewPager);
+        isAutoChangeBanner = true;
+        final Handler handler = new Handler();
+        Timer swipeTimer = new Timer();
+        swipeTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(isAutoChangeBanner) {
+                            if (mSlideCurrentPage == result.size()) {
+                                mSlideCurrentPage = 0;
+                            }
+                            mSlideViewPager.setCurrentItem(mSlideCurrentPage++, true);
+                        }
+                    }
+                });
+            }
+        }, 5000, 5000);
     }
 
     private class AppWebViewClients extends WebViewClient {

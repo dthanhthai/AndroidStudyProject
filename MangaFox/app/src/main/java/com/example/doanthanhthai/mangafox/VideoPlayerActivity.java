@@ -1,7 +1,6 @@
 package com.example.doanthanhthai.mangafox;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -11,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -33,11 +33,15 @@ import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.LoadControl;
+import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.mediacodec.MediaCodecRenderer;
 import com.google.android.exoplayer2.mediacodec.MediaCodecUtil;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
@@ -46,6 +50,7 @@ import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -68,7 +73,7 @@ import java.util.List;
 
 import static com.example.doanthanhthai.mangafox.CrawlActivity.ANIME_ARG;
 
-public class VideoPlayerActivity extends AppCompatActivity implements NumberEpisodeAdapter.OnNumberEpisodeAdapterListener {
+public class VideoPlayerActivity extends AppCompatActivity implements NumberEpisodeAdapter.OnNumberEpisodeAdapterListener, Player.EventListener {
     private static final String TAG = VideoPlayerActivity.class.getSimpleName();
     private Anime mCurrentAnime;
 
@@ -88,6 +93,8 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private TextView animeTitleTv;
     private TextView episodeNameTv;
     private RecyclerView numberEpisodeRv;
+    private FrameLayout progressBarLayout;
+    private TextView errorMsgPlayerTv;
     private NumberEpisodeAdapter mNumberEpisodeAdapter;
     private Dialog mFullScreenDialog;
     private int mResumeWindow;
@@ -120,7 +127,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         webView = (WebView) findViewById(R.id.webView);
         animeTitleTv = findViewById(R.id.anime_title_tv);
         episodeNameTv = findViewById(R.id.episode_name_tv);
-        findViewById(R.id.info_wrapper_layout).requestFocus();
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.clearHistory();
@@ -134,7 +140,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         numberEpisodeRv.setNestedScrollingEnabled(false);
 
         mExoPlayerView.setErrorMessageProvider(new PlayerErrorMessageProvider());
-        mExoPlayerView.requestFocus();
 
         mCurrentAnime = (Anime) getIntent().getSerializableExtra(ANIME_ARG);
         if (mCurrentAnime == null) {
@@ -148,7 +153,9 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             for (int i = mCurrentAnime.minEpisode; i <= mCurrentAnime.maxEpisode; i++) {
                 listEpisode.add(i);
             }
+            mNumberEpisodeAdapter.setCurrentNum(mCurrentAnime.episode.curNum > 0 ? mCurrentAnime.episode.curNum : mCurrentAnime.minEpisode);
             mNumberEpisodeAdapter.setEpisodeList(listEpisode);
+            numberEpisodeRv.scrollToPosition(mCurrentAnime.episode.curNum > 0 ? mCurrentAnime.episode.curNum : mCurrentAnime.minEpisode);
 
             //Init player
             initializePlayer();
@@ -256,8 +263,41 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         });
     }
 
+    private void initProgressLayout() {
+        progressBarLayout = mExoPlayerView.findViewById(R.id.progress_bar_layout);
+        errorMsgPlayerTv = mExoPlayerView.findViewById(R.id.error_player_message_tv);
+    }
+
+    private void showErrorMessage(String msg) {
+        if (!TextUtils.isEmpty(msg)) {
+            errorMsgPlayerTv.setText(msg);
+        } else {
+            errorMsgPlayerTv.setText(R.string.default_msg_player_error);
+        }
+    }
+
+    private void hideErrorMessage() {
+        errorMsgPlayerTv.setVisibility(View.GONE);
+    }
+
+    private void showProgressLayout() {
+        progressBarLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressLayout() {
+        progressBarLayout.setVisibility(View.GONE);
+    }
+
+    private void removeVideoOverlay() {
+        hideErrorMessage();
+        hideProgressLayout();
+    }
+
+
     private void initializePlayer() {
         if (player == null) {
+            initProgressLayout();
+            showProgressLayout();
             initFullscreenDialog();
             initFullscreenButton();
 
@@ -272,7 +312,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
             LoadControl loadControl = new DefaultLoadControl();
             player = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
-            
+            player.addListener(this);
             mExoPlayerView.setPlayer(player);
 
             prepareContentPlayer();
@@ -371,10 +411,72 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     @Override
     public void onItemClick(int item, int position) {
 //        progressDialog.show();
+        showProgressLayout();
         webViewClient.setRunGetSourceWeb(true);
         mNumberEpisodeAdapter.setCurrentNum(item);
+        mNumberEpisodeAdapter.notifyDataSetChanged();
         webView.loadUrl(mCurrentAnime.url + "/tap-" + item);
         Toast.makeText(this, mCurrentAnime.title + "Episode: " + item, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+
+    }
+
+    @Override
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+    }
+
+    @Override
+    public void onLoadingChanged(boolean isLoading) {
+        if (isLoading) {
+            showProgressLayout();
+        }
+    }
+
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        switch (playbackState) {
+            case Player.STATE_BUFFERING:
+                hideErrorMessage();
+                showProgressLayout();
+            case Player.STATE_READY:
+                mExoPlayerView.requestFocus();
+                hideProgressLayout();
+                hideErrorMessage();
+        }
+    }
+
+    @Override
+    public void onRepeatModeChanged(int repeatMode) {
+
+    }
+
+    @Override
+    public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+    }
+
+    @Override
+    public void onPlayerError(ExoPlaybackException error) {
+        showErrorMessage(error.getMessage());
+    }
+
+    @Override
+    public void onPositionDiscontinuity(int reason) {
+
+    }
+
+    @Override
+    public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+    }
+
+    @Override
+    public void onSeekProcessed() {
+
     }
 
     private class PlayerErrorMessageProvider implements ErrorMessageProvider<ExoPlaybackException> {

@@ -13,5 +13,7 @@ public class Anime implements Serializable {
     public String image;
     public int maxEpisode;
     public int minEpisode;
+    public String episodeInfo;
+    public String bannerImage;
     public Episode episode;
 }

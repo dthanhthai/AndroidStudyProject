@@ -35,7 +35,6 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
 
     public void setCurrentNum(int currentNum) {
         this.currentNum = currentNum;
-        notifyDataSetChanged();
     }
 
     @Override
@@ -82,8 +81,10 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
             numnerEpisodeTv.setText(number + "");
             if (currentNum == number) {
                 wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.cyan));
+                itemView.setEnabled(false);
             }else{
                 wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.black_50));
+                itemView.setEnabled(true);
             }
             Log.i("Episode number: ", number + "");
         }

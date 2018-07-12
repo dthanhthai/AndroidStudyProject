@@ -8,7 +8,7 @@
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_layout"
@@ -38,7 +38,7 @@
                 android:layout_marginLeft="15dp"
                 android:text="VuiGhe Anime"
                 android:textColor="@android:color/white"
-                android:textSize="20sp"/>
+                android:textSize="20sp" />
 
             <ImageView
                 android:id="@+id/search_icon_iv"
@@ -52,12 +52,40 @@
         </RelativeLayout>
     </android.support.v7.widget.Toolbar>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/latest_anime_rv"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar_layout"
-        android:background="@color/list_background" />
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/slider_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="30">
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/slide_view_pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true" />
+
+            <me.relex.circleindicator.CircleIndicator
+                android:id="@+id/slide_indicator"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/latest_anime_rv"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_below="@+id/slider_layout"
+            android:layout_weight="70"
+            android:background="@color/list_background" />
+
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/progress_bar"
