@@ -15,7 +15,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="40">
+        android:layout_weight="35">
 
         <FrameLayout
             android:id="@+id/main_media_frame"
@@ -45,7 +45,7 @@
         android:id="@+id/info_wrapper_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="70"
+        android:layout_weight="65"
         android:descendantFocusability="afterDescendants"
         android:focusable="true">
 

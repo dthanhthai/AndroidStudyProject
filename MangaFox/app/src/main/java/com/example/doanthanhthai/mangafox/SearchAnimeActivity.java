@@ -19,7 +19,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.doanthanhthai.mangafox.model.Episode;
+import com.example.doanthanhthai.mangafox.parser.AnimeParser;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.adapter.ResultAnimeAdapter;
 import com.example.doanthanhthai.mangafox.model.Anime;
@@ -29,14 +29,12 @@ import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 public class SearchAnimeActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, ResultAnimeAdapter.OnResultAnimeAdapterListener {
     private static final String TAG = SearchAnimeActivity.class.getSimpleName();
@@ -90,7 +88,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
     public boolean onQueryTextSubmit(String query) {
         emptyTv.setVisibility(View.GONE);
         progressDialog.show();
-        new GetListAnimeTask().execute(Constant.SEARCH_URL + query);
+        new GetResultListAnimeTask().execute(Constant.SEARCH_URL + query);
         return false;
     }
 
@@ -109,68 +107,49 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
     }
 
 
-    private class GetListAnimeTask extends AsyncTask<String, Void, ArrayList<Anime>> {
+    private class GetResultListAnimeTask extends AsyncTask<String, Void, Document> {
 
-        private static final String TAG = "GetListAnimeTask";
+        private final String TAG = GetResultListAnimeTask.class.getSimpleName();
 
         @Override
-        protected ArrayList<Anime> doInBackground(String... strings) {
-            ArrayList<Anime> listEpisode = new ArrayList<>();
+        protected Document doInBackground(String... strings) {
             Document document = null;
             try {
-                document = (Document) Jsoup.connect(strings[0]).get();
-
-                if (document != null) {
-                    Elements subjectElements = document.select("div.tray-item");
-                    if (subjectElements != null && subjectElements.size() > 0) {
-                        for (Element element : subjectElements) {
-                            Element infoElement = element.getElementsByTag("a").first();
-                            Log.i(TAG, "Link: " + infoElement.attr("href"));
-                            Anime anime = new Anime();
-                            anime.episode = new Episode();
-                            anime.url = Constant.HOME_URL + infoElement.attr("href");
-                            anime.episode.url = Constant.HOME_URL + infoElement.attr("href");
-
-                            if (infoElement != null) {
-                                Element imageSubject = infoElement.getElementsByClass("tray-item-thumbnail").first();
-                                Element descriptionSubject = infoElement.getElementsByClass("tray-item-description").first();
-                                if (imageSubject != null) {
-                                    anime.image = imageSubject.attr("src");
-                                }
-                                if (descriptionSubject != null) {
-                                    Element titleSubject = descriptionSubject.getElementsByClass("tray-item-title").first();
-                                    if (titleSubject != null) {
-                                        anime.title = titleSubject.text();
-                                    }
-                                    Element episodeInfoSubject = descriptionSubject.select("div.tray-film-update").first();
-                                    if (episodeInfoSubject != null) {
-                                        anime.episodeInfo = episodeInfoSubject.text();
-                                    }
-                                }
-                                listEpisode.add(anime);
-                            }
-                        }
-                        Log.i(TAG, "List count: " + listEpisode.size());
-                    }
-                }
-
+                document = Jsoup.connect(strings[0]).timeout(3 * 1000).get();
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e(TAG, e.getMessage());
+                Log.e(TAG, "Parse data fail: " + e.getMessage());
             }
-            return listEpisode;
+           return document;
         }
 
         @Override
-        protected void onPostExecute(ArrayList<Anime> result) {
-            progressDialog.dismiss();
-            if (result.isEmpty()) {
-                emptyTv.setVisibility(View.VISIBLE);
-            } else {
-                mResultAnimeAdapter.setEpisodeList(result);
-                searchView.clearFocus();
+        protected void onPostExecute(Document document) {
+            if(document != null){
+                List<Anime> resultItems = new ArrayList<>();
+                resultItems = AnimeParser.getListAnimeItem(document);
+
+                if(resultItems != null && !resultItems.isEmpty()){
+                    mResultAnimeAdapter.setEpisodeList(resultItems);
+                    searchView.clearFocus();
+                }else{
+                    emptyTv.setVisibility(View.VISIBLE);
+//                    confirmWebView.setVisibility(View.VISIBLE);
+//                    confirmWebView.loadUrl(LATEST_URL);
+                }
+
+            }else{
+                Toast.makeText(SearchAnimeActivity.this, "Cannot get document web", Toast.LENGTH_LONG).show();
             }
-            super.onPostExecute(result);
+            progressDialog.dismiss();
+
+//            if (result.isEmpty()) {
+//                emptyTv.setVisibility(View.VISIBLE);
+//            } else {
+//                mResultAnimeAdapter.setEpisodeList(result);
+//                searchView.clearFocus();
+//            }
+            super.onPostExecute(document);
         }
     }
 
@@ -228,7 +207,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                         }
                         if (!TextUtils.isEmpty(mAnimeSelected.episode.url)) {
                             Intent intent = new Intent(SearchAnimeActivity.this, VideoPlayerActivity.class);
-                            intent.putExtra(CrawlActivity.ANIME_ARG, mAnimeSelected);
+                            intent.putExtra(HomeActivity.ANIME_ARG, mAnimeSelected);
                             startActivity(intent);
                             progressDialog.dismiss();
                         } else {

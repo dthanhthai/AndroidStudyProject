@@ -71,7 +71,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.doanthanhthai.mangafox.CrawlActivity.ANIME_ARG;
+import static com.example.doanthanhthai.mangafox.HomeActivity.ANIME_ARG;
 
 public class VideoPlayerActivity extends AppCompatActivity implements NumberEpisodeAdapter.OnNumberEpisodeAdapterListener, Player.EventListener {
     private static final String TAG = VideoPlayerActivity.class.getSimpleName();

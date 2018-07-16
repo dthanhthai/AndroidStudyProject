@@ -47,4 +47,5 @@
     <color name="reverb_dark">#262261</color>
     <color name="reverb_light">#e9e8ef</color>
     <color name="reverb_text">#1d2129</color>
+    <color name="title_anime">#FF836A</color>
 </resources>

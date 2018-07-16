@@ -29,18 +29,21 @@
                 android:src="@drawable/placeholder" />
 
             <TextView
-                android:id="@+id/episode_info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/rank_info"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:gravity="center"
                 android:layout_alignParentTop="true"
                 android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp"
                 android:layout_weight="10"
-                android:background="@color/black_70"
+                android:background="@android:color/black"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:includeFontPadding="false"
-                android:padding="5dp"
-                android:text="Tập 1: he he hi ho"
+                android:padding="3dp"
+                android:text="1"
+                android:textStyle="bold"
                 android:textColor="@android:color/white" />
 
         </RelativeLayout>

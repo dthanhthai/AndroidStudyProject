@@ -60,7 +60,7 @@ public class MangaFoxActivity extends AppCompatActivity {
 
     private void initData() {
         progressDialog = new ProgressDialog(this);
-        progressDialog.setCancelable(false);
+//        progressDialog.setCancelable(false);
         progressDialog.setMessage("Data loading...");
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setIndeterminate(true);

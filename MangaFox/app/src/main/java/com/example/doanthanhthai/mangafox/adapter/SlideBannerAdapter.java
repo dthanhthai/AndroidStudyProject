@@ -1,11 +1,11 @@
 package com.example.doanthanhthai.mangafox.adapter;
 
-import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.doanthanhthai.mangafox.R;
 import com.example.doanthanhthai.mangafox.model.Anime;
@@ -19,11 +19,11 @@ import java.util.List;
  */
 
 public class SlideBannerAdapter extends PagerAdapter {
-    private List<Anime> images;
+    private List<Anime> animeList;
     private OnSlideBannerAdapterListener mListener;
 
-    public SlideBannerAdapter(ArrayList<Anime> images,OnSlideBannerAdapterListener listener) {
-        this.images=images;
+    public SlideBannerAdapter(List<Anime> animeList, OnSlideBannerAdapterListener listener) {
+        this.animeList = animeList;
         mListener = listener;
     }
 
@@ -34,33 +34,43 @@ public class SlideBannerAdapter extends PagerAdapter {
 
     @Override
     public int getCount() {
-        return images.size();
+        return animeList.size();
     }
 
     @Override
     public Object instantiateItem(ViewGroup view, final int position) {
-        View myImageLayout = LayoutInflater.from(view.getContext())
+        View myLayout = LayoutInflater.from(view.getContext())
                 .inflate(R.layout.item_slide_banner, view, false);
-        ImageView myImage = (ImageView) myImageLayout
+        ImageView myImage = (ImageView) myLayout
                 .findViewById(R.id.image_banner);
 
+        TextView titleTv = myLayout.findViewById(R.id.anime_title);
+        TextView episodeTv = myLayout.findViewById(R.id.episode_info);
+        TextView rateTv = myLayout.findViewById(R.id.anime_rate);
+
+        Anime animeData = animeList.get(position);
+
         Picasso.with(view.getContext())
-                .load(images.get(position).bannerImage)
+                .load(animeData.bannerImage)
                 .error(R.drawable.placeholder)
                 .placeholder(R.drawable.placeholder)
                 .into(myImage);
 
-        myImageLayout.setOnClickListener(new View.OnClickListener() {
+        titleTv.setText(animeData.title);
+        episodeTv.setText(animeData.episodeInfo);
+        rateTv.setText(animeData.rate);
+
+        myLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(mListener != null){
-                    mListener.onBannerClick(images.get(position), position);
+                    mListener.onBannerClick(animeList.get(position), position);
                 }
             }
         });
 
-        view.addView(myImageLayout, 0);
-        return myImageLayout;
+        view.addView(myLayout, 0);
+        return myLayout;
     }
 
     @Override

@@ -64,7 +64,7 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
 
     public class LatestViewHolder extends RecyclerView.ViewHolder {
         ImageView posterImg;
-        TextView animeTitleTv, episodeTitleTv;
+        TextView animeTitleTv, episodeTitleTv, rateTv;
         Context mContext;
 
         public LatestViewHolder(View itemView) {
@@ -73,6 +73,7 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
             posterImg = itemView.findViewById(R.id.episode_poster);
             animeTitleTv = itemView.findViewById(R.id.anime_title);
             episodeTitleTv = itemView.findViewById(R.id.episode_title);
+            rateTv = itemView.findViewById(R.id.anime_rate);
         }
 
         public void bindView(Anime anime) {
@@ -86,16 +87,17 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
             }
 
             animeTitleTv.setText(anime.title);
-            Log.i("Episode name", anime.episode.name);
-            if (anime.episode.name.contains("Tập")) {
-                if (anime.episode.name.contains("-")) {
-                    episodeTitleTv.setText(anime.episode.name.substring(0, anime.episode.name.indexOf("-")).trim());
-                } else {
-                    episodeTitleTv.setText(anime.episode.name.substring(0, 5).trim());
-                }
-            } else {
-                episodeTitleTv.setText(anime.episode.name);
-            }
+            episodeTitleTv.setText(anime.episodeInfo);
+            rateTv.setText(anime.rate);
+//            if (anime.episode.name.contains("Tập")) {
+//                if (anime.episode.name.contains("-")) {
+//                    episodeTitleTv.setText(anime.episode.name.substring(0, anime.episode.name.indexOf("-")).trim());
+//                } else {
+//                    episodeTitleTv.setText(anime.episode.name.substring(0, 5).trim());
+//                }
+//            } else {
+//                episodeTitleTv.setText(anime.episode.name);
+//            }
 
         }
     }
