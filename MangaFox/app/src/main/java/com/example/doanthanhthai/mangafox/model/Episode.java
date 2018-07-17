@@ -7,12 +7,8 @@ import java.io.Serializable;
  */
 
 public class Episode implements Serializable {
-    public String title;
     public String name;
     public int curNum;
     public String url;
     public String directUrl;
-    public String image;
-    public int viewCount;
-    public VideoContent videoContent;
 }
