@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/toolbar_height"
         android:layout_alignParentTop="true"
-        android:background="@color/colorPrimary"
+        android:background="@color/title_anime_bg"
         android:contentInsetEnd="0dp"
         android:contentInsetRight="0dp"
         android:contentInsetStart="0dp"
@@ -108,7 +108,12 @@
                 android:layout_height="wrap_content"
                 android:text="Latest Episode"
                 android:textStyle="bold"
-                android:textSize="16sp"
+                android:textSize="14sp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="5dp"
+                android:textColor="@color/black"
+                android:textAllCaps="true"
                 android:padding="5dp"/>
 
             <android.support.v7.widget.RecyclerView
@@ -116,7 +121,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/slider_layout"
-                android:background="@color/list_background"
+                android:background="@color/white"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         </LinearLayout>

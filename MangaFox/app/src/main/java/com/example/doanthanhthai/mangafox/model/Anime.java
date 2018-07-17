@@ -21,6 +21,7 @@ public class Anime implements Serializable {
     public int year;
     public String description;
     public String genres;
+    public String duration;
     public List<Season> seasonList;
     public List<Episode> episodeList;
     public Episode episode;

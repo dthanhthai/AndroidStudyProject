@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:color="@color/slight_gray"
+    tools:targetApi="lollipop">     <!-- ripple color -->
+
+    <!-- for Button -->
+    <item>
+        <shape
+            android:shape="rectangle" android:padding="10dp">
+            <!-- you can use any color you want I used here gray color-->
+            <solid android:color="@color/add_favorite_anime_bg"/>
+            <corners android:radius="5dp"/>
+        </shape>
+    </item>
+
+</ripple>

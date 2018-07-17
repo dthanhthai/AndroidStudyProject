@@ -27,9 +27,12 @@ import com.example.doanthanhthai.mangafox.parser.AnimeParser;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.FormElement;
+import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -44,6 +47,7 @@ import me.relex.circleindicator.CircleIndicator;
 public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdapter.OnLatestEpisodeAdapterListener, View.OnClickListener, SlideBannerAdapter.OnSlideBannerAdapterListener {
 
     public static final String TAG = HomeActivity.class.getSimpleName();
+    public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
     private WebView webView;
     private WebView confirmWebView;
     private AppWebViewClients webViewClient;
@@ -53,7 +57,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     private static final String HARD_URL = "http://vuighe.net/otome-wa-boku-ni-koishiteru";
     private RecyclerView latestEpisodeRV;
     private LatestEpisodeAdapter mLatestEpisodeAdapter;
-    public static final String ANIME_ARG = "episodeUrlArg";
+    public static final String ANIME_ARG = "animeArg";
     public static final String KEYWORD_ARG = "keywordArg";
     private ViewPager mSlideViewPager;
     private CircleIndicator mSlideIndicator;
@@ -66,6 +70,8 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        overridePendingTransition(R.anim.slide_in, R.anim.slide_out);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
@@ -89,6 +95,8 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         confirmWebView.getSettings().setJavaScriptEnabled(true);
         confirmWebView.clearHistory();
         confirmWebView.setWebViewClient(new ConfirmWebViewClients());
+//        confirmWebView.setVisibility(View.VISIBLE);
+//        confirmWebView.loadUrl(LATEST_URL);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
@@ -121,11 +129,16 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
 
     @Override
     public void onItemClick(Anime item, int position) {
-        progressDialog.show();
-        webViewClient.setRunGetSourceWeb(true);
-        mAnimeSelected = item;
-        webView.loadUrl(item.episode.url);
+
+        Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
+        intent.putExtra(HomeActivity.ANIME_ARG, item);
+        startActivity(intent);
         Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show();
+
+//        progressDialog.show();
+//        webViewClient.setRunGetSourceWeb(true);
+//        mAnimeSelected = item;
+//        webView.loadUrl(item.episode.url);
 
     }
 
@@ -161,7 +174,10 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         protected Document doInBackground(String... strings) {
             Document document = null;
             try {
-                document = Jsoup.connect(strings[0]).timeout(3 * 1000).get();
+                document = Jsoup.connect(strings[0])
+                        .timeout(8 * 1000)
+                        .userAgent(USER_AGENT)
+                        .get();
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.e(TAG, "Parse data fail: " + e.getMessage());
@@ -178,21 +194,42 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 List<Anime> bannerItems = new ArrayList<>();
                 bannerItems = AnimeParser.getListBannerAnime(document);
 
-                if(latestItems != null && !latestItems.isEmpty()){
+                if (latestItems != null && !latestItems.isEmpty()) {
                     mLatestEpisodeAdapter.setEpisodeList(latestItems);
-                }else{
+                } else {
                     confirmWebView.setVisibility(View.VISIBLE);
                     confirmWebView.loadUrl(LATEST_URL);
+
+                    if (document.selectFirst("h4").text().equals("Nếu bạn là người Việt thì hãy điền thông tin phía bên dưới để xác minh:")) {
+                        FormElement confirmForm = (FormElement) document.selectFirst("form");
+                        Elements questionSubject = document.select("div.form-group>input");
+                        if (questionSubject != null && questionSubject.size() > 0) {
+                            questionSubject.get(0).text("20/11");
+                            questionSubject.get(1).text("S");
+
+                            // # Now send the form for login
+//                            try {
+//                                Connection.Response loginActionResponse = confirmForm.submit()
+//                                        .userAgent(USER_AGENT)
+//                                        .execute();
+//                                Log.i(TAG, loginActionResponse.parse().html());
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                                Log.e(TAG, e.getMessage());
+//                            }
+                        }
+                    }
                 }
 
-                if(bannerItems != null && !bannerItems.isEmpty()){
+                if (bannerItems != null && !bannerItems.isEmpty()) {
                     // Auto start of viewpager
                     startSlideBanner(bannerItems);
                 }
 
             } else {
                 Toast.makeText(HomeActivity.this, "Cannot get document web", Toast.LENGTH_LONG).show();
-
+                confirmWebView.setVisibility(View.VISIBLE);
+                confirmWebView.loadUrl(LATEST_URL);
             }
             super.onPostExecute(document);
         }

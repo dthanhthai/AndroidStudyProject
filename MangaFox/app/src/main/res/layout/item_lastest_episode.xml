@@ -3,7 +3,7 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardView"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
+    android:layout_height="250dp"
     android:layout_margin="3dp"
     card_view:cardCornerRadius="0dp"
     card_view:cardElevation="0dp"
@@ -18,7 +18,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="75">
+            android:layout_weight="80">
 
             <ImageView
                 android:id="@+id/episode_poster"
@@ -63,12 +63,12 @@
             android:id="@+id/anime_title"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_weight="25"
+            android:layout_weight="20"
             android:ellipsize="end"
             android:maxLines="2"
             android:paddingTop="3dp"
             android:text="Naruto"
-            android:textColor="@android:color/black"
+            android:textColor="@color/anime_home_title"
             android:textSize="16sp" />
 
     </LinearLayout>
