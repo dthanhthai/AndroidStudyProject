@@ -183,7 +183,7 @@ public class AnimeParser {
                         Anime anime = new Anime();
                         anime.episode = new Episode();
                         anime.url = Constant.HOME_URL + infoElement.attr("href");
-                        anime.episode.setUrl(Constant.HOME_URL + infoElement.attr("href"));
+                        anime.episode.url = Constant.HOME_URL + infoElement.attr("href");
 
                         if (infoElement != null) {
                             Element imageSubject = infoElement.getElementsByClass("tray-item-thumbnail").first();
