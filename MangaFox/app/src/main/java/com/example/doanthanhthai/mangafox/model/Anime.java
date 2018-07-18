@@ -9,6 +9,7 @@ import java.util.List;
 
 public class Anime implements Serializable {
     public String title;
+    public String orderTitle;
     public String url;
     public String image;
     public String bannerImage;

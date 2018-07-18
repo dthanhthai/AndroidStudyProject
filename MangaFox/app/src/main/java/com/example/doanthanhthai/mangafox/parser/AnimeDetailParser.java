@@ -57,16 +57,35 @@ public class AnimeDetailParser {
             }
 
             if (detailSubject != null && detailSubject.size() > 0) {
-                String yearRaw = detailSubject.get(1).text();
-                String durationRaw = detailSubject.get(3).text();
-                try {
-                    curAnime.year = Integer.parseInt(yearRaw.substring(yearRaw.indexOf(":") + 1).trim());
-                } catch (NumberFormatException ex) {
-                    ex.printStackTrace();
-                    Log.e(TAG, ex.getMessage());
-                    curAnime.year = -1;
+
+                for(Element element: detailSubject){
+                    if(element.text().contains("Năm phát hành")){
+                        String yearRaw = element.text();
+                        try {
+                            curAnime.year = Integer.parseInt(yearRaw.substring(yearRaw.indexOf(":") + 1).trim());
+                        } catch (NumberFormatException ex) {
+                            ex.printStackTrace();
+                            Log.e(TAG, ex.getMessage());
+                            curAnime.year = -1;
+                        }
+                    }else if(element.text().contains("Thời lượng")){
+                        String durationRaw = element.text();
+                        curAnime.duration = durationRaw.substring(durationRaw.indexOf(":") + 1).trim();
+                    }else if(element.text().contains("Tên khác")){
+                        String orderTitleRaw = element.text();
+                        curAnime.orderTitle = orderTitleRaw.substring(orderTitleRaw.indexOf(":") + 1).trim();
+                    }
                 }
-                curAnime.duration = yearRaw.substring(yearRaw.indexOf(":") + 1).trim();
+//                String yearRaw = detailSubject.get(1).text();
+//                String durationRaw = detailSubject.get(3).text();
+//                try {
+//                    curAnime.year = Integer.parseInt(yearRaw.substring(yearRaw.indexOf(":") + 1).trim());
+//                } catch (NumberFormatException ex) {
+//                    ex.printStackTrace();
+//                    Log.e(TAG, ex.getMessage());
+//                    curAnime.year = -1;
+//                }
+//                curAnime.duration = durationRaw.substring(yearRaw.indexOf(":") + 1).trim();
             }
         }
         return curAnime;

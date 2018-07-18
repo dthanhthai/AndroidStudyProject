@@ -99,11 +99,18 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
 
     @Override
     public void onItemClick(Anime item, int position) {
-        progressDialog.show();
-        webViewClient.setRunGetSourceWeb(true);
-        mAnimeSelected = item;
-        webView.loadUrl(item.url);
+
+        Intent intent = new Intent(SearchAnimeActivity.this, DetailActivity.class);
+        intent.putExtra(HomeActivity.ANIME_ARG, item);
+        startActivity(intent);
         Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show();
+
+
+//        progressDialog.show();
+//        webViewClient.setRunGetSourceWeb(true);
+//        mAnimeSelected = item;
+//        webView.loadUrl(item.url);
+//        Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show();
     }
 
 

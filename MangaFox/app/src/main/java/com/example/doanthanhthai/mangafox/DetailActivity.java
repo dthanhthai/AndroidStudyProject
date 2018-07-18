@@ -4,34 +4,36 @@ import android.os.AsyncTask;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.parser.AnimeDetailParser;
-import com.example.doanthanhthai.mangafox.parser.AnimeParser;
 import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.example.doanthanhthai.mangafox.HomeActivity.ANIME_ARG;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = DetailActivity.class.getSimpleName();
     private Anime mCurrentAnime;
     private ImageView thumbnailIv, coverIv;
-    private TextView titleTv, yearTv, genresTv, durationTv, descriptionTv, toolbarTitleTv;
+    private TextView titleTv, yearTv, genresTv, durationTv, descriptionTv, toolbarTitleTv, otherTitleTv;
     private Button playBtn;
+    private ImageView backBtn;
+    private LinearLayout otherTitleLayout;
+    private FrameLayout progressBarLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,15 +51,33 @@ public class DetailActivity extends AppCompatActivity {
         genresTv = findViewById(R.id.detail_anime_genres);
         durationTv = findViewById(R.id.detail_anime_duration);
         descriptionTv = findViewById(R.id.detail_anime_description);
-        toolbarTitleTv = findViewById(R.id.order_toolbar_title);
+        toolbarTitleTv = findViewById(R.id.toolbar_title);
+        otherTitleTv = findViewById(R.id.detail_anime_other_title);
+        otherTitleLayout = findViewById(R.id.detail_anime_other_title_layout);
+        progressBarLayout = findViewById(R.id.progress_bar_layout);
+        backBtn = findViewById(R.id.toolbar_back_btn);
 
+        playBtn.setOnClickListener(this);
+        backBtn.setOnClickListener(this);
 
+        progressBarLayout.setVisibility(View.VISIBLE);
         mCurrentAnime = (Anime) getIntent().getSerializableExtra(ANIME_ARG);
         if (mCurrentAnime == null) {
             Toast.makeText(DetailActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
         } else {
             toolbarTitleTv.setText(mCurrentAnime.title);
             new GetDetailAnimeTask().execute(mCurrentAnime.url);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.toolbar_back_btn:
+                DetailActivity.this.finish();
+                break;
+            case R.id.play_btn:
+                break;
         }
     }
 
@@ -94,6 +114,13 @@ public class DetailActivity extends AppCompatActivity {
                         .resize(750, 400)
                         .into(coverIv);
 
+                if (!TextUtils.isEmpty(mCurrentAnime.orderTitle)) {
+                    otherTitleTv.setText(mCurrentAnime.orderTitle);
+                    otherTitleLayout.setVisibility(View.VISIBLE);
+                } else {
+                    otherTitleLayout.setVisibility(View.GONE);
+                }
+
                 titleTv.setText(mCurrentAnime.title);
                 toolbarTitleTv.setText(mCurrentAnime.title);
                 yearTv.setText(mCurrentAnime.year + "");
@@ -101,9 +128,9 @@ public class DetailActivity extends AppCompatActivity {
                 durationTv.setText(mCurrentAnime.duration);
                 descriptionTv.setText(mCurrentAnime.description);
 
+                progressBarLayout.setVisibility(View.GONE);
             } else {
                 Toast.makeText(DetailActivity.this, "Cannot get document web", Toast.LENGTH_LONG).show();
-
             }
             super.onPostExecute(document);
         }
