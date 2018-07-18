@@ -27,6 +27,7 @@ public class AnimeDetailParser {
             Elements genresSubject = document.select("div.ah-pif-fdetails>ul>li>span");
             Element descriptionSubject = document.select("div.ah-pif-fcontent>p").first();
             Elements detailSubject = document.select("div.ah-pif-fdetails>ul>li");
+            Element buttonSubject = document.selectFirst("div.ah-pif-ftool>div.ah-float-left>span>a");
 
 
             if (thumbnailSubject != null) {
@@ -58,8 +59,8 @@ public class AnimeDetailParser {
 
             if (detailSubject != null && detailSubject.size() > 0) {
 
-                for(Element element: detailSubject){
-                    if(element.text().contains("Năm phát hành")){
+                for (Element element : detailSubject) {
+                    if (element.text().contains("Năm phát hành")) {
                         String yearRaw = element.text();
                         try {
                             curAnime.year = Integer.parseInt(yearRaw.substring(yearRaw.indexOf(":") + 1).trim());
@@ -68,14 +69,16 @@ public class AnimeDetailParser {
                             Log.e(TAG, ex.getMessage());
                             curAnime.year = -1;
                         }
-                    }else if(element.text().contains("Thời lượng")){
+                    } else if (element.text().contains("Thời lượng")) {
                         String durationRaw = element.text();
                         curAnime.duration = durationRaw.substring(durationRaw.indexOf(":") + 1).trim();
-                    }else if(element.text().contains("Tên khác")){
+                    } else if (element.text().contains("Tên khác")) {
                         String orderTitleRaw = element.text();
                         curAnime.orderTitle = orderTitleRaw.substring(orderTitleRaw.indexOf(":") + 1).trim();
                     }
                 }
+
+
 //                String yearRaw = detailSubject.get(1).text();
 //                String durationRaw = detailSubject.get(3).text();
 //                try {
@@ -86,6 +89,12 @@ public class AnimeDetailParser {
 //                    curAnime.year = -1;
 //                }
 //                curAnime.duration = durationRaw.substring(yearRaw.indexOf(":") + 1).trim();
+            }
+
+            if(buttonSubject != null){
+                curAnime.episode = new Episode();
+                curAnime.episode.name = "1";
+                curAnime.episode.url = buttonSubject.attr("href");
             }
         }
         return curAnime;

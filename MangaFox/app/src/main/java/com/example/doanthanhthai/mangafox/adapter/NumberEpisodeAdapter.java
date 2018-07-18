@@ -10,6 +10,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.example.doanthanhthai.mangafox.R;
+import com.example.doanthanhthai.mangafox.model.Episode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.List;
  */
 
 public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdapter.NumberEpisodeViewHolder> {
-    private List<Integer> episodeList;
+    private List<Episode> episodeList;
     private OnNumberEpisodeAdapterListener mListener;
     private int currentNum = 1;
 
@@ -28,7 +29,7 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
         mListener = listener;
     }
 
-    public void setEpisodeList(List<Integer> episodeList) {
+    public void setEpisodeList(List<Episode> episodeList) {
         this.episodeList = episodeList;
         notifyDataSetChanged();
     }
@@ -45,14 +46,14 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
 
     @Override
     public void onBindViewHolder(NumberEpisodeViewHolder holder, final int position) {
-        final int item = episodeList.get(position);
+        final Episode item = episodeList.get(position);
         holder.bindView(item);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mListener != null) {
                     mListener.onItemClick(item, position);
-                    currentNum = item;
+//                    currentNum = item;
                 }
             }
         });
@@ -77,20 +78,20 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
 
         }
 
-        public void bindView(int number) {
-            numnerEpisodeTv.setText(number + "");
-            if (currentNum == number) {
-                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.cyan));
-                itemView.setEnabled(false);
-            }else{
-                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.black_50));
-                itemView.setEnabled(true);
-            }
+        public void bindView(Episode number) {
+            numnerEpisodeTv.setText(number.name);
+//            if (currentNum == number) {
+//                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.cyan));
+//                itemView.setEnabled(false);
+//            }else{
+//                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.black_50));
+//                itemView.setEnabled(true);
+//            }
             Log.i("Episode number: ", number + "");
         }
     }
 
     public interface OnNumberEpisodeAdapterListener {
-        void onItemClick(int item, int position);
+        void onItemClick(Episode item, int position);
     }
 }

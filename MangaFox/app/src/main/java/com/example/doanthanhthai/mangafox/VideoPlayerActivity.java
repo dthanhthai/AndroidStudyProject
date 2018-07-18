@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.example.doanthanhthai.mangafox.adapter.NumberEpisodeAdapter;
 import com.example.doanthanhthai.mangafox.model.Anime;
+import com.example.doanthanhthai.mangafox.model.Episode;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
 import com.google.android.exoplayer2.C;
@@ -145,17 +146,11 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         if (mCurrentAnime == null) {
             Toast.makeText(VideoPlayerActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
         } else {
-            animeTitleTv.setText(mCurrentAnime.episode.name);
+            animeTitleTv.setText(mCurrentAnime.title);
 //            episodeNameTv.setText(mCurrentAnime.episode.name);
 
-            //Init list episode number
-            List<Integer> listEpisode = new ArrayList<>();
-            for (int i = mCurrentAnime.minEpisode; i <= mCurrentAnime.maxEpisode; i++) {
-                listEpisode.add(i);
-            }
-            mNumberEpisodeAdapter.setCurrentNum(mCurrentAnime.episode.curNum > 0 ? mCurrentAnime.episode.curNum : mCurrentAnime.minEpisode);
-            mNumberEpisodeAdapter.setEpisodeList(listEpisode);
-            numberEpisodeRv.scrollToPosition(mCurrentAnime.episode.curNum > 0 ? mCurrentAnime.episode.curNum : mCurrentAnime.minEpisode);
+            mNumberEpisodeAdapter.setCurrentNum(1);
+            mNumberEpisodeAdapter.setEpisodeList(mCurrentAnime.episodeList);
 
             //Init player
             initializePlayer();
@@ -409,12 +404,12 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     }
 
     @Override
-    public void onItemClick(int item, int position) {
+    public void onItemClick(Episode item, int position) {
 //        progressDialog.show();
         showProgressLayout();
         webViewClient.setRunGetSourceWeb(true);
-        mNumberEpisodeAdapter.setCurrentNum(item);
-        mNumberEpisodeAdapter.notifyDataSetChanged();
+//        mNumberEpisodeAdapter.setCurrentNum(item);
+//        mNumberEpisodeAdapter.notifyDataSetChanged();
         webView.loadUrl(mCurrentAnime.url + "/tap-" + item);
         Toast.makeText(this, mCurrentAnime.title + "Episode: " + item, Toast.LENGTH_SHORT).show();
     }
