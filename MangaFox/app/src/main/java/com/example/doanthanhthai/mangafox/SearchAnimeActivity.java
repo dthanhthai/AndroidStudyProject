@@ -189,12 +189,12 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                             Element videoSubject = playerSubject.getElementsByClass("player-video").first();
                             if (videoSubject != null) {
                                 Log.d("Direct link: ", videoSubject.attr("src"));
-                                mAnimeSelected.episode.directUrl = videoSubject.attr("src");
+                                mAnimeSelected.episode.setDirectUrl(videoSubject.attr("src"));
                             }
 
                             Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
                             if (titleSubject != null) {
-                                mAnimeSelected.episode.name = titleSubject.text();
+                                mAnimeSelected.episode.setName(titleSubject.text());
                             }
                         }
 
@@ -209,10 +209,10 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                             if (inputEpisodeSubject != null) {
                                 mAnimeSelected.maxEpisode = Integer.parseInt(inputEpisodeSubject.attr("max"));
                                 mAnimeSelected.minEpisode = Integer.parseInt(inputEpisodeSubject.attr("min"));
-                                mAnimeSelected.episode.curNum = mAnimeSelected.minEpisode;
+                                mAnimeSelected.episode.setCurNum(mAnimeSelected.minEpisode);
                             }
                         }
-                        if (!TextUtils.isEmpty(mAnimeSelected.episode.url)) {
+                        if (!TextUtils.isEmpty(mAnimeSelected.episode.getUrl())) {
                             Intent intent = new Intent(SearchAnimeActivity.this, VideoPlayerActivity.class);
                             intent.putExtra(HomeActivity.ANIME_ARG, mAnimeSelected);
                             startActivity(intent);

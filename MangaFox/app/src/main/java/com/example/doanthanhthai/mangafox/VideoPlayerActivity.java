@@ -145,7 +145,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         if (mCurrentAnime == null) {
             Toast.makeText(VideoPlayerActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
         } else {
-            animeTitleTv.setText(mCurrentAnime.episode.name);
+            animeTitleTv.setText(mCurrentAnime.episode.getName());
 //            episodeNameTv.setText(mCurrentAnime.episode.name);
 
             //Init list episode number
@@ -153,9 +153,9 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             for (int i = mCurrentAnime.minEpisode; i <= mCurrentAnime.maxEpisode; i++) {
                 listEpisode.add(i);
             }
-            mNumberEpisodeAdapter.setCurrentNum(mCurrentAnime.episode.curNum > 0 ? mCurrentAnime.episode.curNum : mCurrentAnime.minEpisode);
+            mNumberEpisodeAdapter.setCurrentNum(mCurrentAnime.episode.getCurNum() > 0 ? mCurrentAnime.episode.getCurNum() : mCurrentAnime.minEpisode);
             mNumberEpisodeAdapter.setEpisodeList(listEpisode);
-            numberEpisodeRv.scrollToPosition(mCurrentAnime.episode.curNum > 0 ? mCurrentAnime.episode.curNum : mCurrentAnime.minEpisode);
+            numberEpisodeRv.scrollToPosition(mCurrentAnime.episode.getCurNum() > 0 ? mCurrentAnime.episode.getCurNum() : mCurrentAnime.minEpisode);
 
             //Init player
             initializePlayer();
@@ -329,7 +329,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private void prepareContentPlayer() {
         boolean haveResumePosition = mResumeWindow != C.INDEX_UNSET;
 
-        mediaSource = buildMediaSource(Uri.parse(mCurrentAnime.episode.directUrl), null);
+        mediaSource = buildMediaSource(Uri.parse(mCurrentAnime.episode.getDirectUrl()), null);
         player.prepare(mediaSource);
         player.setPlayWhenReady(true);
 
@@ -543,13 +543,13 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                             if (videoSubject != null) {
                                 Log.d("Direct link: ", videoSubject.attr("src"));
 //                                progressDialog.dismiss();
-                                mCurrentAnime.episode.directUrl = videoSubject.attr("src");
+                                mCurrentAnime.episode.setDirectUrl(videoSubject.attr("src"));
                             }
 
                             Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
                             if (titleSubject != null) {
-                                mCurrentAnime.episode.name = titleSubject.text();
-                                animeTitleTv.setText(mCurrentAnime.episode.name);
+                                mCurrentAnime.episode.setName(titleSubject.text());
+                                animeTitleTv.setText(mCurrentAnime.episode.getName());
                             }
                             prepareContentPlayer();
                         }

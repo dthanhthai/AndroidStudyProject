@@ -148,7 +148,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         progressDialog.show();
         webViewClient.setRunGetSourceWeb(true);
         mAnimeSelected = item;
-        webView.loadUrl(item.episode.url);
+        webView.loadUrl(item.episode.getUrl());
         Toast.makeText(this, "Index: " + position, Toast.LENGTH_SHORT).show();
     }
 
@@ -393,11 +393,11 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                             Element videoSubject = playerSubject.getElementsByClass("player-video").first();
                             if (videoSubject != null) {
                                 Log.d("Direct link: ", videoSubject.attr("src"));
-                                mAnimeSelected.episode.directUrl = videoSubject.attr("src");
+                                mAnimeSelected.episode.setDirectUrl(videoSubject.attr("src"));
                             }
                             Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
                             if (titleSubject != null) {
-                                mAnimeSelected.episode.name = titleSubject.text();
+                                mAnimeSelected.episode.setName(titleSubject.text());
                             }
                         }
 
@@ -411,7 +411,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                         }
 
 //                        mAnimeSelected.episode = episode;
-                        if (!TextUtils.isEmpty(mAnimeSelected.episode.directUrl)) {
+                        if (!TextUtils.isEmpty(mAnimeSelected.episode.getDirectUrl())) {
                             Intent intent = new Intent(HomeActivity.this, VideoPlayerActivity.class);
                             intent.putExtra(HomeActivity.ANIME_ARG, mAnimeSelected);
                             startActivity(intent);
