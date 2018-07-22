@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.doanthanhthai.mangafox.R;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.squareup.picasso.Picasso;
@@ -50,11 +52,21 @@ public class SlideBannerAdapter extends PagerAdapter {
 
         Anime animeData = animeList.get(position);
 
-        Picasso.with(view.getContext())
+        RequestOptions requestOptions = new RequestOptions();
+//        requestOptions.placeholder(R.drawable.placeholder);
+        requestOptions.error(R.drawable.placeholder);
+
+        Glide.with(view.getContext())
                 .load(animeData.bannerImage)
-                .error(R.drawable.placeholder)
-                .placeholder(R.drawable.placeholder)
+                .thumbnail(0.2f)
+                .apply(requestOptions)
                 .into(myImage);
+
+//        Picasso.with(view.getContext())
+//                .load(animeData.bannerImage)
+//                .error(R.drawable.placeholder)
+//                .placeholder(R.drawable.placeholder)
+//                .into(myImage);
 
         titleTv.setText(animeData.title);
         episodeTv.setText(animeData.episodeInfo);

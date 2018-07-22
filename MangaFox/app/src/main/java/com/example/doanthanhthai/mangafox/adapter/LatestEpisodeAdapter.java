@@ -3,17 +3,16 @@ package com.example.doanthanhthai.mangafox.adapter;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.doanthanhthai.mangafox.R;
 import com.example.doanthanhthai.mangafox.model.Anime;
-import com.example.doanthanhthai.mangafox.model.Episode;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,17 +22,26 @@ import java.util.List;
  */
 
 public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdapter.LatestViewHolder> {
-    private List<Anime> episodeList;
+    private List<Anime> animeList;
     private OnLatestEpisodeAdapterListener mListener;
 
     public LatestEpisodeAdapter(OnLatestEpisodeAdapterListener listener) {
-        this.episodeList = new ArrayList<>();
+        this.animeList = new ArrayList<>();
         mListener = listener;
     }
 
-    public void setEpisodeList(List<Anime> episodeList) {
-        this.episodeList = episodeList;
+    public void setAnimeList(List<Anime> animeList) {
+        this.animeList = animeList;
         notifyDataSetChanged();
+    }
+
+    public void addMoreAnime(List<Anime> animeList) {
+        int indexBegin = this.animeList.size();
+        for (Anime anime : animeList) {
+            this.animeList.add(anime);
+        }
+        notifyItemRangeChanged(indexBegin, animeList.size());
+//        notifyDataSetChanged();
     }
 
     @Override
@@ -44,7 +52,7 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
 
     @Override
     public void onBindViewHolder(LatestViewHolder holder, final int position) {
-        final Anime item = episodeList.get(position);
+        final Anime item = animeList.get(position);
         holder.bindView(item);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,7 +67,7 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
 
     @Override
     public int getItemCount() {
-        return episodeList.size();
+        return animeList.size();
     }
 
     public class LatestViewHolder extends RecyclerView.ViewHolder {
@@ -79,10 +87,20 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
         public void bindView(Anime anime) {
             if (!TextUtils.isEmpty(anime.image)) {
 
-                Picasso.with(mContext)
+//                Picasso.with(mContext)
+//                        .load(anime.image)
+//                        .error(R.drawable.placeholder)
+//                        .placeholder(R.drawable.placeholder)
+//                        .into(posterImg);
+
+                RequestOptions requestOptions = new RequestOptions();
+                requestOptions.placeholder(R.drawable.placeholder);
+                requestOptions.error(R.drawable.placeholder);
+
+                Glide.with(mContext)
                         .load(anime.image)
-                        .error(R.drawable.placeholder)
-                        .placeholder(R.drawable.placeholder)
+                        .thumbnail(0.4f)
+                        .apply(requestOptions)
                         .into(posterImg);
             }
 

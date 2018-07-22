@@ -64,7 +64,7 @@
     </android.support.v7.widget.Toolbar>
 
     <android.support.v4.widget.NestedScrollView
-        android:id="@+id/nestedScroll"
+        android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar_layout"

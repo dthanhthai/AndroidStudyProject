@@ -5,8 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar_layout"
         android:layout_width="match_parent"
@@ -40,11 +38,11 @@
                 style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/toolbar_back_btn"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="15dp"
-                android:singleLine="true"
+                android:layout_toRightOf="@+id/toolbar_back_btn"
                 android:ellipsize="end"
+                android:singleLine="true"
                 android:text="Anime Detail"
                 android:textColor="@android:color/white"
                 android:textSize="20sp" />
@@ -132,8 +130,8 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_marginTop="10dp"
-                android:paddingBottom="30dp"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingBottom="30dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -165,7 +163,7 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:layout_weight="30"
                             android:text="Title"
                             android:textColor="@color/black"
                             android:textSize="14sp"
@@ -175,12 +173,44 @@
                             android:id="@+id/detail_anime_title"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="3"
+                            android:layout_weight="70"
                             android:paddingLeft="10dp"
                             android:text=""
                             android:textColor="@color/black"
                             android:textSize="14sp" />
                     </LinearLayout>
+
+
+                    <LinearLayout
+                        android:id="@+id/detail_anime_new_episode_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:orientation="horizontal"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="30"
+                            android:text="New Episode"
+                            android:textColor="@color/black"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/detail_anime_new_episode"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="70"
+                            android:paddingLeft="10dp"
+                            android:text=""
+                            android:textColor="@color/black"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
 
                     <LinearLayout
                         android:id="@+id/detail_anime_other_title_layout"
@@ -195,7 +225,7 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:layout_weight="30"
                             android:text="Other Title"
                             android:textColor="@color/black"
                             android:textSize="14sp"
@@ -205,7 +235,7 @@
                             android:id="@+id/detail_anime_other_title"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="3"
+                            android:layout_weight="70"
                             android:paddingLeft="10dp"
                             android:text=""
                             android:textColor="@color/black"
@@ -224,7 +254,7 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:layout_weight="30"
                             android:text="Year"
                             android:textColor="@color/black"
                             android:textSize="14sp"
@@ -234,7 +264,7 @@
                             android:id="@+id/detail_anime_year_released"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="3"
+                            android:layout_weight="70"
                             android:paddingLeft="10dp"
                             android:text=""
                             android:textColor="@color/black"
@@ -252,7 +282,7 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:layout_weight="30"
                             android:text="Geners"
                             android:textColor="@color/black"
                             android:textSize="14sp"
@@ -262,7 +292,7 @@
                             android:id="@+id/detail_anime_genres"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="3"
+                            android:layout_weight="70"
                             android:maxLines="3"
                             android:paddingLeft="10dp"
                             android:text=""
@@ -281,7 +311,7 @@
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:layout_weight="30"
                             android:text="Duration"
                             android:textColor="@color/black"
                             android:textSize="14sp"
@@ -291,7 +321,7 @@
                             android:id="@+id/detail_anime_duration"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="3"
+                            android:layout_weight="70"
                             android:paddingLeft="10dp"
                             android:text=""
                             android:textColor="@color/black"
@@ -345,6 +375,7 @@
         android:layout_height="match_parent"
         android:visibility="gone" />
 
-    <include layout="@layout/progress_view"
-        android:visibility="gone"/>
+    <include
+        layout="@layout/progress_view"
+        android:visibility="gone" />
 </RelativeLayout>

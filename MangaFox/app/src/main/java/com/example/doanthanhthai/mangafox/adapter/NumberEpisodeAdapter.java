@@ -2,6 +2,7 @@ package com.example.doanthanhthai.mangafox.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
     private List<Episode> episodeList;
     private OnNumberEpisodeAdapterListener mListener;
     private int currentNum = 1;
+    private String curEpisodeName;
 
     public NumberEpisodeAdapter(OnNumberEpisodeAdapterListener listener) {
         this.episodeList = new ArrayList<>();
@@ -34,8 +36,8 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
         notifyDataSetChanged();
     }
 
-    public void setCurrentNum(int currentNum) {
-        this.currentNum = currentNum;
+    public void setCurrentNum(String name) {
+        this.curEpisodeName = name;
     }
 
     @Override
@@ -53,7 +55,7 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
             public void onClick(View view) {
                 if (mListener != null) {
                     mListener.onItemClick(item, position);
-//                    currentNum = item;
+                    curEpisodeName = item.name;
                 }
             }
         });
@@ -78,16 +80,19 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
 
         }
 
-        public void bindView(Episode number) {
-            numnerEpisodeTv.setText(number.name);
-//            if (currentNum == number) {
-//                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.cyan));
-//                itemView.setEnabled(false);
-//            }else{
-//                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.black_50));
-//                itemView.setEnabled(true);
-//            }
-            Log.i("Episode number: ", number + "");
+        public void bindView(Episode episode) {
+            numnerEpisodeTv.setText(episode.name);
+            if (curEpisodeName.equals(episode.name)) {
+                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.cyan));
+                itemView.setEnabled(false);
+            } else if (!TextUtils.isEmpty(episode.directUrl)) {
+                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.black_70));
+                itemView.setEnabled(true);
+            } else {
+                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.black_50));
+                itemView.setEnabled(true);
+            }
+            Log.i("Episode episode: ", episode.name + "");
         }
     }
 

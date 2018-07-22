@@ -23,7 +23,8 @@ public class Anime implements Serializable {
     public String description;
     public String genres;
     public String duration;
+    public String newEpisodeInfo;
     public List<Season> seasonList;
     public List<Episode> episodeList;
-    public Episode episode;
+//    public Episode episode;
 }

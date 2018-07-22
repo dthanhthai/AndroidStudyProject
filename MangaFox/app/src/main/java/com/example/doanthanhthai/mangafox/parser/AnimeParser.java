@@ -121,7 +121,7 @@ public class AnimeParser {
             if (subjectElements != null && subjectElements.size() > 0) {
                 for (Element element : subjectElements) {
                     Anime anime = new Anime();
-                    anime.episode = new Episode();
+//                    anime.episode = new Episode();
                     Element padSubject = element.getElementsByClass("ah-pad-film").first();
                     if (padSubject != null) {
                         anime.url = padSubject.getElementsByTag("a").first().attr("href");
@@ -147,7 +147,7 @@ public class AnimeParser {
             if (subjectElements != null && subjectElements.size() > 0) {
                 for (Element element : subjectElements) {
                     Anime anime = new Anime();
-                    anime.episode = new Episode();
+//                    anime.episode = new Episode();
                     Element padSubject = element.getElementsByClass("ah-pad-film").first();
                     if (padSubject != null) {
                         anime.url = padSubject.getElementsByTag("a").first().attr("href");
@@ -167,51 +167,69 @@ public class AnimeParser {
         return animeList;
     }
 
-
-    public static List<Anime> getListAnimeByItem(String url) {
-        ArrayList<Anime> listEpisode = new ArrayList<>();
-        Document document = null;
-        try {
-            document = (Document) Jsoup.connect(url).get();
-
-            if (document != null) {
-                Elements subjectElements = document.select("div.tray-item");
-                if (subjectElements != null && subjectElements.size() > 0) {
-                    for (Element element : subjectElements) {
-                        Element infoElement = element.getElementsByTag("a").first();
-                        Log.i(TAG, "Link: " + infoElement.attr("href"));
-                        Anime anime = new Anime();
-                        anime.episode = new Episode();
-                        anime.url = Constant.HOME_URL + infoElement.attr("href");
-                        anime.episode.url = Constant.HOME_URL + infoElement.attr("href");
-
-                        if (infoElement != null) {
-                            Element imageSubject = infoElement.getElementsByClass("tray-item-thumbnail").first();
-                            Element descriptionSubject = infoElement.getElementsByClass("tray-item-description").first();
-                            if (imageSubject != null) {
-                                anime.image = imageSubject.attr("src");
-                            }
-                            if (descriptionSubject != null) {
-                                Element titleSubject = descriptionSubject.getElementsByClass("tray-item-title").first();
-                                if (titleSubject != null) {
-                                    anime.title = titleSubject.text();
-                                }
-                                Element episodeInfoSubject = descriptionSubject.select("div.tray-film-update").first();
-                                if (episodeInfoSubject != null) {
-                                    anime.episodeInfo = episodeInfoSubject.text();
-                                }
-                            }
-                            listEpisode.add(anime);
-                        }
-                    }
-                    Log.i(TAG, "List count: " + listEpisode.size());
+    public static int getPaginationAnime(Document document) {
+        ArrayList<Anime> animeList = new ArrayList<>();
+        int totalPage = 1;
+        if (document != null) {
+            Elements subjectElements = document.select("div.ah-pagenavi>ul.pagination>li>a");
+            if (subjectElements != null && subjectElements.size() > 0) {
+                try {
+                    totalPage = Integer.parseInt(subjectElements.get(subjectElements.size() - 1).text());
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, e.getMessage());
+                    return 1;
                 }
+                Log.i(TAG, "List pagination: " + animeList.size());
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e(TAG, e.getMessage());
         }
-        return listEpisode;
+        return totalPage;
     }
+
+
+//    public static List<Anime> getListAnimeByItem(String url) {
+//        ArrayList<Anime> listEpisode = new ArrayList<>();
+//        Document document = null;
+//        try {
+//            document = (Document) Jsoup.connect(url).get();
+//
+//            if (document != null) {
+//                Elements subjectElements = document.select("div.tray-item");
+//                if (subjectElements != null && subjectElements.size() > 0) {
+//                    for (Element element : subjectElements) {
+//                        Element infoElement = element.getElementsByTag("a").first();
+//                        Log.i(TAG, "Link: " + infoElement.attr("href"));
+//                        Anime anime = new Anime();
+//                        anime.episode = new Episode();
+//                        anime.url = Constant.HOME_URL + infoElement.attr("href");
+//                        anime.episode.url = Constant.HOME_URL + infoElement.attr("href");
+//
+//                        if (infoElement != null) {
+//                            Element imageSubject = infoElement.getElementsByClass("tray-item-thumbnail").first();
+//                            Element descriptionSubject = infoElement.getElementsByClass("tray-item-description").first();
+//                            if (imageSubject != null) {
+//                                anime.image = imageSubject.attr("src");
+//                            }
+//                            if (descriptionSubject != null) {
+//                                Element titleSubject = descriptionSubject.getElementsByClass("tray-item-title").first();
+//                                if (titleSubject != null) {
+//                                    anime.title = titleSubject.text();
+//                                }
+//                                Element episodeInfoSubject = descriptionSubject.select("div.tray-film-update").first();
+//                                if (episodeInfoSubject != null) {
+//                                    anime.episodeInfo = episodeInfoSubject.text();
+//                                }
+//                            }
+//                            listEpisode.add(anime);
+//                        }
+//                    }
+//                    Log.i(TAG, "List count: " + listEpisode.size());
+//                }
+//            }
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            Log.e(TAG, e.getMessage());
+//        }
+//        return listEpisode;
+//    }
 }

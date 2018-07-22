@@ -30,8 +30,11 @@ public class AnimeDetailParser {
             Element buttonSubject = document.selectFirst("div.ah-pif-ftool>div.ah-float-left>span>a");
 
 
+            //Document don't have thumbnail -> is not anime page, that is confirm page
             if (thumbnailSubject != null) {
                 curAnime.image = thumbnailSubject.attr("src");
+            }else{
+                return null;
             }
 
             if (coverSubject != null) {
@@ -75,6 +78,9 @@ public class AnimeDetailParser {
                     } else if (element.text().contains("Tên khác")) {
                         String orderTitleRaw = element.text();
                         curAnime.orderTitle = orderTitleRaw.substring(orderTitleRaw.indexOf(":") + 1).trim();
+                    } else if(element.text().contains("Tập mới")){
+                        String newEpisodeRaw = element.text();
+                        curAnime.newEpisodeInfo = newEpisodeRaw.substring(newEpisodeRaw.indexOf(":") + 1).trim();
                     }
                 }
 
@@ -92,9 +98,12 @@ public class AnimeDetailParser {
             }
 
             if(buttonSubject != null){
-                curAnime.episode = new Episode();
-                curAnime.episode.name = "1";
-                curAnime.episode.url = buttonSubject.attr("href");
+                List<Episode> episodes = new ArrayList<>();
+                Episode item = new Episode();
+                item.name = "1";
+                item.url = buttonSubject.attr("href");
+                episodes.add(item);
+                curAnime.episodeList = episodes;
             }
         }
         return curAnime;

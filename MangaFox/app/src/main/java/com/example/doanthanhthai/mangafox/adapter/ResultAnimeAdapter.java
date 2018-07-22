@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.doanthanhthai.mangafox.R;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
@@ -79,11 +81,21 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
         public void bindView(Anime anime) {
             if (!TextUtils.isEmpty(anime.image)) {
 
-                Picasso.with(mContext)
+                RequestOptions requestOptions = new RequestOptions();
+                requestOptions.placeholder(R.drawable.placeholder);
+                requestOptions.error(R.drawable.placeholder);
+
+                Glide.with(mContext)
                         .load(anime.image)
-                        .error(R.drawable.placeholder)
-                        .placeholder(R.drawable.placeholder)
+                        .thumbnail(0.4f)
+                        .apply(requestOptions)
                         .into(posterImg);
+
+//                Picasso.with(mContext)
+//                        .load(anime.image)
+//                        .error(R.drawable.placeholder)
+//                        .placeholder(R.drawable.placeholder)
+//                        .into(posterImg);
             }
 
             animeTitleTv.setText(anime.title);

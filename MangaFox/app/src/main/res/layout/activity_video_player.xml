@@ -12,6 +12,51 @@
         android:layout_height="match_parent"
         android:visibility="gone" />
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/toolbar_height"
+        android:layout_alignParentTop="true"
+        android:background="@color/title_anime_bg"
+        android:contentInsetEnd="0dp"
+        android:contentInsetRight="0dp"
+        android:contentInsetStart="0dp"
+        app:contentInsetEnd="0dp"
+        app:contentInsetLeft="0dp"
+        app:contentInsetRight="0dp"
+        app:contentInsetStart="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="5dp">
+
+            <ImageView
+                android:id="@+id/toolbar_back_btn"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerVertical="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_arrow_left"
+                android:visibility="visible" />
+
+            <TextView
+                android:id="@+id/toolbar_title"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="15dp"
+                android:layout_toRightOf="@+id/toolbar_back_btn"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Anime Player"
+                android:textColor="@android:color/white"
+                android:textSize="20sp" />
+
+        </RelativeLayout>
+    </android.support.v7.widget.Toolbar>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -35,11 +80,6 @@
         </FrameLayout>
 
     </RelativeLayout>
-
-    <!--<android.support.v4.widget.NestedScrollView-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="0dp"-->
-    <!--android:layout_weight="70">-->
 
     <RelativeLayout
         android:id="@+id/info_wrapper_layout"
@@ -96,6 +136,5 @@
             android:focusable="false" />
 
     </RelativeLayout>
-    <!--</android.support.v4.widget.NestedScrollView>-->
 
 </LinearLayout>

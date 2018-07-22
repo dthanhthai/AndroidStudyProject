@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 public class Episode implements Serializable {
     public String name;
-    public int curNum;
+    public String fullName;
     public String url;
     public String directUrl;
 }

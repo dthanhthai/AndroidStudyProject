@@ -3,6 +3,7 @@ package com.example.doanthanhthai.mangafox;
 import android.app.Dialog;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
@@ -24,9 +25,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.doanthanhthai.mangafox.adapter.NumberEpisodeAdapter;
+import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
+import com.example.doanthanhthai.mangafox.parser.AnimePlayerParser;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
 import com.google.android.exoplayer2.C;
@@ -62,19 +68,19 @@ import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.ErrorMessageProvider;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.example.doanthanhthai.mangafox.HomeActivity.ANIME_ARG;
 
-public class VideoPlayerActivity extends AppCompatActivity implements NumberEpisodeAdapter.OnNumberEpisodeAdapterListener, Player.EventListener {
+public class VideoPlayerActivity extends AppCompatActivity implements NumberEpisodeAdapter.OnNumberEpisodeAdapterListener, Player.EventListener, View.OnClickListener {
     private static final String TAG = VideoPlayerActivity.class.getSimpleName();
     private Anime mCurrentAnime;
 
@@ -91,26 +97,30 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private boolean mExoPlayerFullscreen = false;
     private FrameLayout mFullScreenButton;
     private ImageView mFullScreenIcon;
-    private TextView animeTitleTv;
+    private TextView animeTitleTv, toolbarTitleTv;
     private TextView episodeNameTv;
     private RecyclerView numberEpisodeRv;
     private FrameLayout progressBarLayout;
     private TextView errorMsgPlayerTv;
+    private ImageView coverPlayerIv;
+    private ImageView backBtn;
     private NumberEpisodeAdapter mNumberEpisodeAdapter;
     private Dialog mFullScreenDialog;
     private int mResumeWindow;
     private long mResumePosition;
+    private int indexPlayingItem = 0;
 
     private final String STATE_RESUME_WINDOW = "resumeWindow";
     private final String STATE_RESUME_POSITION = "resumePosition";
     private final String STATE_PLAYER_FULLSCREEN = "playerFullscreen";
+    private final String STATE_INDEX_PLAYING_ITEM = "indexPlayItem";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE); //Remove title bar
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); //Remove notification bar
+//        this.requestWindowFeature(Window.FEATURE_NO_TITLE); //Remove title bar
+//        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); //Remove notification bar
         this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_video_player);
 
@@ -121,6 +131,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             mResumeWindow = savedInstanceState.getInt(STATE_RESUME_WINDOW);
             mResumePosition = savedInstanceState.getLong(STATE_RESUME_POSITION);
             mExoPlayerFullscreen = savedInstanceState.getBoolean(STATE_PLAYER_FULLSCREEN);
+            indexPlayingItem = savedInstanceState.getInt(STATE_INDEX_PLAYING_ITEM);
         }
 
         mExoPlayerView = findViewById(R.id.exoplayer);
@@ -128,6 +139,10 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         webView = (WebView) findViewById(R.id.webView);
         animeTitleTv = findViewById(R.id.anime_title_tv);
         episodeNameTv = findViewById(R.id.episode_name_tv);
+        backBtn = findViewById(R.id.toolbar_back_btn);
+        toolbarTitleTv = findViewById(R.id.toolbar_title);
+
+        backBtn.setOnClickListener(this);
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.clearHistory();
@@ -142,14 +157,16 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
         mExoPlayerView.setErrorMessageProvider(new PlayerErrorMessageProvider());
 
-        mCurrentAnime = (Anime) getIntent().getSerializableExtra(ANIME_ARG);
+        mCurrentAnime = AnimeDataManager.getInstance().getAnime();
         if (mCurrentAnime == null) {
             Toast.makeText(VideoPlayerActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
         } else {
-            animeTitleTv.setText(mCurrentAnime.title);
+
+            animeTitleTv.setText(mCurrentAnime.episodeList.get(indexPlayingItem).fullName);
+            toolbarTitleTv.setText(mCurrentAnime.title);
 //            episodeNameTv.setText(mCurrentAnime.episode.name);
 
-            mNumberEpisodeAdapter.setCurrentNum(1);
+            mNumberEpisodeAdapter.setCurrentNum(mCurrentAnime.episodeList.get(indexPlayingItem).name);
             mNumberEpisodeAdapter.setEpisodeList(mCurrentAnime.episodeList);
 
             //Init player
@@ -169,6 +186,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         outState.putInt(STATE_RESUME_WINDOW, mResumeWindow);
         outState.putLong(STATE_RESUME_POSITION, mResumePosition);
         outState.putBoolean(STATE_PLAYER_FULLSCREEN, mExoPlayerFullscreen);
+        outState.putInt(STATE_INDEX_PLAYING_ITEM, indexPlayingItem);
 
         super.onSaveInstanceState(outState);
     }
@@ -210,7 +228,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     }
 
     private void initFullscreenDialog() {
-
         mFullScreenDialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
             public void onBackPressed() {
                 if (mExoPlayerFullscreen)
@@ -221,7 +238,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     }
 
     private void openFullscreenDialog() {
-
         ((ViewGroup) mExoPlayerView.getParent()).removeView(mExoPlayerView);
         mFullScreenDialog.addContentView(mExoPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mFullScreenIcon.setImageDrawable(VideoPlayerActivity.this.getResources().getDrawable(R.drawable.ic_fullscreen_skrink));
@@ -230,9 +246,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         mFullScreenDialog.show();
     }
 
-
     private void closeFullscreenDialog() {
-
         VideoPlayerActivity.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         ((ViewGroup) mExoPlayerView.getParent()).removeView(mExoPlayerView);
         ((FrameLayout) findViewById(R.id.main_media_frame)).addView(mExoPlayerView);
@@ -241,9 +255,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         mFullScreenIcon.setImageDrawable(VideoPlayerActivity.this.getResources().getDrawable(R.drawable.ic_fullscreen_expand));
     }
 
-
     private void initFullscreenButton() {
-
         PlaybackControlView controlView = mExoPlayerView.findViewById(R.id.exo_controller);
         mFullScreenIcon = controlView.findViewById(R.id.exo_fullscreen_icon);
         mFullScreenButton = controlView.findViewById(R.id.exo_fullscreen_button);
@@ -258,9 +270,27 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         });
     }
 
-    private void initProgressLayout() {
+    private void playerMapView() {
         progressBarLayout = mExoPlayerView.findViewById(R.id.progress_bar_layout);
         errorMsgPlayerTv = mExoPlayerView.findViewById(R.id.error_player_message_tv);
+        coverPlayerIv = mExoPlayerView.findViewById(R.id.player_cover_iv);
+    }
+
+    private void initCoverImage() {
+//        Picasso.with(VideoPlayerActivity.this)
+//                .load(mCurrentAnime.coverImage)
+//                .resize(750, 400)
+//                .into(coverPlayerIv);
+
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions.placeholder(R.drawable.placeholder);
+        requestOptions.error(R.drawable.placeholder);
+
+        Glide.with(VideoPlayerActivity.this)
+                .load(mCurrentAnime.coverImage)
+                .thumbnail(0.2f)
+                .apply(requestOptions)
+                .into(coverPlayerIv);
     }
 
     private void showErrorMessage(String msg) {
@@ -291,8 +321,9 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
     private void initializePlayer() {
         if (player == null) {
-            initProgressLayout();
+            playerMapView();
             showProgressLayout();
+            initCoverImage();
             initFullscreenDialog();
             initFullscreenButton();
 
@@ -310,7 +341,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             player.addListener(this);
             mExoPlayerView.setPlayer(player);
 
-            prepareContentPlayer();
+            prepareContentPlayer(mCurrentAnime.episodeList.get(indexPlayingItem));
 
         }
         if (mExoPlayerFullscreen) {
@@ -321,10 +352,10 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         }
     }
 
-    private void prepareContentPlayer() {
+    private void prepareContentPlayer(Episode episode) {
         boolean haveResumePosition = mResumeWindow != C.INDEX_UNSET;
 
-        mediaSource = buildMediaSource(Uri.parse(mCurrentAnime.episode.directUrl), null);
+        mediaSource = buildMediaSource(Uri.parse(episode.directUrl), null);
         player.prepare(mediaSource);
         player.setPlayWhenReady(true);
 
@@ -405,13 +436,21 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
     @Override
     public void onItemClick(Episode item, int position) {
-//        progressDialog.show();
         showProgressLayout();
-        webViewClient.setRunGetSourceWeb(true);
-//        mNumberEpisodeAdapter.setCurrentNum(item);
-//        mNumberEpisodeAdapter.notifyDataSetChanged();
-        webView.loadUrl(mCurrentAnime.url + "/tap-" + item);
-        Toast.makeText(this, mCurrentAnime.title + "Episode: " + item, Toast.LENGTH_SHORT).show();
+        indexPlayingItem = position;
+        pauseVideo();
+
+        mExoPlayerView.clearFocus();
+
+        if (!TextUtils.isEmpty(item.directUrl)) {
+            prepareContentPlayer(item);
+        } else {
+            webViewClient.setRunGetSourceWeb(true);
+            webView.loadUrl(item.url);
+        }
+        mNumberEpisodeAdapter.setCurrentNum(item.name);
+        mNumberEpisodeAdapter.notifyDataSetChanged();
+        Toast.makeText(this, mCurrentAnime.title + "Episode: " + item.name, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -428,6 +467,8 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     public void onLoadingChanged(boolean isLoading) {
         if (isLoading) {
             showProgressLayout();
+        } else {
+            hideProgressLayout();
         }
     }
 
@@ -474,6 +515,15 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
     }
 
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.toolbar_back_btn:
+                VideoPlayerActivity.this.finish();
+                break;
+        }
+    }
+
     private class PlayerErrorMessageProvider implements ErrorMessageProvider<ExoPlaybackException> {
 
         @Override
@@ -511,10 +561,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private class AppWebViewClients extends WebViewClient {
         boolean isRunGetSourceWeb = false;
 
-        public AppWebViewClients() {
-//            progress.setVisibility(View.VISIBLE);
-        }
-
         public void setRunGetSourceWeb(boolean runGetSourceWeb) {
             isRunGetSourceWeb = runGetSourceWeb;
         }
@@ -532,32 +578,29 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
                     Document playerDocument = Jsoup.parse(html);
                     if (playerDocument != null) {
-                        Element playerSubject = playerDocument.select("div.player").first();
-                        if (playerSubject != null) {
-                            Element videoSubject = playerSubject.getElementsByClass("player-video").first();
-                            if (videoSubject != null) {
-                                Log.d("Direct link: ", videoSubject.attr("src"));
-//                                progressDialog.dismiss();
-                                mCurrentAnime.episode.directUrl = videoSubject.attr("src");
-                            }
 
-                            Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
-                            if (titleSubject != null) {
-                                mCurrentAnime.episode.name = titleSubject.text();
-                                animeTitleTv.setText(mCurrentAnime.episode.name);
-                            }
-                            prepareContentPlayer();
+                        Anime reuslt = AnimePlayerParser.getDirectLinkPlayer(playerDocument, webView, mCurrentAnime, indexPlayingItem);
+                        if (reuslt != null) {
+                            mCurrentAnime = reuslt;
+                        } else {
+                            return true;
+                        }
+                        //If we have direct link -> call player prepare content
+                        Episode ep = mCurrentAnime.episodeList.get(indexPlayingItem);
+                        if (!TextUtils.isEmpty(ep.directUrl)) {
+                            webView.stopLoading();
+                            Episode episode = ep;
+                            animeTitleTv.setText(ep.fullName);
+                            prepareContentPlayer(episode);
                         }
                     }
-
-                    webView.stopLoading();
                 } catch (UnsupportedEncodingException e) {
                     Log.e("example", "failed to decode source", e);
+                    showErrorMessage(e.getMessage());
                     Toast.makeText(VideoPlayerActivity.this, "[" + TAG + "] - " + "Can not get link episode", Toast.LENGTH_LONG).show();
                 }
                 return true;
             }
-            // For all other links, let the WebView do it's normal thing
             return false;
         }
 
@@ -566,7 +609,8 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             super.onPageFinished(view, url);
             if (isRunGetSourceWeb) {
                 webView.loadUrl(
-                        "javascript:this.document.location.href = 'source://' + encodeURI(document.documentElement.outerHTML);");
+                        "javascript:changeHtml5();" +
+                                "javascript:this.document.location.href = 'source://' + encodeURI(document.documentElement.outerHTML);");
                 isRunGetSourceWeb = false;
             }
         }
