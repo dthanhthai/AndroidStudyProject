@@ -102,7 +102,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
 
         Intent intent = new Intent(SearchAnimeActivity.this, DetailActivity.class);
         startActivity(intent);
-        Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
     }
 
 
@@ -115,7 +115,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
             Document document = null;
             try {
                 document = Jsoup.connect(strings[0])
-                        .timeout(Constant.TIME_OUT)
+                        .timeout(Constant.INSTANCE.getTIME_OUT())
                         .userAgent(Constant.USER_AGENT)
                         .get();
             } catch (IOException e) {

@@ -55,7 +55,7 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
             public void onClick(View view) {
                 if (mListener != null) {
                     mListener.onItemClick(item, position);
-                    curEpisodeName = item.name;
+                    curEpisodeName = item.getName();
                 }
             }
         });
@@ -81,18 +81,18 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
         }
 
         public void bindView(Episode episode) {
-            numnerEpisodeTv.setText(episode.name);
-            if (curEpisodeName.equals(episode.name)) {
+            numnerEpisodeTv.setText(episode.getName());
+            if (curEpisodeName.equals(episode.getName())) {
                 wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.cyan));
                 itemView.setEnabled(false);
-            } else if (!TextUtils.isEmpty(episode.directUrl)) {
+            } else if (!TextUtils.isEmpty(episode.getDirectUrl())) {
                 wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.black_70));
                 itemView.setEnabled(true);
             } else {
                 wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.black_50));
                 itemView.setEnabled(true);
             }
-            Log.i("Episode episode: ", episode.name + "");
+            Log.i("Episode episode: ", episode.getName() + "");
         }
     }
 

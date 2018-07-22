@@ -144,7 +144,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         AnimeDataManager.getInstance().setAnime(item);
         Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
         startActivity(intent);
-        Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -153,7 +153,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         AnimeDataManager.getInstance().setAnime(item);
         Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
         startActivity(intent);
-        Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -185,7 +185,6 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                     if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
                         mGetAnimeByPageNumTask.startTask(Constant.LATEST_URL + Constant.PAGE_PARAM + (++mCurrentPage));
                         Log.i(TAG, "Load more");
-//                        Load Your Data
                     }
                 }
             }
@@ -209,7 +208,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
             Document document = null;
             try {
                 document = Jsoup.connect(strings[0])
-                        .timeout(Constant.TIME_OUT)
+                        .timeout(Constant.INSTANCE.getTIME_OUT())
                         .userAgent(Constant.USER_AGENT)
                         .get();
             } catch (IOException e) {
@@ -233,7 +232,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
 
                 mTotalPage = AnimeParser.getPaginationAnime(document);
                 //If latest page have more than 5 pages, hard code total is 5 pages
-                if(mTotalPage > 5){
+                if (mTotalPage > 5) {
                     mTotalPage = 5;
                 }
 
@@ -306,7 +305,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
             Document document = null;
             try {
                 document = Jsoup.connect(strings[0])
-                        .timeout(Constant.TIME_OUT)
+                        .timeout(Constant.INSTANCE.getTIME_OUT())
                         .userAgent(Constant.USER_AGENT)
                         .get();
             } catch (IOException e) {

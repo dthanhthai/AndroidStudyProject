@@ -18,14 +18,14 @@ public class AnimePlayerParser {
         Elements fullNameSubject = document.select("div.ah-wf-title>h1");
 
 
-        Episode episode = curAnime.episodeList.get(indexPlayingItem);
+        Episode episode = curAnime.getEpisodeList().get(indexPlayingItem);
 
         if (videoSubject != null) {
-            episode.directUrl = videoSubject.attr("src");
+            episode.setDirectUrl(videoSubject.attr("src"));
         }
 
         //Call to get html source code until we have right direct link
-        String directLinkRaw = episode.directUrl;
+        String directLinkRaw = episode.getDirectUrl();
         if (TextUtils.isEmpty(directLinkRaw)
                 || (!TextUtils.isEmpty(directLinkRaw) && directLinkRaw.contains("media.yomedia.vn"))) {
             webView.loadUrl(
@@ -34,9 +34,9 @@ public class AnimePlayerParser {
         }
 
         if (fullNameSubject != null) {
-            episode.fullName = fullNameSubject.text();
+            episode.setFullName(fullNameSubject.text());
         } else {
-            episode.fullName = episode.name;
+            episode.setFullName(episode.getName());
         }
         return curAnime;
     }
@@ -46,14 +46,14 @@ public class AnimePlayerParser {
         Elements listEpisodeSubject = document.select("div.ah-wf-le>ul>li>a");
         Elements fullNameSubject = document.select("div.ah-wf-title>h1");
 
-        Episode firstEpisode = curAnime.episodeList.get(0);
+        Episode firstEpisode = curAnime.getEpisodeList().get(0);
 
         if (videoSubject != null) {
-            firstEpisode.directUrl = videoSubject.attr("src");
+            firstEpisode.setDirectUrl(videoSubject.attr("src"));
         }
 
         //Call to get html source code until we have right direct link
-        String directLinkRaw = firstEpisode.directUrl;
+        String directLinkRaw = firstEpisode.getDirectUrl();
         if (TextUtils.isEmpty(directLinkRaw)
                 || (!TextUtils.isEmpty(directLinkRaw) && directLinkRaw.contains("media.yomedia.vn"))) {
             webView.loadUrl(
@@ -66,15 +66,14 @@ public class AnimePlayerParser {
             for (int i = 0; i < listEpisodeSubject.size(); i++) {
                 //The first firstEpisode is available -> just update data
                 if (i == 0) {
-                    firstEpisode.url = listEpisodeSubject.get(i).attr("href");
-                    firstEpisode.name = listEpisodeSubject.get(i).text();
-                    firstEpisode.fullName
-                            = fullNameSubject != null ? fullNameSubject.text() : firstEpisode.name;
+                    firstEpisode.setUrl(listEpisodeSubject.get(i).attr("href"));
+                    firstEpisode.setName(listEpisodeSubject.get(i).text());
+                    firstEpisode.setFullName(fullNameSubject != null ? fullNameSubject.text() : firstEpisode.getName());
                 } else {
                     Episode item = new Episode();
-                    item.url = listEpisodeSubject.get(i).attr("href");
-                    item.name = listEpisodeSubject.get(i).text();
-                    curAnime.episodeList.add(item);
+                    item.setUrl(listEpisodeSubject.get(i).attr("href"));
+                    item.setName(listEpisodeSubject.get(i).text());
+                    curAnime.getEpisodeList().add(item);
                 }
             }
         }

@@ -85,7 +85,7 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
         }
 
         public void bindView(Anime anime) {
-            if (!TextUtils.isEmpty(anime.image)) {
+            if (!TextUtils.isEmpty(anime.getImage())) {
 
 //                Picasso.with(mContext)
 //                        .load(anime.image)
@@ -98,15 +98,15 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
                 requestOptions.error(R.drawable.placeholder);
 
                 Glide.with(mContext)
-                        .load(anime.image)
+                        .load(anime.getImage())
                         .thumbnail(0.4f)
                         .apply(requestOptions)
                         .into(posterImg);
             }
 
-            animeTitleTv.setText(anime.title);
-            episodeTitleTv.setText(anime.episodeInfo);
-            rateTv.setText(anime.rate);
+            animeTitleTv.setText(anime.getTitle());
+            episodeTitleTv.setText(anime.getEpisodeInfo());
+            rateTv.setText(anime.getRate());
 //            if (anime.episode.name.contains("Tập")) {
 //                if (anime.episode.name.contains("-")) {
 //                    episodeTitleTv.setText(anime.episode.name.substring(0, anime.episode.name.indexOf("-")).trim());

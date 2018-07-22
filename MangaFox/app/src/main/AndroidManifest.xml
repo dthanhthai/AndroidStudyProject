@@ -29,8 +29,10 @@
         <activity
             android:name=".SearchAnimeActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".DetailActivity"
-            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".DetailActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".FavoriteActivity"></activity>
     </application>
 
 </manifest>

@@ -1,12 +1,16 @@
 package com.example.doanthanhthai.mangafox.manager;
 
 import com.example.doanthanhthai.mangafox.model.Anime;
+import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
+
+import java.util.List;
 
 public class AnimeDataManager {
     private static final String TAG = AnimeDataManager.class.getSimpleName();
 
     private static AnimeDataManager instance;
     private Anime anime;
+    private List<Anime> favoriteAnimeList;
 
     public static AnimeDataManager getInstance(){
         if(instance == null){
@@ -21,5 +25,29 @@ public class AnimeDataManager {
 
     public void setAnime(Anime anime) {
         this.anime = anime;
+    }
+
+    public List<Anime> getFavoriteAnimeList() {
+        return favoriteAnimeList;
+    }
+
+    public void setFavoriteAnimeList(List<Anime> favoriteAnimeList) {
+        this.favoriteAnimeList = favoriteAnimeList;
+    }
+
+    public boolean addFavoriteAnime(Anime favoriteAnime){
+        if(favoriteAnimeList != null){
+            favoriteAnimeList.add(favoriteAnime);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeFavoriteAnime(Anime favoriteAnime){
+        if(favoriteAnimeList != null){
+            favoriteAnimeList.remove(favoriteAnime);
+            return true;
+        }
+        return false;
     }
 }

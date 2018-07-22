@@ -124,12 +124,12 @@ public class AnimeParser {
 //                    anime.episode = new Episode();
                     Element padSubject = element.getElementsByClass("ah-pad-film").first();
                     if (padSubject != null) {
-                        anime.url = padSubject.getElementsByTag("a").first().attr("href");
-                        anime.image = padSubject.getElementsByTag("img").first().attr("src");
-                        anime.episodeInfo = padSubject.getElementsByClass("number-ep-film").first().text();
-                        anime.rate = padSubject.getElementsByClass("rate-point").first() != null ? padSubject.getElementsByClass("rate-point").first().text() : "";
-                        anime.title = padSubject.getElementsByClass("name-film").first().text();
-                        Log.i(TAG, "Link film: " + anime.url);
+                        anime.setUrl(padSubject.getElementsByTag("a").first().attr("href"));
+                        anime.setImage(padSubject.getElementsByTag("img").first().attr("src"));
+                        anime.setEpisodeInfo(padSubject.getElementsByClass("number-ep-film").first().text());
+                        anime.setRate(padSubject.getElementsByClass("rate-point").first() != null ? padSubject.getElementsByClass("rate-point").first().text() : "");
+                        anime.setTitle(padSubject.getElementsByClass("name-film").first().text());
+                        Log.i(TAG, "Link film: " + anime.getUrl());
 
                     }
                     animeList.add(anime);
@@ -150,13 +150,13 @@ public class AnimeParser {
 //                    anime.episode = new Episode();
                     Element padSubject = element.getElementsByClass("ah-pad-film").first();
                     if (padSubject != null) {
-                        anime.url = padSubject.getElementsByTag("a").first().attr("href");
-                        anime.bannerImage = padSubject.getElementsByTag("img").first().attr("src");
-                        anime.episodeInfo = padSubject.getElementsByClass("number-ep-film").first().text();
-                        anime.rate = padSubject.getElementsByClass("rate-point").first().text();
-                        anime.title = padSubject.getElementsByClass("name-film").first().getElementsByTag("span").get(1).text();
-                        anime.year = Integer.parseInt(padSubject.getElementsByClass("name-film").first().getElementsByTag("span").get(2).text());
-                        Log.i(TAG, "Link film: " + anime.url);
+                        anime.setUrl(padSubject.getElementsByTag("a").first().attr("href"));
+                        anime.setBannerImage(padSubject.getElementsByTag("img").first().attr("src"));
+                        anime.setEpisodeInfo(padSubject.getElementsByClass("number-ep-film").first().text());
+                        anime.setRate(padSubject.getElementsByClass("rate-point").first().text());
+                        anime.setTitle(padSubject.getElementsByClass("name-film").first().getElementsByTag("span").get(1).text());
+                        anime.setYear(Integer.parseInt(padSubject.getElementsByClass("name-film").first().getElementsByTag("span").get(2).text()));
+                        Log.i(TAG, "Link film: " + anime.getUrl());
 
                     }
                     animeList.add(anime);

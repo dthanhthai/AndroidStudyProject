@@ -162,12 +162,12 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             Toast.makeText(VideoPlayerActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
         } else {
 
-            animeTitleTv.setText(mCurrentAnime.episodeList.get(indexPlayingItem).fullName);
-            toolbarTitleTv.setText(mCurrentAnime.title);
+            animeTitleTv.setText(mCurrentAnime.getEpisodeList().get(indexPlayingItem).getFullName());
+            toolbarTitleTv.setText(mCurrentAnime.getTitle());
 //            episodeNameTv.setText(mCurrentAnime.episode.name);
 
-            mNumberEpisodeAdapter.setCurrentNum(mCurrentAnime.episodeList.get(indexPlayingItem).name);
-            mNumberEpisodeAdapter.setEpisodeList(mCurrentAnime.episodeList);
+            mNumberEpisodeAdapter.setCurrentNum(mCurrentAnime.getEpisodeList().get(indexPlayingItem).getName());
+            mNumberEpisodeAdapter.setEpisodeList(mCurrentAnime.getEpisodeList());
 
             //Init player
             initializePlayer();
@@ -287,7 +287,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         requestOptions.error(R.drawable.placeholder);
 
         Glide.with(VideoPlayerActivity.this)
-                .load(mCurrentAnime.coverImage)
+                .load(mCurrentAnime.getCoverImage())
                 .thumbnail(0.2f)
                 .apply(requestOptions)
                 .into(coverPlayerIv);
@@ -341,7 +341,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             player.addListener(this);
             mExoPlayerView.setPlayer(player);
 
-            prepareContentPlayer(mCurrentAnime.episodeList.get(indexPlayingItem));
+            prepareContentPlayer(mCurrentAnime.getEpisodeList().get(indexPlayingItem));
 
         }
         if (mExoPlayerFullscreen) {
@@ -355,7 +355,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private void prepareContentPlayer(Episode episode) {
         boolean haveResumePosition = mResumeWindow != C.INDEX_UNSET;
 
-        mediaSource = buildMediaSource(Uri.parse(episode.directUrl), null);
+        mediaSource = buildMediaSource(Uri.parse(episode.getDirectUrl()), null);
         player.prepare(mediaSource);
         player.setPlayWhenReady(true);
 
@@ -442,15 +442,15 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
         mExoPlayerView.clearFocus();
 
-        if (!TextUtils.isEmpty(item.directUrl)) {
+        if (!TextUtils.isEmpty(item.getDirectUrl())) {
             prepareContentPlayer(item);
         } else {
             webViewClient.setRunGetSourceWeb(true);
-            webView.loadUrl(item.url);
+            webView.loadUrl(item.getUrl());
         }
-        mNumberEpisodeAdapter.setCurrentNum(item.name);
+        mNumberEpisodeAdapter.setCurrentNum(item.getName());
         mNumberEpisodeAdapter.notifyDataSetChanged();
-        Toast.makeText(this, mCurrentAnime.title + "Episode: " + item.name, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, mCurrentAnime.getTitle() + "Episode: " + item.getName(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -586,11 +586,11 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                             return true;
                         }
                         //If we have direct link -> call player prepare content
-                        Episode ep = mCurrentAnime.episodeList.get(indexPlayingItem);
-                        if (!TextUtils.isEmpty(ep.directUrl)) {
+                        Episode ep = mCurrentAnime.getEpisodeList().get(indexPlayingItem);
+                        if (!TextUtils.isEmpty(ep.getDirectUrl())) {
                             webView.stopLoading();
                             Episode episode = ep;
-                            animeTitleTv.setText(ep.fullName);
+                            animeTitleTv.setText(ep.getFullName());
                             prepareContentPlayer(episode);
                         }
                     }

@@ -2,7 +2,9 @@ package com.example.doanthanhthai.mangafox;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -28,6 +30,7 @@ import com.example.doanthanhthai.mangafox.model.Episode;
 import com.example.doanthanhthai.mangafox.parser.AnimeDetailParser;
 import com.example.doanthanhthai.mangafox.parser.AnimePlayerParser;
 import com.example.doanthanhthai.mangafox.share.Constant;
+import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
@@ -49,13 +52,15 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private Anime mCurrentAnime;
     private ImageView thumbnailIv, coverIv;
     private TextView titleTv, yearTv, genresTv, durationTv, descriptionTv, toolbarTitleTv, otherTitleTv, newEpisodeTv;
-    private Button playBtn;
+    private Button playBtn, favoriteBtn;
     private ImageView backBtn;
     private LinearLayout otherTitleLayout, newEpisodeLayout;
     private FrameLayout progressBarLayout;
     private WebView webView;
     private AppWebViewClients webViewClient;
     private ProgressDialog progressDialog;
+
+    private boolean isFavoriteAnime = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,9 +85,11 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         newEpisodeLayout = findViewById(R.id.detail_anime_new_episode_layout);
         progressBarLayout = findViewById(R.id.progress_bar_layout);
         backBtn = findViewById(R.id.toolbar_back_btn);
+        favoriteBtn = findViewById(R.id.add_favorite_btn);
         webView = findViewById(R.id.webView);
 
         playBtn.setOnClickListener(this);
+        favoriteBtn.setOnClickListener(this);
         backBtn.setOnClickListener(this);
 
         webView.getSettings().setJavaScriptEnabled(true);
@@ -102,8 +109,34 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         if (mCurrentAnime == null) {
             Toast.makeText(DetailActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
         } else {
-            toolbarTitleTv.setText(mCurrentAnime.title);
-            new GetDetailAnimeTask().execute(mCurrentAnime.url);
+            toolbarTitleTv.setText(mCurrentAnime.getTitle());
+
+            checkFavoriteAnime();
+            new GetDetailAnimeTask().execute(mCurrentAnime.getUrl());
+        }
+    }
+
+    private void checkFavoriteAnime() {
+        isFavoriteAnime = false;
+        for (Anime anime : AnimeDataManager.getInstance().getFavoriteAnimeList()) {
+            if (anime.getTitle().equalsIgnoreCase(mCurrentAnime.getTitle())) {
+                isFavoriteAnime = true;
+                break;
+            }
+        }
+        setFavoriteUI(isFavoriteAnime);
+    }
+
+    private void setFavoriteUI(boolean isFavorite) {
+        Resources resources = this.getResources();
+        if (!isFavorite) {
+            favoriteBtn.setText(resources.getText(R.string.add_favorite));
+            favoriteBtn.setBackground(resources.getDrawable(R.drawable.round_corner_border_add_favorite));
+            favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add_white_18dp, 0, 0, 0);
+        } else {
+            favoriteBtn.setText(resources.getText(R.string.remove_favorite));
+            favoriteBtn.setBackground(resources.getDrawable(R.drawable.round_corner_border_remove_favorite));
+            favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_remove_circle_outline_white_24dp, 0, 0, 0);
         }
     }
 
@@ -117,10 +150,10 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 progressDialog.show();
                 //If the first episode has direct link -> go to player activity
                 //If the first episode doesn't have direct link -> perform get direct link then go to player activity
-                Episode episode = mCurrentAnime.episodeList.get(0);
-                if (TextUtils.isEmpty(episode.directUrl)) {
+                Episode episode = mCurrentAnime.getEpisodeList().get(0);
+                if (TextUtils.isEmpty(episode.getDirectUrl())) {
                     webViewClient.setRunGetSourceWeb(true);
-                    webView.loadUrl(episode.url);
+                    webView.loadUrl(episode.getUrl());
                 } else {
                     Intent intent = new Intent(DetailActivity.this, VideoPlayerActivity.class);
                     intent.putExtra(HomeActivity.ANIME_ARG, mCurrentAnime);
@@ -128,7 +161,26 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                     progressDialog.dismiss();
                 }
                 break;
+            case R.id.add_favorite_btn:
+                toggleFavoriteBtn();
+                break;
         }
+    }
+
+    private void toggleFavoriteBtn() {
+        if (isFavoriteAnime) {
+            boolean result = AnimeDataManager.getInstance().removeFavoriteAnime(mCurrentAnime);
+            if (result) {
+                PreferenceHelper.getInstance(this).saveListFavoriteAnime(AnimeDataManager.getInstance().getFavoriteAnimeList());
+            }
+        } else {
+            boolean result = AnimeDataManager.getInstance().addFavoriteAnime(mCurrentAnime);
+            if (result) {
+                PreferenceHelper.getInstance(this).saveListFavoriteAnime(AnimeDataManager.getInstance().getFavoriteAnimeList());
+            }
+        }
+        isFavoriteAnime = !isFavoriteAnime;
+        setFavoriteUI(isFavoriteAnime);
     }
 
     private class GetDetailAnimeTask extends AsyncTask<String, Void, Document> {
@@ -139,7 +191,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
             Document document = null;
             try {
                 document = Jsoup.connect(strings[0])
-                        .timeout(Constant.TIME_OUT)
+                        .timeout(Constant.INSTANCE.getTIME_OUT())
                         .userAgent(Constant.USER_AGENT)
                         .get();
             } catch (IOException e) {
@@ -156,31 +208,31 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
                 Anime resultAnime = AnimeDetailParser.getAnimeDetail(document, mCurrentAnime);
 
-                if(resultAnime != null){
+                if (resultAnime != null) {
                     mCurrentAnime = resultAnime;
-                }else{
+                } else {
                     Log.e(TAG, "Cannot get CONTENT in document web");
                     Toast.makeText(DetailActivity.this, "Cannot get CONTENT in document web", Toast.LENGTH_LONG).show();
-                    GetDetailAnimeTask.this.execute(mCurrentAnime.url);
+                    GetDetailAnimeTask.this.execute(mCurrentAnime.getUrl());
                     return;
                 }
 
                 AnimeDataManager.getInstance().setAnime(mCurrentAnime);
 
-                Log.i(TAG, mCurrentAnime.title);
+                Log.i(TAG, mCurrentAnime.getTitle());
 
                 RequestOptions requestOptions = new RequestOptions();
                 requestOptions.placeholder(R.drawable.placeholder);
                 requestOptions.error(R.drawable.placeholder);
 
                 Glide.with(DetailActivity.this)
-                        .load(mCurrentAnime.image)
+                        .load(mCurrentAnime.getImage())
                         .thumbnail(0.4f)
                         .apply(requestOptions)
                         .into(thumbnailIv);
 
                 Glide.with(DetailActivity.this)
-                        .load(mCurrentAnime.coverImage)
+                        .load(mCurrentAnime.getCoverImage())
                         .thumbnail(0.2f)
                         .into(coverIv);
 
@@ -195,32 +247,32 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 //                        .resize(750, 400)
 //                        .into(coverIv);
 
-                if (!TextUtils.isEmpty(mCurrentAnime.orderTitle)) {
-                    otherTitleTv.setText(mCurrentAnime.orderTitle);
+                if (!TextUtils.isEmpty(mCurrentAnime.getOrderTitle())) {
+                    otherTitleTv.setText(mCurrentAnime.getOrderTitle());
                     otherTitleLayout.setVisibility(View.VISIBLE);
                 } else {
                     otherTitleLayout.setVisibility(View.GONE);
                 }
 
-                if (!TextUtils.isEmpty(mCurrentAnime.newEpisodeInfo)) {
-                    newEpisodeTv.setText(mCurrentAnime.newEpisodeInfo);
+                if (!TextUtils.isEmpty(mCurrentAnime.getNewEpisodeInfo())) {
+                    newEpisodeTv.setText(mCurrentAnime.getNewEpisodeInfo());
                     newEpisodeLayout.setVisibility(View.VISIBLE);
                 } else {
                     newEpisodeLayout.setVisibility(View.GONE);
                 }
 
-                titleTv.setText(mCurrentAnime.title);
-                toolbarTitleTv.setText(mCurrentAnime.title);
-                yearTv.setText(mCurrentAnime.year + "");
-                genresTv.setText(mCurrentAnime.genres);
-                durationTv.setText(mCurrentAnime.duration);
-                descriptionTv.setText(mCurrentAnime.description);
+                titleTv.setText(mCurrentAnime.getTitle());
+                toolbarTitleTv.setText(mCurrentAnime.getTitle());
+                yearTv.setText(mCurrentAnime.getYear() + "");
+                genresTv.setText(mCurrentAnime.getGenres());
+                durationTv.setText(mCurrentAnime.getDuration());
+                descriptionTv.setText(mCurrentAnime.getDescription());
 
                 progressBarLayout.setVisibility(View.GONE);
             } else {
                 Log.e(TAG, "Cannot get DOCUMENT web");
                 Toast.makeText(DetailActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_LONG).show();
-                GetDetailAnimeTask.this.execute(mCurrentAnime.url);
+                GetDetailAnimeTask.this.execute(mCurrentAnime.getUrl());
             }
         }
     }
@@ -258,7 +310,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                             return true;
                         }
                         //If we have direct link -> go to player activity
-                        if (!TextUtils.isEmpty(mCurrentAnime.episodeList.get(0).directUrl)) {
+                        if (!TextUtils.isEmpty(mCurrentAnime.getEpisodeList().get(0).getDirectUrl())) {
                             Intent intent = new Intent(DetailActivity.this, VideoPlayerActivity.class);
 //                            intent.putExtra(HomeActivity.ANIME_ARG, mCurrentAnime);
                             startActivity(intent);

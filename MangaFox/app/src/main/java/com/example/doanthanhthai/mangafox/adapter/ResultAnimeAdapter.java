@@ -79,14 +79,14 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
         }
 
         public void bindView(Anime anime) {
-            if (!TextUtils.isEmpty(anime.image)) {
+            if (!TextUtils.isEmpty(anime.getImage())) {
 
                 RequestOptions requestOptions = new RequestOptions();
                 requestOptions.placeholder(R.drawable.placeholder);
                 requestOptions.error(R.drawable.placeholder);
 
                 Glide.with(mContext)
-                        .load(anime.image)
+                        .load(anime.getImage())
                         .thumbnail(0.4f)
                         .apply(requestOptions)
                         .into(posterImg);
@@ -98,9 +98,9 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
 //                        .into(posterImg);
             }
 
-            animeTitleTv.setText(anime.title);
-            animeEpisodeInfoTv.setText(anime.episodeInfo);
-            Log.i("Anime result name: ", anime.title);
+            animeTitleTv.setText(anime.getTitle());
+            animeEpisodeInfoTv.setText(anime.getEpisodeInfo());
+            Log.i("Anime result name: ", anime.getTitle());
         }
     }
 

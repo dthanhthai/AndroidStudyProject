@@ -57,7 +57,7 @@ public class SlideBannerAdapter extends PagerAdapter {
         requestOptions.error(R.drawable.placeholder);
 
         Glide.with(view.getContext())
-                .load(animeData.bannerImage)
+                .load(animeData.getBannerImage())
                 .thumbnail(0.2f)
                 .apply(requestOptions)
                 .into(myImage);
@@ -68,9 +68,9 @@ public class SlideBannerAdapter extends PagerAdapter {
 //                .placeholder(R.drawable.placeholder)
 //                .into(myImage);
 
-        titleTv.setText(animeData.title);
-        episodeTv.setText(animeData.episodeInfo);
-        rateTv.setText(animeData.rate);
+        titleTv.setText(animeData.getTitle());
+        episodeTv.setText(animeData.getEpisodeInfo());
+        rateTv.setText(animeData.getRate());
 
         myLayout.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -90,20 +90,21 @@
                 android:layout_height="25dp"
                 android:layout_alignParentBottom="true"
                 android:layout_marginBottom="20dp"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="10dp"
                 android:layout_toRightOf="@+id/anime_thumbnail_iv"
                 android:background="@drawable/round_corner_border_play"
                 android:drawableLeft="@drawable/ic_play_circle_filled_white_14dp"
                 android:includeFontPadding="false"
                 android:paddingLeft="3dp"
+                android:paddingRight="3dp"
                 android:text="Play Film"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="12sp" />
+                android:textSize="11sp" />
 
             <Button
                 android:id="@+id/add_favorite_btn"
-                android:layout_width="100dp"
+                android:layout_width="wrap_content"
                 android:layout_height="25dp"
                 android:layout_alignParentBottom="true"
                 android:layout_marginBottom="20dp"
@@ -112,11 +113,12 @@
                 android:background="@drawable/round_corner_border_add_favorite"
                 android:drawableLeft="@drawable/ic_add_white_18dp"
                 android:includeFontPadding="false"
-                android:paddingLeft="3dp"
-                android:text="Add Favorite"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:text="@string/add_favorite"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="12sp" />
+                android:textSize="11sp" />
         </RelativeLayout>
 
         <ScrollView

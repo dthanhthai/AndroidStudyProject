@@ -22,4 +22,6 @@
 
     <string name="error_unsupported_audio">Media includes audio tracks, but none are playable by this device</string>
     <string name="default_msg_player_error">Don\'t have video to play</string>
+    <string name="remove_favorite">Remove Favorite</string>
+    <string name="add_favorite">Add Favorite</string>
 </resources>
