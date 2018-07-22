@@ -25,4 +25,5 @@ class Anime : Serializable {
     var duration: String? = null
     var newEpisodeInfo: String? = null
     var episodeList: List<Episode>? = null
+    var isFavorite: Boolean? = false
 }

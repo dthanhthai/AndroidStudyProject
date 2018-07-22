@@ -53,5 +53,7 @@
     <color name="title_anime_bg">#FF5252</color>
     <color name="play_anime_bg">#FF5722</color>
     <color name="add_favorite_anime_bg">#43A047</color>
+    <color name="remove_favorite_anime_bg">#43A047</color>
     <color name="anime_home_title">#1565C0</color>
+    <color name="dark_gray">#646464</color>
 </resources>

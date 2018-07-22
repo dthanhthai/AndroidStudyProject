@@ -58,7 +58,7 @@
                     android:layout_toRightOf="@+id/toolbar_back_btn"
                     android:ellipsize="end"
                     android:singleLine="true"
-                    android:text="Anime Favorite"
+                    android:text="Favorite Anime"
                     android:textColor="@android:color/white"
                     android:textSize="20sp" />
             </RelativeLayout>
@@ -89,5 +89,8 @@
         android:textStyle="bold"
         android:visibility="gone" />
 
+    <include
+        layout="@layout/progress_view"
+        android:visibility="gone" />
 
 </RelativeLayout>

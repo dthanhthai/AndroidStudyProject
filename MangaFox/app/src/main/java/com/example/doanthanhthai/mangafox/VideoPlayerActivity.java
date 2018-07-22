@@ -33,6 +33,7 @@ import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
 import com.example.doanthanhthai.mangafox.parser.AnimePlayerParser;
+import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
 import com.google.android.exoplayer2.C;
@@ -288,7 +289,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
         Glide.with(VideoPlayerActivity.this)
                 .load(mCurrentAnime.getCoverImage())
-                .thumbnail(0.2f)
+                .thumbnail(0.1f)
                 .apply(requestOptions)
                 .into(coverPlayerIv);
     }
@@ -588,6 +589,13 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                         //If we have direct link -> call player prepare content
                         Episode ep = mCurrentAnime.getEpisodeList().get(indexPlayingItem);
                         if (!TextUtils.isEmpty(ep.getDirectUrl())) {
+
+//                            if (AnimeDataManager.getInstance().getIndexFavoriteItem() > 0) {
+//                                AnimeDataManager.getInstance().getFavoriteAnimeList().set(AnimeDataManager.getInstance().getIndexFavoriteItem(), mCurrentAnime);
+//                                PreferenceHelper.getInstance(VideoPlayerActivity.this)
+//                                        .saveListFavoriteAnime(AnimeDataManager.getInstance().getFavoriteAnimeList());
+//                            }
+
                             webView.stopLoading();
                             Episode episode = ep;
                             animeTitleTv.setText(ep.getFullName());

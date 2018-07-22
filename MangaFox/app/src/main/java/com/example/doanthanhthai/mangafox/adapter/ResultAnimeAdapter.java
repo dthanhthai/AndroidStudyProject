@@ -14,8 +14,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.doanthanhthai.mangafox.R;
 import com.example.doanthanhthai.mangafox.model.Anime;
-import com.example.doanthanhthai.mangafox.model.Episode;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,16 +23,16 @@ import java.util.List;
  */
 
 public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.ResultAnimeViewHolder> {
-    private List<Anime> episodeList;
+    private List<Anime> animeList;
     private OnResultAnimeAdapterListener mListener;
 
     public ResultAnimeAdapter(OnResultAnimeAdapterListener listener) {
-        this.episodeList = new ArrayList<>();
+        this.animeList = new ArrayList<>();
         mListener = listener;
     }
 
-    public void setEpisodeList(List<Anime> episodeList) {
-        this.episodeList = episodeList;
+    public void setAnimeList(List<Anime> animeList) {
+        this.animeList = animeList;
         notifyDataSetChanged();
     }
 
@@ -46,7 +44,7 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
 
     @Override
     public void onBindViewHolder(ResultAnimeViewHolder holder, final int position) {
-        final Anime item = episodeList.get(position);
+        final Anime item = animeList.get(position);
         holder.bindView(item);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,7 +59,7 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
 
     @Override
     public int getItemCount() {
-        return episodeList.size();
+        return animeList.size();
     }
 
     public class ResultAnimeViewHolder extends RecyclerView.ViewHolder {

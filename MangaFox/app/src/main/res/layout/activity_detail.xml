@@ -100,7 +100,7 @@
                 android:text="Play Film"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/add_favorite_btn"
@@ -113,12 +113,12 @@
                 android:background="@drawable/round_corner_border_add_favorite"
                 android:drawableLeft="@drawable/ic_add_white_18dp"
                 android:includeFontPadding="false"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
                 android:text="@string/add_favorite"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="11sp" />
+                android:textSize="12sp" />
         </RelativeLayout>
 
         <ScrollView

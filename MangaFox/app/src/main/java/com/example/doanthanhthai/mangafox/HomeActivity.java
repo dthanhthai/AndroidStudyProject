@@ -53,8 +53,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     private WebView webView;
     private WebView confirmWebView;
     private AppWebViewClients webViewClient;
-    private ImageView searchIconIv;
-    private ImageView mangaIconIv;
+    private ImageView searchIconIv, favoriteIconIv, mangaIconIv;
     private RecyclerView latestEpisodeRV;
     private LatestEpisodeAdapter mLatestEpisodeAdapter;
     private NestedScrollView nestedScrollView;
@@ -90,10 +89,12 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         nestedScrollView = findViewById(R.id.nested_scroll_view);
         progressBarLayout = findViewById(R.id.progress_bar_layout);
         progressLoadMoreLayout = findViewById(R.id.progress_load_more_layout);
+        favoriteIconIv = findViewById(R.id.favorite_icon_iv);
 
         nestedScrollView.setOnScrollChangeListener(this);
         mangaIconIv.setOnClickListener(this);
         searchIconIv.setOnClickListener(this);
+        favoriteIconIv.setOnClickListener(this);
 
         mSlideIndicator = findViewById(R.id.slide_indicator);
 
@@ -158,14 +159,19 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
 
     @Override
     public void onClick(View view) {
+        Intent intent;
         switch (view.getId()) {
             case R.id.search_icon_iv:
-                Intent intent = new Intent(this, SearchAnimeActivity.class);
+                intent = new Intent(this, SearchAnimeActivity.class);
                 intent.putExtra(KEYWORD_ARG, "");
                 startActivity(intent);
                 break;
             case R.id.manga_icon_iv:
                 intent = new Intent(this, MangaFoxActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.favorite_icon_iv:
+                intent = new Intent(this, FavoriteActivity.class);
                 startActivity(intent);
                 break;
         }
@@ -189,6 +195,11 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 }
             }
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 
     private class GetAnimeHomePageTask extends AsyncTask<String, Void, Document> {

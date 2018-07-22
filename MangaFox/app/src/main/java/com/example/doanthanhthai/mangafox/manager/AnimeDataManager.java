@@ -11,6 +11,7 @@ public class AnimeDataManager {
     private static AnimeDataManager instance;
     private Anime anime;
     private List<Anime> favoriteAnimeList;
+    private int indexFavoriteItem = -1;
 
     public static AnimeDataManager getInstance(){
         if(instance == null){
@@ -49,5 +50,17 @@ public class AnimeDataManager {
             return true;
         }
         return false;
+    }
+
+    public int getIndexFavoriteItem() {
+        return indexFavoriteItem;
+    }
+
+    public void setIndexFavoriteItem(int indexFavoriteItem) {
+        this.indexFavoriteItem = indexFavoriteItem;
+    }
+
+    public void resetIndexFavoriteItem() {
+        this.indexFavoriteItem = -1;
     }
 }

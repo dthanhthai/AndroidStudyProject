@@ -2,19 +2,16 @@ package com.example.doanthanhthai.mangafox;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,11 +26,8 @@ import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -132,7 +126,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                 resultItems = AnimeParser.getListAnimeItem(document);
 
                 if(resultItems != null && !resultItems.isEmpty()){
-                    mResultAnimeAdapter.setEpisodeList(resultItems);
+                    mResultAnimeAdapter.setAnimeList(resultItems);
                     searchView.clearFocus();
                 }else{
                     emptyTv.setVisibility(View.VISIBLE);
