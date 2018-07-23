@@ -182,11 +182,9 @@
         android:layout_height="match_parent"
         android:visibility="gone" />
 
-    <include
-        layout="@layout/progress_view"
-        android:visibility="gone" />
+    <com.example.doanthanhthai.mangafox.widget.ProgressAnimeView
+        android:id="@+id/progress_full_screen_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-    <include
-        layout="@layout/progress_anime_view"
-        android:visibility="gone" />
 </RelativeLayout>

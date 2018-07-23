@@ -14,7 +14,6 @@ import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -28,6 +27,7 @@ import com.example.doanthanhthai.mangafox.model.Episode;
 import com.example.doanthanhthai.mangafox.parser.AnimeParser;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
+import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -45,7 +45,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private Button playBtn, favoriteBtn;
     private ImageView backBtn;
     private LinearLayout otherTitleLayout, newEpisodeLayout;
-    private FrameLayout progressBarLayout;
+    private ProgressAnimeView progressFullLayout;
     private WebView webView;
     private AppWebViewClients webViewClient;
     private ProgressDialog progressDialog;
@@ -73,7 +73,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         newEpisodeTv = findViewById(R.id.detail_anime_new_episode);
         otherTitleLayout = findViewById(R.id.detail_anime_other_title_layout);
         newEpisodeLayout = findViewById(R.id.detail_anime_new_episode_layout);
-        progressBarLayout = findViewById(R.id.progress_bar_layout);
+        progressFullLayout = findViewById(R.id.progress_full_screen_view);
         backBtn = findViewById(R.id.toolbar_back_btn);
         favoriteBtn = findViewById(R.id.add_favorite_btn);
         webView = findViewById(R.id.webView);
@@ -93,7 +93,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setIndeterminate(true);
 
-        progressBarLayout.setVisibility(View.VISIBLE);
+        progressFullLayout.setVisibility(View.VISIBLE);
         mCurrentAnime = AnimeDataManager.getInstance().getAnime();
         if (mCurrentAnime == null) {
             Toast.makeText(DetailActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
@@ -102,11 +102,11 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
             //If anime is favorite, get data in cache favorite
             isFavoriteAnime = checkFavoriteAnime();
-            if (!isFavoriteAnime){
-                new GetDetailAnimeTask().execute(mCurrentAnime.getUrl());
-            } else{
-                updateUIAnimeInfo();
-            }
+//            if (!isFavoriteAnime){
+            new GetDetailAnimeTask().execute(mCurrentAnime.getUrl());
+//            } else{
+//                updateUIAnimeInfo();
+//            }
         }
     }
 
@@ -116,8 +116,8 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         for (int i = 0; i < favoriteAnimeList.size(); i++) {
             Anime anime = favoriteAnimeList.get(i);
             if (anime.getTitle().equalsIgnoreCase(mCurrentAnime.getTitle())) {
-                mCurrentAnime = anime;
-                AnimeDataManager.getInstance().setAnime(mCurrentAnime);
+//                mCurrentAnime = anime;
+//                AnimeDataManager.getInstance().setAnime(mCurrentAnime);
                 AnimeDataManager.getInstance().setIndexFavoriteItem(i);
                 isFavorite = true;
                 break;
@@ -218,7 +218,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                     return;
                 }
 
-                AnimeDataManager.getInstance().setAnime(mCurrentAnime);
+//                AnimeDataManager.getInstance().setAnime(mCurrentAnime);
 
                 Log.i(TAG, mCurrentAnime.getTitle());
 
@@ -279,7 +279,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         durationTv.setText(mCurrentAnime.getDuration());
         descriptionTv.setText(mCurrentAnime.getDescription());
 
-        progressBarLayout.setVisibility(View.GONE);
+        progressFullLayout.setVisibility(View.GONE);
     }
 
     private class AppWebViewClients extends WebViewClient {
@@ -310,7 +310,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                         Anime result = new AnimeParser().getDirectLinkDetail(playerDocument, webView, mCurrentAnime);
                         if (result != null) {
                             mCurrentAnime = result;
-                            AnimeDataManager.getInstance().setAnime(mCurrentAnime);
+
                         } else {
                             return true;
                         }
@@ -320,12 +320,33 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                             int indexFavoriteItem = AnimeDataManager.getInstance().getIndexFavoriteItem();
                             if (indexFavoriteItem > 0) {
                                 List<Anime> favoriteAnimeList = AnimeDataManager.getInstance().getFavoriteAnimeList();
-                                favoriteAnimeList.set(indexFavoriteItem, mCurrentAnime);
-                                PreferenceHelper.getInstance(DetailActivity.this)
-                                        .saveListFavoriteAnime(favoriteAnimeList);
+                                Anime favoriteAnime = favoriteAnimeList.get(indexFavoriteItem);
+                                if (favoriteAnime.episodeList.size() == mCurrentAnime.episodeList.size()) {
+                                    //Change current anime to cache favorite data
+                                    mCurrentAnime = favoriteAnime;
+//                                    AnimeDataManager.getInstance().setAnime(favoriteAnime);
+                                } else {
+                                    //Update episode data from cache favorite to current data then
+                                    for (int i = 0; i < favoriteAnime.episodeList.size(); i++) {
+                                        Episode ep = favoriteAnime.episodeList.get(i);
+                                        if (!TextUtils.isEmpty(ep.getDirectUrl())) {
+                                            mCurrentAnime.episodeList.set(i, ep);
+                                        }
+                                    }
+                                    //Change cache favorite data to current anime data
+                                    favoriteAnimeList.set(indexFavoriteItem, mCurrentAnime);
+                                    //Save data
+                                    PreferenceHelper.getInstance(DetailActivity.this)
+                                            .saveListFavoriteAnime(favoriteAnimeList);
+                                }
+//                                favoriteAnimeList.set(indexFavoriteItem, mCurrentAnime);
+//                                PreferenceHelper.getInstance(DetailActivity.this)
+//                                        .saveListFavoriteAnime(favoriteAnimeList);
                                 Log.i(TAG, "hello");
+//                                AnimeDataManager.getInstance().setAnime(mCurrentAnime);
+//                            }else{
                             }
-
+                            AnimeDataManager.getInstance().setAnime(mCurrentAnime);
                             Intent intent = new Intent(DetailActivity.this, VideoPlayerActivity.class);
                             startActivity(intent);
                             webView.stopLoading();

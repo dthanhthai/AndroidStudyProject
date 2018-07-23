@@ -16,12 +16,10 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
 import com.example.doanthanhthai.mangafox.adapter.SlideBannerAdapter;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
@@ -30,6 +28,7 @@ import com.example.doanthanhthai.mangafox.parser.AnimeParser;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
+import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -68,7 +67,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     private GetAnimeHomePageTask mGetAnimeHomePageTask;
     private GetAnimeByPageNumTask mGetAnimeByPageNumTask;
     private GridLayoutManager mGridLayoutManager;
-    private FrameLayout progressBarLayout;
+    private ProgressAnimeView progressFullLayout;
     private LinearLayout progressLoadMoreLayout;
 
     @Override
@@ -88,15 +87,9 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         latestEpisodeRV = findViewById(R.id.latest_anime_rv);
         confirmWebView = findViewById(R.id.confirm_webView);
         nestedScrollView = findViewById(R.id.nested_scroll_view);
-        progressBarLayout = findViewById(R.id.progress_anime_layout);
+        progressFullLayout = findViewById(R.id.progress_full_screen_view);
         progressLoadMoreLayout = findViewById(R.id.progress_load_more_layout);
         favoriteIconIv = findViewById(R.id.favorite_icon_iv);
-
-        ImageView progressAnimeIv = findViewById(R.id.progress_iv);
-
-        Glide.with(HomeActivity.this)
-                .load(R.raw.loading)
-                .into(progressAnimeIv);
 
         nestedScrollView.setOnScrollChangeListener(this);
         mangaIconIv.setOnClickListener(this);
@@ -121,7 +114,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setIndeterminate(true);
 
-        progressBarLayout.setVisibility(View.VISIBLE);
+        progressFullLayout.setVisibility(View.VISIBLE);
 
         latestEpisodeRV.setNestedScrollingEnabled(false);
         mGridLayoutManager = new AutoFitGridLayoutManager(this, Utils.convertDpToPixel(this, 150));
@@ -217,6 +210,9 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         }
 
         public void restartTask(String url) {
+            mGetAnimeHomePageTask.cancel(true);
+            mGetAnimeHomePageTask = null;
+
             mGetAnimeHomePageTask = new GetAnimeHomePageTask();
             mGetAnimeHomePageTask.execute(url);
         }
@@ -287,7 +283,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                     startSlideBanner(bannerItems);
                 }
 
-                progressBarLayout.setVisibility(View.GONE);
+                progressFullLayout.setVisibility(View.GONE);
             } else {
                 Log.e(TAG, "Cannot get DOCUMENT web");
                 Toast.makeText(HomeActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_LONG).show();

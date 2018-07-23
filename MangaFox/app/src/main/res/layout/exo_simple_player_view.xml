@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2016 The Android Open Source Project
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2016 The Android Open Source Project
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
      You may obtain a copy of the License at
@@ -12,32 +11,45 @@
 -->
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.google.android.exoplayer2.ui.AspectRatioFrameLayout android:id="@id/exo_content_frame"
+
+    <com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+        android:id="@id/exo_content_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center">
 
         <!-- Video surface will be inserted as the first child of the content frame. -->
 
-        <View android:id="@id/exo_shutter"
+        <View
+            android:id="@id/exo_shutter"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/black"/>
+            android:background="@android:color/black" />
 
-        <ImageView android:id="@id/exo_artwork"
+        <ImageView
+            android:id="@id/exo_artwork"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="fitXY"/>
+            android:scaleType="fitXY" />
 
-        <com.google.android.exoplayer2.ui.SubtitleView android:id="@id/exo_subtitles"
+        <com.google.android.exoplayer2.ui.SubtitleView
+            android:id="@id/exo_subtitles"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
 
     </com.google.android.exoplayer2.ui.AspectRatioFrameLayout>
 
-    <View android:id="@id/exo_controller_placeholder"
+    <View
+        android:id="@id/exo_controller_placeholder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
+
+
+    <!--<View-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:background="@color/black_50"/>-->
+
 
     <FrameLayout
         android:id="@+id/progress_bar_layout"
@@ -49,28 +61,29 @@
             android:id="@+id/player_cover_iv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="fitXY"/>
+            android:scaleType="fitXY" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/black_50"/>
+            android:background="@color/black_50" />
 
         <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center" />
+
     </FrameLayout>
 
     <TextView
         android:id="@+id/error_player_message_tv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/default_msg_player_error"
         android:background="@color/black"
         android:gravity="center"
-        android:textSize="16sp"
-        android:textColor="@color/white"/>
+        android:text="@string/default_msg_player_error"
+        android:textColor="@color/white"
+        android:textSize="16sp" />
 
     <com.google.android.exoplayer2.ui.PlaybackControlView
         android:id="@id/exo_controller"
@@ -78,7 +91,7 @@
         android:layout_height="match_parent" />
 
     <!--<FrameLayout android:id="@id/exo_overlay"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"/>-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"/>-->
 
 </merge>

@@ -9,6 +9,7 @@ import android.widget.Toast
 import com.example.doanthanhthai.mangafox.adapter.ResultAnimeAdapter
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager
 import com.example.doanthanhthai.mangafox.model.Anime
+import com.example.doanthanhthai.mangafox.model.Episode
 import com.example.doanthanhthai.mangafox.share.Utils
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager
 import kotlinx.android.synthetic.main.activity_favorite.*;
@@ -40,6 +41,8 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, ResultAnimeA
                 empty_result_tv.visibility = View.VISIBLE
             } else {
                 empty_result_tv.visibility = View.GONE
+//                val tmpList: MutableList<Anime> = mutableListOf<Anime>()
+//                AnimeDataManager.getInstance().favoriteAnimeList.forEach { tmpList.add(it) }
                 mResultAnimeAdapter?.setAnimeList(AnimeDataManager.getInstance().favoriteAnimeList)
             }
         }
@@ -52,7 +55,33 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, ResultAnimeA
     }
 
     override fun onItemClick(item: Anime?, position: Int) {
-        AnimeDataManager.getInstance().anime = item
+        var tmpAnime: Anime? = Anime()
+        var tmpEpList: MutableList<Episode> = mutableListOf<Episode>()
+        tmpAnime?.title = item?.title
+        tmpAnime?.url = item?.url
+        tmpAnime?.orderTitle = item?.orderTitle
+        tmpAnime?.image = item?.image
+        tmpAnime?.bannerImage = item?.bannerImage
+        tmpAnime?.coverImage = item?.coverImage
+        tmpAnime?.episodeInfo = item?.episodeInfo
+        tmpAnime?.rate = item?.rate
+        tmpAnime?.year = item?.year!!
+        tmpAnime?.description = item?.description
+        tmpAnime?.genres = item?.genres
+        tmpAnime?.duration = item?.duration
+        tmpAnime?.newEpisodeInfo = item?.newEpisodeInfo
+        tmpAnime?.isFavorite = item?.isFavorite
+        tmpAnime?.isFavorite = item?.isFavorite
+        item?.episodeList.forEach {
+            var tmpEp:Episode = Episode()
+            tmpEp.name = it.name
+            tmpEp.url = it.url
+            tmpEp.directUrl = it.directUrl
+            tmpEp.fullName = it.fullName
+            tmpEpList.add(tmpEp)
+        }
+        tmpAnime?.episodeList = tmpEpList
+        AnimeDataManager.getInstance().anime = tmpAnime
         val intent = Intent(this, DetailActivity::class.java)
         startActivity(intent)
         Toast.makeText(this, item?.title, Toast.LENGTH_SHORT).show()

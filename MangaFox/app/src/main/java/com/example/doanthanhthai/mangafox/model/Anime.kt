@@ -10,7 +10,8 @@ import java.io.Serializable
  * Created by DOAN THANH THAI on 7/5/2018.
  */
 
-class Anime : Serializable {
+ class Anime : Serializable {
+
     var url: String? = null
     var title: String? = null
     var orderTitle: String? = null

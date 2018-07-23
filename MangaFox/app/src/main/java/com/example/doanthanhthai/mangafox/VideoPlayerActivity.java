@@ -299,24 +299,22 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         errorMsgPlayerTv.setVisibility(View.GONE);
     }
 
-    private void showProgressLayout() {
+    private void showProgressLayout(boolean isShowCover) {
+        if(isShowCover){
+            coverPlayerIv.setVisibility(View.VISIBLE);
+        }
         progressBarLayout.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressLayout() {
         progressBarLayout.setVisibility(View.GONE);
+        coverPlayerIv.setVisibility(View.GONE);
     }
-
-    private void removeVideoOverlay() {
-        hideErrorMessage();
-        hideProgressLayout();
-    }
-
 
     private void initializePlayer() {
         if (player == null) {
             playerMapView();
-            showProgressLayout();
+            showProgressLayout(true);
             initCoverImage();
             initFullscreenDialog();
             initFullscreenButton();
@@ -347,6 +345,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     }
 
     private void prepareContentPlayer(Episode episode) {
+        coverPlayerIv.setVisibility(View.VISIBLE);
         boolean haveResumePosition = mResumeWindow != C.INDEX_UNSET;
 
         mediaSource = buildMediaSource(Uri.parse(episode.getDirectUrl()), null);
@@ -430,7 +429,8 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
     @Override
     public void onItemClick(Episode item, int position) {
-        showProgressLayout();
+        coverPlayerIv.setVisibility(View.VISIBLE);
+        showProgressLayout(false);
         indexPlayingItem = position;
         pauseVideo();
 
@@ -444,7 +444,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         }
         mNumberEpisodeAdapter.setCurrentNum(item.getName());
         mNumberEpisodeAdapter.notifyDataSetChanged();
-        Toast.makeText(this, mCurrentAnime.getTitle() + "Episode: " + item.getName(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, mCurrentAnime.getTitle() + " - Episode: " + item.getName(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -460,7 +460,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     @Override
     public void onLoadingChanged(boolean isLoading) {
         if (isLoading) {
-            showProgressLayout();
+            showProgressLayout(false);
         } else {
             hideProgressLayout();
         }
@@ -469,13 +469,18 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         switch (playbackState) {
+            case Player.STATE_IDLE:
+                showProgressLayout(true);
+                break;
             case Player.STATE_BUFFERING:
                 hideErrorMessage();
-                showProgressLayout();
+                showProgressLayout(false);
             case Player.STATE_READY:
                 mExoPlayerView.requestFocus();
                 hideProgressLayout();
                 hideErrorMessage();
+            case Player.STATE_ENDED:
+                break;
         }
     }
 
@@ -583,11 +588,13 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                         Episode ep = mCurrentAnime.getEpisodeList().get(indexPlayingItem);
                         if (!TextUtils.isEmpty(ep.getDirectUrl())) {
 
-                            //If indexFavorite != -1 -> update current data to cache favorite
+                            //If indexFavorite != -1 -> update cache favorite data
                             int indexFavoriteItem = AnimeDataManager.getInstance().getIndexFavoriteItem();
                             if (indexFavoriteItem > 0) {
+                                //Change cache favorite data to current anime data
                                 List<Anime> favoriteAnimeList = AnimeDataManager.getInstance().getFavoriteAnimeList();
                                 favoriteAnimeList.set(indexFavoriteItem, mCurrentAnime);
+                                //Save data
                                 PreferenceHelper.getInstance(VideoPlayerActivity.this)
                                         .saveListFavoriteAnime(favoriteAnimeList);
                                 Log.i(TAG, "hello");
