@@ -3,7 +3,6 @@ package com.example.doanthanhthai.mangafox;
 import android.app.Dialog;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
@@ -16,7 +15,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -26,13 +24,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.doanthanhthai.mangafox.adapter.NumberEpisodeAdapter;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
-import com.example.doanthanhthai.mangafox.parser.AnimePlayerParser;
+import com.example.doanthanhthai.mangafox.parser.AnimeParser;
 import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
@@ -69,17 +66,13 @@ import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.ErrorMessageProvider;
 import com.google.android.exoplayer2.util.Util;
-import com.squareup.picasso.Picasso;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-
-import static com.example.doanthanhthai.mangafox.HomeActivity.ANIME_ARG;
+import java.util.List;
 
 public class VideoPlayerActivity extends AppCompatActivity implements NumberEpisodeAdapter.OnNumberEpisodeAdapterListener, Player.EventListener, View.OnClickListener {
     private static final String TAG = VideoPlayerActivity.class.getSimpleName();
@@ -580,9 +573,9 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                     Document playerDocument = Jsoup.parse(html);
                     if (playerDocument != null) {
 
-                        Anime reuslt = AnimePlayerParser.getDirectLinkPlayer(playerDocument, webView, mCurrentAnime, indexPlayingItem);
-                        if (reuslt != null) {
-                            mCurrentAnime = reuslt;
+                        Anime result = new AnimeParser().getDirectLinkPlayer(playerDocument, webView, mCurrentAnime, indexPlayingItem);
+                        if (result != null) {
+                            mCurrentAnime = result;
                         } else {
                             return true;
                         }
@@ -590,11 +583,15 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                         Episode ep = mCurrentAnime.getEpisodeList().get(indexPlayingItem);
                         if (!TextUtils.isEmpty(ep.getDirectUrl())) {
 
-//                            if (AnimeDataManager.getInstance().getIndexFavoriteItem() > 0) {
-//                                AnimeDataManager.getInstance().getFavoriteAnimeList().set(AnimeDataManager.getInstance().getIndexFavoriteItem(), mCurrentAnime);
-//                                PreferenceHelper.getInstance(VideoPlayerActivity.this)
-//                                        .saveListFavoriteAnime(AnimeDataManager.getInstance().getFavoriteAnimeList());
-//                            }
+                            //If indexFavorite != -1 -> update current data to cache favorite
+                            int indexFavoriteItem = AnimeDataManager.getInstance().getIndexFavoriteItem();
+                            if (indexFavoriteItem > 0) {
+                                List<Anime> favoriteAnimeList = AnimeDataManager.getInstance().getFavoriteAnimeList();
+                                favoriteAnimeList.set(indexFavoriteItem, mCurrentAnime);
+                                PreferenceHelper.getInstance(VideoPlayerActivity.this)
+                                        .saveListFavoriteAnime(favoriteAnimeList);
+                                Log.i(TAG, "hello");
+                            }
 
                             webView.stopLoading();
                             Episode episode = ep;

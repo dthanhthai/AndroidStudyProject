@@ -56,4 +56,6 @@
     <color name="remove_favorite_anime_bg">#43A047</color>
     <color name="anime_home_title">#1565C0</color>
     <color name="dark_gray">#646464</color>
+    <color name="progress_anime_bg">#FFFFFD</color>
+    <color name="progress_anime_bg">#FFFFFD</color>
 </resources>

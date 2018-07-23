@@ -24,6 +24,6 @@ class Anime : Serializable {
     var genres: String? = null
     var duration: String? = null
     var newEpisodeInfo: String? = null
-    var episodeList: List<Episode>? = null
+    lateinit var episodeList: MutableList<Episode>;
     var isFavorite: Boolean? = false
 }

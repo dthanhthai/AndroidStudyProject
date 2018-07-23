@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
 import com.example.doanthanhthai.mangafox.adapter.SlideBannerAdapter;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
@@ -87,9 +88,15 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         latestEpisodeRV = findViewById(R.id.latest_anime_rv);
         confirmWebView = findViewById(R.id.confirm_webView);
         nestedScrollView = findViewById(R.id.nested_scroll_view);
-        progressBarLayout = findViewById(R.id.progress_bar_layout);
+        progressBarLayout = findViewById(R.id.progress_anime_layout);
         progressLoadMoreLayout = findViewById(R.id.progress_load_more_layout);
         favoriteIconIv = findViewById(R.id.favorite_icon_iv);
+
+        ImageView progressAnimeIv = findViewById(R.id.progress_iv);
+
+        Glide.with(HomeActivity.this)
+                .load(R.raw.loading)
+                .into(progressAnimeIv);
 
         nestedScrollView.setOnScrollChangeListener(this);
         mangaIconIv.setOnClickListener(this);
@@ -236,12 +243,12 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 confirmWebView.setVisibility(View.GONE);
 
                 List<Anime> latestItems = new ArrayList<>();
-                latestItems = AnimeParser.getListAnimeItem(document);
+                latestItems = new AnimeParser().getListAnimeItem(document);
 
                 List<Anime> bannerItems = new ArrayList<>();
-                bannerItems = AnimeParser.getListBannerAnime(document);
+                bannerItems = new AnimeParser().getListBannerAnime(document);
 
-                mTotalPage = AnimeParser.getPaginationAnime(document);
+                mTotalPage = new AnimeParser().getPaginationAnime(document);
                 //If latest page have more than 5 pages, hard code total is 5 pages
                 if (mTotalPage > 5) {
                     mTotalPage = 5;
@@ -333,7 +340,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 confirmWebView.setVisibility(View.GONE);
 
                 List<Anime> moreItems = new ArrayList<>();
-                moreItems = AnimeParser.getListAnimeItem(document);
+                moreItems = new AnimeParser().getListAnimeItem(document);
 
                 if (moreItems != null && !moreItems.isEmpty()) {
                     mLatestEpisodeAdapter.addMoreAnime(moreItems);

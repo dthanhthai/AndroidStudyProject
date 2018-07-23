@@ -25,8 +25,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
-import com.example.doanthanhthai.mangafox.parser.AnimeDetailParser;
-import com.example.doanthanhthai.mangafox.parser.AnimePlayerParser;
+import com.example.doanthanhthai.mangafox.parser.AnimeParser;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 
@@ -36,6 +35,7 @@ import org.jsoup.nodes.Document;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.List;
 
 public class DetailActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = DetailActivity.class.getSimpleName();
@@ -49,7 +49,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private WebView webView;
     private AppWebViewClients webViewClient;
     private ProgressDialog progressDialog;
-    private int indexFavorite = -1;
 
     private boolean isFavoriteAnime = false;
 
@@ -95,144 +94,158 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         progressDialog.setIndeterminate(true);
 
         progressBarLayout.setVisibility(View.VISIBLE);
-//        mCurrentAnime = (Anime) getIntent().getSerializableExtra(ANIME_ARG);
         mCurrentAnime = AnimeDataManager.getInstance().getAnime();
         if (mCurrentAnime == null) {
             Toast.makeText(DetailActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
         } else {
             toolbarTitleTv.setText(mCurrentAnime.getTitle());
 
-            checkFavoriteAnime();
-            new GetDetailAnimeTask().execute(mCurrentAnime.getUrl());
+            //If anime is favorite, get data in cache favorite
+            isFavoriteAnime = checkFavoriteAnime();
+            if (!isFavoriteAnime){
+                new GetDetailAnimeTask().execute(mCurrentAnime.getUrl());
+            } else{
+                updateUIAnimeInfo();
+            }
         }
     }
 
-    private void checkFavoriteAnime() {
-        isFavoriteAnime = false;
-            for (int i = 0; i < AnimeDataManager.getInstance().getFavoriteAnimeList().size(); i++) {
-                if (AnimeDataManager.getInstance()
-                        .getFavoriteAnimeList().get(i).getTitle().equalsIgnoreCase(mCurrentAnime.getTitle())) {
-                    mCurrentAnime.setFavorite(true);
-//                    AnimeDataManager.getInstance().getFavoriteAnimeList().set(i,mCurrentAnime);
-//                    indexFavorite = i;
-//                    AnimeDataManager.getInstance().setIndexFavoriteItem(i);
-                    isFavoriteAnime = true;
-                    break;
-                }
+    private boolean checkFavoriteAnime() {
+        boolean isFavorite = false;
+        List<Anime> favoriteAnimeList = AnimeDataManager.getInstance().getFavoriteAnimeList();
+        for (int i = 0; i < favoriteAnimeList.size(); i++) {
+            Anime anime = favoriteAnimeList.get(i);
+            if (anime.getTitle().equalsIgnoreCase(mCurrentAnime.getTitle())) {
+                mCurrentAnime = anime;
+                AnimeDataManager.getInstance().setAnime(mCurrentAnime);
+                AnimeDataManager.getInstance().setIndexFavoriteItem(i);
+                isFavorite = true;
+                break;
             }
-            setFavoriteUI(isFavoriteAnime);
         }
+        setFavoriteUI(isFavorite);
+        return isFavorite;
+    }
 
-        private void setFavoriteUI ( boolean isFavorite){
-            Resources resources = this.getResources();
-            if (!isFavorite) {
-                favoriteBtn.setText(resources.getText(R.string.add_favorite));
-                favoriteBtn.setBackground(resources.getDrawable(R.drawable.round_corner_border_add_favorite));
-                favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add_white_18dp, 0, 0, 0);
-            } else {
-                favoriteBtn.setText(resources.getText(R.string.remove_favorite));
-                favoriteBtn.setBackground(resources.getDrawable(R.drawable.round_corner_border_remove_favorite));
-                favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+    private void setFavoriteUI(boolean isFavorite) {
+        Resources resources = this.getResources();
+        if (!isFavorite) {
+            favoriteBtn.setText(resources.getText(R.string.add_favorite));
+            favoriteBtn.setBackground(resources.getDrawable(R.drawable.round_corner_border_add_favorite));
+            favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add_white_18dp, 0, 0, 0);
+        } else {
+            favoriteBtn.setText(resources.getText(R.string.remove_favorite));
+            favoriteBtn.setBackground(resources.getDrawable(R.drawable.round_corner_border_remove_favorite));
+            favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.toolbar_back_btn:
+                DetailActivity.this.finish();
+                break;
+            case R.id.play_btn:
+                progressDialog.show();
+                //If the first episode has direct link -> go to player activity
+                //If the first episode doesn't have direct link -> perform get direct link then go to player activity
+                Episode episode = mCurrentAnime.getEpisodeList().get(0);
+                if (TextUtils.isEmpty(episode.getDirectUrl())) {
+                    webViewClient.setRunGetSourceWeb(true);
+                    webView.loadUrl(episode.getUrl());
+                } else {
+                    Intent intent = new Intent(DetailActivity.this, VideoPlayerActivity.class);
+                    intent.putExtra(HomeActivity.ANIME_ARG, mCurrentAnime);
+                    startActivity(intent);
+                    progressDialog.dismiss();
+                }
+                break;
+            case R.id.add_favorite_btn:
+                toggleFavoriteBtn();
+                break;
+        }
+    }
+
+    private void toggleFavoriteBtn() {
+        if (isFavoriteAnime) {
+            mCurrentAnime.setFavorite(false);
+            boolean result = AnimeDataManager.getInstance().removeFavoriteAnime(mCurrentAnime);
+            if (result) {
+                PreferenceHelper.getInstance(this).saveListFavoriteAnime(AnimeDataManager.getInstance().getFavoriteAnimeList());
             }
+        } else {
+            mCurrentAnime.setFavorite(true);
+            boolean result = AnimeDataManager.getInstance().addFavoriteAnime(mCurrentAnime);
+            if (result) {
+                PreferenceHelper.getInstance(this).saveListFavoriteAnime(AnimeDataManager.getInstance().getFavoriteAnimeList());
+            }
+        }
+        isFavoriteAnime = !isFavoriteAnime;
+        setFavoriteUI(isFavoriteAnime);
+    }
+
+    private class GetDetailAnimeTask extends AsyncTask<String, Void, Document> {
+        private final String TAG = GetDetailAnimeTask.class.getSimpleName();
+
+        @Override
+        protected Document doInBackground(String... strings) {
+            Document document = null;
+            try {
+                document = Jsoup.connect(strings[0])
+                        .timeout(Constant.INSTANCE.getTIME_OUT())
+                        .userAgent(Constant.USER_AGENT)
+                        .get();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(TAG, "Parse data fail: " + e.getMessage());
+            }
+            return document;
         }
 
         @Override
-        public void onClick (View v){
-            switch (v.getId()) {
-                case R.id.toolbar_back_btn:
-                    DetailActivity.this.finish();
-                    break;
-                case R.id.play_btn:
-                    progressDialog.show();
-                    //If the first episode has direct link -> go to player activity
-                    //If the first episode doesn't have direct link -> perform get direct link then go to player activity
-                    Episode episode = mCurrentAnime.getEpisodeList().get(0);
-                    if (TextUtils.isEmpty(episode.getDirectUrl())) {
-                        webViewClient.setRunGetSourceWeb(true);
-                        webView.loadUrl(episode.getUrl());
-                    } else {
-                        Intent intent = new Intent(DetailActivity.this, VideoPlayerActivity.class);
-                        intent.putExtra(HomeActivity.ANIME_ARG, mCurrentAnime);
-                        startActivity(intent);
-                        progressDialog.dismiss();
-                    }
-                    break;
-                case R.id.add_favorite_btn:
-                    toggleFavoriteBtn();
-                    break;
-            }
-        }
+        protected void onPostExecute(final Document document) {
+            super.onPostExecute(document);
+            if (document != null) {
+                Anime resultAnime = new AnimeParser().getAnimeDetail(document, mCurrentAnime);
 
-        private void toggleFavoriteBtn () {
-            if (isFavoriteAnime) {
-                mCurrentAnime.setFavorite(false);
-                boolean result = AnimeDataManager.getInstance().removeFavoriteAnime(mCurrentAnime);
-                if (result) {
-                    PreferenceHelper.getInstance(this).saveListFavoriteAnime(AnimeDataManager.getInstance().getFavoriteAnimeList());
+                if (resultAnime != null) {
+                    mCurrentAnime = resultAnime;
+                } else {
+                    Log.e(TAG, "Cannot get CONTENT in document web");
+                    Toast.makeText(DetailActivity.this, "Cannot get CONTENT in document web", Toast.LENGTH_LONG).show();
+//                    GetDetailAnimeTask.this.execute(mCurrentAnime.getUrl());
+                    return;
                 }
+
+                AnimeDataManager.getInstance().setAnime(mCurrentAnime);
+
+                Log.i(TAG, mCurrentAnime.getTitle());
+
+                updateUIAnimeInfo();
             } else {
-                mCurrentAnime.setFavorite(true);
-                boolean result = AnimeDataManager.getInstance().addFavoriteAnime(mCurrentAnime);
-                if (result) {
-                    PreferenceHelper.getInstance(this).saveListFavoriteAnime(AnimeDataManager.getInstance().getFavoriteAnimeList());
-                }
+                Log.e(TAG, "Cannot get DOCUMENT web");
+                Toast.makeText(DetailActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_LONG).show();
+//                GetDetailAnimeTask.this.execute(mCurrentAnime.getUrl());
             }
-            isFavoriteAnime = !isFavoriteAnime;
-            setFavoriteUI(isFavoriteAnime);
         }
+    }
 
-        private class GetDetailAnimeTask extends AsyncTask<String, Void, Document> {
-            private final String TAG = GetDetailAnimeTask.class.getSimpleName();
+    private void updateUIAnimeInfo() {
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions.placeholder(R.drawable.placeholder);
+        requestOptions.error(R.drawable.placeholder);
 
-            @Override
-            protected Document doInBackground(String... strings) {
-                Document document = null;
-                try {
-                    document = Jsoup.connect(strings[0])
-                            .timeout(Constant.INSTANCE.getTIME_OUT())
-                            .userAgent(Constant.USER_AGENT)
-                            .get();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, "Parse data fail: " + e.getMessage());
-                }
-                return document;
-            }
+        Glide.with(DetailActivity.this)
+                .load(mCurrentAnime.getImage())
+                .thumbnail(0.4f)
+                .apply(requestOptions)
+                .into(thumbnailIv);
 
-            @Override
-            protected void onPostExecute(final Document document) {
-                super.onPostExecute(document);
-                if (document != null) {
-
-                    Anime resultAnime = AnimeDetailParser.getAnimeDetail(document, mCurrentAnime);
-
-                    if (resultAnime != null) {
-                        mCurrentAnime = resultAnime;
-                    } else {
-                        Log.e(TAG, "Cannot get CONTENT in document web");
-                        Toast.makeText(DetailActivity.this, "Cannot get CONTENT in document web", Toast.LENGTH_LONG).show();
-                        GetDetailAnimeTask.this.execute(mCurrentAnime.getUrl());
-                        return;
-                    }
-
-                    AnimeDataManager.getInstance().setAnime(mCurrentAnime);
-
-                    Log.i(TAG, mCurrentAnime.getTitle());
-
-                    RequestOptions requestOptions = new RequestOptions();
-                    requestOptions.placeholder(R.drawable.placeholder);
-                    requestOptions.error(R.drawable.placeholder);
-
-                    Glide.with(DetailActivity.this)
-                            .load(mCurrentAnime.getImage())
-                            .thumbnail(0.4f)
-                            .apply(requestOptions)
-                            .into(thumbnailIv);
-
-                    Glide.with(DetailActivity.this)
-                            .load(mCurrentAnime.getCoverImage())
-                            .thumbnail(0.2f)
-                            .into(coverIv);
+        Glide.with(DetailActivity.this)
+                .load(mCurrentAnime.getCoverImage())
+                .thumbnail(0.2f)
+                .into(coverIv);
 
 //                Picasso.with(DetailActivity.this)
 //                        .load(mCurrentAnime.image)
@@ -245,110 +258,107 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 //                        .resize(750, 400)
 //                        .into(coverIv);
 
-                    if (!TextUtils.isEmpty(mCurrentAnime.getOrderTitle())) {
-                        otherTitleTv.setText(mCurrentAnime.getOrderTitle());
-                        otherTitleLayout.setVisibility(View.VISIBLE);
-                    } else {
-                        otherTitleLayout.setVisibility(View.GONE);
-                    }
-
-                    if (!TextUtils.isEmpty(mCurrentAnime.getNewEpisodeInfo())) {
-                        newEpisodeTv.setText(mCurrentAnime.getNewEpisodeInfo());
-                        newEpisodeLayout.setVisibility(View.VISIBLE);
-                    } else {
-                        newEpisodeLayout.setVisibility(View.GONE);
-                    }
-
-                    titleTv.setText(mCurrentAnime.getTitle());
-                    toolbarTitleTv.setText(mCurrentAnime.getTitle());
-                    yearTv.setText(mCurrentAnime.getYear() + "");
-                    genresTv.setText(mCurrentAnime.getGenres());
-                    durationTv.setText(mCurrentAnime.getDuration());
-                    descriptionTv.setText(mCurrentAnime.getDescription());
-
-                    progressBarLayout.setVisibility(View.GONE);
-                } else {
-                    Log.e(TAG, "Cannot get DOCUMENT web");
-                    Toast.makeText(DetailActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_LONG).show();
-                    GetDetailAnimeTask.this.execute(mCurrentAnime.getUrl());
-                }
-            }
+        if (!TextUtils.isEmpty(mCurrentAnime.getOrderTitle())) {
+            otherTitleTv.setText(mCurrentAnime.getOrderTitle());
+            otherTitleLayout.setVisibility(View.VISIBLE);
+        } else {
+            otherTitleLayout.setVisibility(View.GONE);
         }
 
-        private class AppWebViewClients extends WebViewClient {
-            boolean isRunGetSourceWeb = false;
+        if (!TextUtils.isEmpty(mCurrentAnime.getNewEpisodeInfo())) {
+            newEpisodeTv.setText(mCurrentAnime.getNewEpisodeInfo());
+            newEpisodeLayout.setVisibility(View.VISIBLE);
+        } else {
+            newEpisodeLayout.setVisibility(View.GONE);
+        }
 
-            public AppWebViewClients() {
-//            progress.setVisibility(View.VISIBLE);
-            }
+        titleTv.setText(mCurrentAnime.getTitle());
+        toolbarTitleTv.setText(mCurrentAnime.getTitle());
+        yearTv.setText(mCurrentAnime.getYear() + "");
+        genresTv.setText(mCurrentAnime.getGenres());
+        durationTv.setText(mCurrentAnime.getDuration());
+        descriptionTv.setText(mCurrentAnime.getDescription());
 
-            public void setRunGetSourceWeb(boolean runGetSourceWeb) {
-                isRunGetSourceWeb = runGetSourceWeb;
-            }
+        progressBarLayout.setVisibility(View.GONE);
+    }
 
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                super.onPageStarted(view, url, favicon);
-            }
+    private class AppWebViewClients extends WebViewClient {
+        boolean isRunGetSourceWeb = false;
 
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url.startsWith("source://")) {
-                    try {
-                        String html = URLDecoder.decode(url, "UTF-8").substring(9);
-
-                        Document playerDocument = Jsoup.parse(html);
-                        if (playerDocument != null) {
-
-                            Anime result = AnimePlayerParser.getDirectLinkDetail(playerDocument, webView, mCurrentAnime);
-                            if (result != null) {
-                                mCurrentAnime = result;
-                                AnimeDataManager.getInstance().setAnime(mCurrentAnime);
-                            } else {
-                                return true;
-                            }
-                            //If we have direct link -> go to player activity
-                            if (!TextUtils.isEmpty(mCurrentAnime.getEpisodeList().get(0).getDirectUrl())) {
-
-//                                if (AnimeDataManager.getInstance().getIndexFavoriteItem() > 0) {
-//                                    AnimeDataManager.getInstance().getFavoriteAnimeList().set(indexFavorite, mCurrentAnime);
-//                                    PreferenceHelper.getInstance(DetailActivity.this)
-//                                            .saveListFavoriteAnime(AnimeDataManager.getInstance().getFavoriteAnimeList());
-//                                }
-
-                                Intent intent = new Intent(DetailActivity.this, VideoPlayerActivity.class);
-                                startActivity(intent);
-                                webView.stopLoading();
-                                progressDialog.dismiss();
-                            }
-                        }
-                    } catch (UnsupportedEncodingException e) {
-                        Log.e("example", "failed to decode source", e);
-                        Toast.makeText(DetailActivity.this, "[" + TAG + "] - " + "Can not get link episode", Toast.LENGTH_LONG).show();
-                    }
-                    return true;
-                }
-                return false;
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                if (isRunGetSourceWeb) {
-                    webView.loadUrl(
-                            "javascript:changeHtml5();" +
-                                    "javascript:this.document.location.href = 'source://' + encodeURI(document.documentElement.outerHTML);");
-                    isRunGetSourceWeb = false;
-                }
-            }
+        public AppWebViewClients() {
 
         }
 
+        public void setRunGetSourceWeb(boolean runGetSourceWeb) {
+            isRunGetSourceWeb = runGetSourceWeb;
+        }
 
         @Override
-        protected void onDestroy () {
-            AnimeDataManager.getInstance().setAnime(null);
-            AnimeDataManager.getInstance().resetIndexFavoriteItem();
-            super.onDestroy();
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            super.onPageStarted(view, url, favicon);
         }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            if (url.startsWith("source://")) {
+                try {
+                    String html = URLDecoder.decode(url, "UTF-8").substring(9);
+
+                    Document playerDocument = Jsoup.parse(html);
+                    if (playerDocument != null) {
+
+                        Anime result = new AnimeParser().getDirectLinkDetail(playerDocument, webView, mCurrentAnime);
+                        if (result != null) {
+                            mCurrentAnime = result;
+                            AnimeDataManager.getInstance().setAnime(mCurrentAnime);
+                        } else {
+                            return true;
+                        }
+                        //If we have direct link -> go to player activity
+                        if (!TextUtils.isEmpty(mCurrentAnime.getEpisodeList().get(0).getDirectUrl())) {
+
+                            int indexFavoriteItem = AnimeDataManager.getInstance().getIndexFavoriteItem();
+                            if (indexFavoriteItem > 0) {
+                                List<Anime> favoriteAnimeList = AnimeDataManager.getInstance().getFavoriteAnimeList();
+                                favoriteAnimeList.set(indexFavoriteItem, mCurrentAnime);
+                                PreferenceHelper.getInstance(DetailActivity.this)
+                                        .saveListFavoriteAnime(favoriteAnimeList);
+                                Log.i(TAG, "hello");
+                            }
+
+                            Intent intent = new Intent(DetailActivity.this, VideoPlayerActivity.class);
+                            startActivity(intent);
+                            webView.stopLoading();
+                            progressDialog.dismiss();
+                        }
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    Log.e("example", "failed to decode source", e);
+                    Toast.makeText(DetailActivity.this, "[" + TAG + "] - " + "Can not get link episode", Toast.LENGTH_LONG).show();
+                }
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            if (isRunGetSourceWeb) {
+                webView.loadUrl(
+                        "javascript:changeHtml5();" +
+                                "javascript:this.document.location.href = 'source://' + encodeURI(document.documentElement.outerHTML);");
+                isRunGetSourceWeb = false;
+            }
+        }
+
     }
+
+
+    @Override
+    protected void onDestroy() {
+        AnimeDataManager.getInstance().setAnime(null);
+        AnimeDataManager.getInstance().resetIndexFavoriteItem();
+        super.onDestroy();
+    }
+}

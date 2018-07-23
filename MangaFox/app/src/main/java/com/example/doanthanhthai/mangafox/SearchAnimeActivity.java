@@ -123,7 +123,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
         protected void onPostExecute(Document document) {
             if(document != null){
                 List<Anime> resultItems = new ArrayList<>();
-                resultItems = AnimeParser.getListAnimeItem(document);
+                resultItems = new AnimeParser().getListAnimeItem(document);
 
                 if(resultItems != null && !resultItems.isEmpty()){
                     mResultAnimeAdapter.setAnimeList(resultItems);

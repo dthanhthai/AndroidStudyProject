@@ -186,4 +186,7 @@
         layout="@layout/progress_view"
         android:visibility="gone" />
 
+    <include
+        layout="@layout/progress_anime_view"
+        android:visibility="gone" />
 </RelativeLayout>

@@ -380,4 +380,5 @@
     <include
         layout="@layout/progress_view"
         android:visibility="gone" />
+
 </RelativeLayout>
