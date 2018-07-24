@@ -13,6 +13,7 @@ import com.example.doanthanhthai.mangafox.model.Anime
 import com.example.doanthanhthai.mangafox.model.Episode
 import com.example.doanthanhthai.mangafox.share.Utils
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_favorite.*;
 
 class FavoriteActivity : AppCompatActivity(), View.OnClickListener, ResultAnimeAdapter.OnResultAnimeAdapterListener {
@@ -56,7 +57,6 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, ResultAnimeA
     }
 
     override fun onItemClick(item: Anime?, position: Int) {
-        val startTime:Long = System.currentTimeMillis()
         var tmpAnime: Anime? = Anime()
         var tmpEpList: MutableList<Episode> = mutableListOf<Episode>()
         tmpAnime?.title = item?.title
@@ -84,7 +84,6 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, ResultAnimeA
         }
         tmpAnime?.episodeList = tmpEpList
         AnimeDataManager.getInstance().anime = tmpAnime
-        Log.i(TAG, "Total time: " + (System.currentTimeMillis() - startTime))
         val intent = Intent(this, DetailActivity::class.java)
         startActivity(intent)
         Toast.makeText(this, item?.title, Toast.LENGTH_SHORT).show()

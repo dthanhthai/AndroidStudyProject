@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/toolbar_height"
         android:layout_alignParentTop="true"
-        android:background="@color/colorPrimary"
+        android:background="@color/title_anime_bg"
         android:contentInsetEnd="0dp"
         android:contentInsetRight="0dp"
         android:contentInsetStart="0dp"
@@ -28,6 +28,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="5dp">
+
+            <ImageView
+                android:id="@+id/favorite_icon_iv"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="15dp"
+                android:layout_alignParentLeft="true"
+                android:src="@drawable/ic_favorite_white_24dp"
+                android:visibility="visible" />
 
             <TextView
                 android:id="@+id/toolbar_title"
@@ -68,8 +78,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar_layout"
+        android:background="@color/list_background"
         android:fillViewport="true"
-        android:scrollbars="none">
+        android:scrollbars="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -79,7 +90,7 @@
             <RelativeLayout
                 android:id="@+id/slider_layout"
                 android:layout_width="match_parent"
-                android:layout_height="260dp"
+                android:layout_height="250dp"
                 android:background="@drawable/drop_shadow"
                 android:paddingBottom="5dp">
 
@@ -98,30 +109,72 @@
                     android:id="@+id/slide_indicator"
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
-                    app:ci_gravity="center"
                     android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"/>
+                    android:layout_centerHorizontal="true"
+                    app:ci_gravity="center" />
             </RelativeLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:padding="5dp"
                 android:text="Latest Episode"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:padding="5dp"/>
+                android:textAllCaps="true"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/latest_anime_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/slider_layout"
-                android:background="@color/list_background"
+                android:background="@color/white"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:textSize="16dp"
+                    android:text="No more data" />
+
+                <LinearLayout
+                    android:id="@+id/progress_load_more_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:background="@color/list_background"
+                    android:visibility="gone">
+
+                    <ProgressBar
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_gravity="center" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:textSize="16dp"
+                        android:text="Loading more data" />
+                </LinearLayout>
+
+            </FrameLayout>
+
 
         </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>
+
 
     <WebView
         android:id="@+id/confirm_webView"
@@ -129,10 +182,9 @@
         android:layout_height="match_parent"
         android:visibility="gone" />
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:visibility="gone" />
+    <com.example.doanthanhthai.mangafox.widget.ProgressAnimeView
+        android:id="@+id/progress_full_screen_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </RelativeLayout>

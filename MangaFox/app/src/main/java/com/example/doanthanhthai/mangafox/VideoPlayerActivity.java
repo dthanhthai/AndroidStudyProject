@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -103,6 +104,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private int mResumeWindow;
     private long mResumePosition;
     private int indexPlayingItem = 0;
+    private boolean isPrepareContent = false;
 
     private final String STATE_RESUME_WINDOW = "resumeWindow";
     private final String STATE_RESUME_POSITION = "resumePosition";
@@ -275,16 +277,11 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 //                .load(mCurrentAnime.coverImage)
 //                .resize(750, 400)
 //                .into(coverPlayerIv);
-
-        RequestOptions requestOptions = new RequestOptions();
-        requestOptions.placeholder(R.drawable.placeholder);
-        requestOptions.error(R.drawable.placeholder);
-
         Glide.with(VideoPlayerActivity.this)
                 .load(mCurrentAnime.getCoverImage())
                 .thumbnail(0.1f)
-                .apply(requestOptions)
                 .into(coverPlayerIv);
+
     }
 
     private void showErrorMessage(String msg) {
@@ -299,22 +296,19 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         errorMsgPlayerTv.setVisibility(View.GONE);
     }
 
-    private void showProgressLayout(boolean isShowCover) {
-        if(isShowCover){
-            coverPlayerIv.setVisibility(View.VISIBLE);
-        }
+    private void showProgressLayout() {
         progressBarLayout.setVisibility(View.VISIBLE);
     }
 
     private void hideProgressLayout() {
         progressBarLayout.setVisibility(View.GONE);
-        coverPlayerIv.setVisibility(View.GONE);
+//        coverPlayerIv.setVisibility(View.GONE);
     }
 
     private void initializePlayer() {
         if (player == null) {
             playerMapView();
-            showProgressLayout(true);
+            showProgressLayout();
             initCoverImage();
             initFullscreenDialog();
             initFullscreenButton();
@@ -344,22 +338,30 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         }
     }
 
-    private void prepareContentPlayer(Episode episode) {
+    private void prepareContentPlayer(final Episode episode) {
+        isPrepareContent = true;
+        showProgressLayout();
         coverPlayerIv.setVisibility(View.VISIBLE);
-        boolean haveResumePosition = mResumeWindow != C.INDEX_UNSET;
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                boolean haveResumePosition = mResumeWindow != C.INDEX_UNSET;
 
-        mediaSource = buildMediaSource(Uri.parse(episode.getDirectUrl()), null);
-        player.prepare(mediaSource);
-        player.setPlayWhenReady(true);
+                mediaSource = buildMediaSource(Uri.parse(episode.getDirectUrl()), null);
+                player.prepare(mediaSource);
+                player.setPlayWhenReady(true);
 
-        if (haveResumePosition) {
-            if (mResumePosition <= 1000) {
-                mResumePosition = 0;
-            } else {
-                mResumePosition -= 1000;
+                if (haveResumePosition) {
+                    if (mResumePosition <= 1000) {
+                        mResumePosition = 0;
+                    } else {
+                        mResumePosition -= 1000;
+                    }
+                    mExoPlayerView.getPlayer().seekTo(mResumePosition);
+                }
             }
-            mExoPlayerView.getPlayer().seekTo(mResumePosition);
-        }
+        });
+
     }
 
     public void pauseVideo() {
@@ -430,7 +432,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     @Override
     public void onItemClick(Episode item, int position) {
         coverPlayerIv.setVisibility(View.VISIBLE);
-        showProgressLayout(false);
+        showProgressLayout();
         indexPlayingItem = position;
         pauseVideo();
 
@@ -460,23 +462,35 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     @Override
     public void onLoadingChanged(boolean isLoading) {
         if (isLoading) {
-            showProgressLayout(false);
+            showProgressLayout();
+            if (isPrepareContent) {
+                coverPlayerIv.setVisibility(View.VISIBLE);
+                isPrepareContent = false;
+            }
         } else {
+//            if (isPrepareContent) {
+            coverPlayerIv.setVisibility(View.GONE);
+//                isPrepareContent = false;
+//            }
             hideProgressLayout();
         }
     }
 
+    //Buffer -> True -> Buffer - > false
+    //Buffer - > Buffer ->buffer ->buffer -> true ->buffer->false
+
+    //Ready -> Buffer -> Ready -> Buffer -> true
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         switch (playbackState) {
             case Player.STATE_IDLE:
-                showProgressLayout(true);
+                showProgressLayout();
                 break;
             case Player.STATE_BUFFERING:
                 hideErrorMessage();
-                showProgressLayout(false);
+                showProgressLayout();
             case Player.STATE_READY:
-                mExoPlayerView.requestFocus();
+                coverPlayerIv.setVisibility(View.GONE);
                 hideProgressLayout();
                 hideErrorMessage();
             case Player.STATE_ENDED:
@@ -506,7 +520,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
     @Override
     public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
     }
 
     @Override

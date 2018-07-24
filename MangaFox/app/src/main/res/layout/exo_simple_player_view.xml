@@ -24,7 +24,7 @@
             android:id="@id/exo_shutter"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/black" />
+            android:background="@color/black_50" />
 
         <ImageView
             android:id="@id/exo_artwork"
@@ -50,6 +50,12 @@
     <!--android:layout_height="match_parent"-->
     <!--android:background="@color/black_50"/>-->
 
+    <ImageView
+        android:id="@+id/player_cover_iv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_favorite_white_24dp" />
 
     <FrameLayout
         android:id="@+id/progress_bar_layout"
@@ -57,16 +63,10 @@
         android:layout_height="match_parent"
         android:layout_centerInParent="true">
 
-        <ImageView
-            android:id="@+id/player_cover_iv"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitXY" />
-
         <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/black_50" />
+            android:background="@color/black_30" />
 
         <ProgressBar
             android:layout_width="wrap_content"
@@ -83,12 +83,14 @@
         android:gravity="center"
         android:text="@string/default_msg_player_error"
         android:textColor="@color/white"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:visibility="gone" />
 
     <com.google.android.exoplayer2.ui.PlaybackControlView
         android:id="@id/exo_controller"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
 
     <!--<FrameLayout android:id="@id/exo_overlay"-->
     <!--android:layout_width="match_parent"-->
