@@ -170,7 +170,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private void toggleFavoriteBtn() {
         if (isFavoriteAnime) {
             mCurrentAnime.setFavorite(false);
-            boolean result = AnimeDataManager.getInstance().removeFavoriteAnime(mCurrentAnime);
+            boolean result = AnimeDataManager.getInstance().removeFavoriteAnime(AnimeDataManager.getInstance().getIndexFavoriteItem());
             if (result) {
                 PreferenceHelper.getInstance(this).saveListFavoriteAnime(AnimeDataManager.getInstance().getFavoriteAnimeList());
             }

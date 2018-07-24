@@ -4,6 +4,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.GridLayoutManager
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.example.doanthanhthai.mangafox.adapter.ResultAnimeAdapter
@@ -55,6 +56,7 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, ResultAnimeA
     }
 
     override fun onItemClick(item: Anime?, position: Int) {
+        val startTime:Long = System.currentTimeMillis()
         var tmpAnime: Anime? = Anime()
         var tmpEpList: MutableList<Episode> = mutableListOf<Episode>()
         tmpAnime?.title = item?.title
@@ -82,6 +84,7 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, ResultAnimeA
         }
         tmpAnime?.episodeList = tmpEpList
         AnimeDataManager.getInstance().anime = tmpAnime
+        Log.i(TAG, "Total time: " + (System.currentTimeMillis() - startTime))
         val intent = Intent(this, DetailActivity::class.java)
         startActivity(intent)
         Toast.makeText(this, item?.title, Toast.LENGTH_SHORT).show()

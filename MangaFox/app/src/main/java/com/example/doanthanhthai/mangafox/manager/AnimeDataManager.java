@@ -44,9 +44,9 @@ public class AnimeDataManager {
         return false;
     }
 
-    public boolean removeFavoriteAnime(Anime favoriteAnime){
+    public boolean removeFavoriteAnime(int indexFavoriteItem){
         if(favoriteAnimeList != null){
-            favoriteAnimeList.remove(favoriteAnime);
+            favoriteAnimeList.remove(indexFavoriteItem);
             return true;
         }
         return false;
