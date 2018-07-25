@@ -31,6 +31,7 @@ import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
 import com.example.doanthanhthai.mangafox.parser.AnimeParser;
+import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
@@ -591,7 +592,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                     Document playerDocument = Jsoup.parse(html);
                     if (playerDocument != null) {
 
-                        Anime result = new AnimeParser().getDirectLinkPlayer(playerDocument, webView, mCurrentAnime, indexPlayingItem);
+                        Anime result = new AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getDirectLinkPlayer(playerDocument, webView, mCurrentAnime, indexPlayingItem);
                         if (result != null) {
                             mCurrentAnime = result;
                         } else {

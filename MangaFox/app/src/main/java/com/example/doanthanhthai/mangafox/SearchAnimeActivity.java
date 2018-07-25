@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.parser.AnimeParser;
+import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.adapter.ResultAnimeAdapter;
 import com.example.doanthanhthai.mangafox.model.Anime;
@@ -123,7 +124,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
         protected void onPostExecute(Document document) {
             if(document != null){
                 List<Anime> resultItems = new ArrayList<>();
-                resultItems = new AnimeParser().getListAnimeItem(document);
+                resultItems = new AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getListAnimeItem(document);
 
                 if(resultItems != null && !resultItems.isEmpty()){
                     mResultAnimeAdapter.setAnimeList(resultItems);

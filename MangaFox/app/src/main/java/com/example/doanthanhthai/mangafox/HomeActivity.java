@@ -25,6 +25,7 @@ import com.example.doanthanhthai.mangafox.adapter.SlideBannerAdapter;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.parser.AnimeParser;
+import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
@@ -239,12 +240,12 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 confirmWebView.setVisibility(View.GONE);
 
                 List<Anime> latestItems = new ArrayList<>();
-                latestItems = new AnimeParser().getListAnimeItem(document);
+                latestItems = new AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getListAnimeItem(document);
 
                 List<Anime> bannerItems = new ArrayList<>();
-                bannerItems = new AnimeParser().getListBannerAnime(document);
+                bannerItems = new AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getListBannerAnime(document);
 
-                mTotalPage = new AnimeParser().getPaginationAnime(document);
+                mTotalPage = new AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getPaginationAnime(document);
                 //If latest page have more than 5 pages, hard code total is 5 pages
                 if (mTotalPage > 5) {
                     mTotalPage = 5;
@@ -336,7 +337,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 confirmWebView.setVisibility(View.GONE);
 
                 List<Anime> moreItems = new ArrayList<>();
-                moreItems = new AnimeParser().getListAnimeItem(document);
+                moreItems = new AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getListAnimeItem(document);
 
                 if (moreItems != null && !moreItems.isEmpty()) {
                     mLatestEpisodeAdapter.addMoreAnime(moreItems);

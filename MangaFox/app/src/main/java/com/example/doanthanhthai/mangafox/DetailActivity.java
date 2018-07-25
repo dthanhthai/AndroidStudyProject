@@ -25,6 +25,7 @@ import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
 import com.example.doanthanhthai.mangafox.parser.AnimeParser;
+import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
@@ -207,7 +208,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         protected void onPostExecute(final Document document) {
             super.onPostExecute(document);
             if (document != null) {
-                Anime resultAnime = new AnimeParser().getAnimeDetail(document, mCurrentAnime);
+                Anime resultAnime = new AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getAnimeDetail(document, mCurrentAnime);
 
                 if (resultAnime != null) {
                     mCurrentAnime = resultAnime;
@@ -307,7 +308,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                     Document playerDocument = Jsoup.parse(html);
                     if (playerDocument != null) {
 
-                        Anime result = new AnimeParser().getDirectLinkDetail(playerDocument, webView, mCurrentAnime);
+                        Anime result = new AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getDirectLinkDetail(playerDocument, webView, mCurrentAnime);
                         if (result != null) {
                             mCurrentAnime = result;
 
