@@ -35,7 +35,7 @@ class AnimeParser : IBaseAnimeParser {
         if (document != null) {
             val thumbnailSubject = document.select("div.ah-pif-fthumbnail>img").first()
             val coverSubject = document.select("div.ah-pif-fcover>img").first()
-            val rateSubject = document.select("div.ah-rate-film>span").first()
+//            val rateSubject = document.select("div.ah-rate-film>span").first()
             val genresSubject = document.select("div.ah-pif-fdetails>ul>li>span")
             val descriptionSubject = document.select("div.ah-pif-fcontent>p").first()
             val detailSubject = document.select("div.ah-pif-fdetails>ul>li")
@@ -52,9 +52,9 @@ class AnimeParser : IBaseAnimeParser {
                 curAnime.coverImage = coverSubject.attr("src")
             }
 
-            if (rateSubject != null) {
-                curAnime.rate = rateSubject.text()
-            }
+//            if (rateSubject != null) {
+//                curAnime.rate = rateSubject.text()
+//            }
 
             if (genresSubject != null && genresSubject.size > 0) {
                 curAnime.genres = ""
@@ -87,10 +87,12 @@ class AnimeParser : IBaseAnimeParser {
                     } else if (element.text().contains("Thời lượng")) {
                         val durationRaw = element.text()
                         curAnime.duration = durationRaw.substring(durationRaw.indexOf(":") + 1).trim { it <= ' ' }
-                    } else if (element.text().contains("Tên khác")) {
-                        val orderTitleRaw = element.text()
-                        curAnime.orderTitle = orderTitleRaw.substring(orderTitleRaw.indexOf(":") + 1).trim { it <= ' ' }
-                    } else if (element.text().contains("Tập mới")) {
+                    }
+//                    else if (element.text().contains("Tên khác")) {
+//                        val orderTitleRaw = element.text()
+//                        curAnime.orderTitle = orderTitleRaw.substring(orderTitleRaw.indexOf(":") + 1).trim { it <= ' ' }
+//                    }
+                    else if (element.text().contains("Tập mới")) {
                         val newEpisodeRaw = element.text()
                         curAnime.newEpisodeInfo = newEpisodeRaw.substring(newEpisodeRaw.indexOf(":") + 1).trim { it <= ' ' }
                     }

@@ -25,16 +25,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_alignParentTop="true"
+                android:background="@drawable/border_gray"
+                android:padding="1dp"
                 android:scaleType="fitXY"
-                android:background="@drawable/border_black"
-                android:padding="1.5dp"
-                android:src="@drawable/placeholder" />
+                android:src="@drawable/placeholder"
+                android:transitionName="@string/transition_image" />
 
             <TextView
                 android:id="@+id/episode_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
+                android:layout_marginLeft="1dp"
                 android:layout_marginTop="10dp"
                 android:background="@color/black_70"
                 android:ellipsize="end"
@@ -51,14 +53,16 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
                 android:layout_marginBottom="10dp"
+                android:layout_marginRight="1dp"
                 android:background="@color/black_70"
                 android:ellipsize="end"
                 android:includeFontPadding="false"
                 android:maxLines="1"
                 android:padding="5dp"
                 android:text="8.8"
+                android:textColor="@color/title_anime"
                 android:textSize="14sp"
-                android:textColor="@color/title_anime" />
+                android:visibility="gone"/>
         </RelativeLayout>
 
         <TextView

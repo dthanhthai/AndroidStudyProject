@@ -65,7 +65,8 @@
                 android:id="@+id/anime_cover_iv"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="fitXY" />
+                android:scaleType="fitXY"
+                android:src="@drawable/nature_cover"/>
 
             <View
                 android:layout_width="match_parent"
@@ -79,10 +80,11 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="20dp"
-                android:background="@drawable/border_black"
-                android:padding="1.5dp"
+                android:background="@drawable/border_gray"
+                android:padding="1dp"
                 android:scaleType="fitXY"
-                android:src="@drawable/placeholder" />
+                android:src="@drawable/placeholder"
+                android:transitionName="@string/transition_image" />
 
             <Button
                 android:id="@+id/play_btn"
@@ -100,7 +102,8 @@
                 android:text="Play Film"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/add_favorite_btn"
@@ -118,256 +121,267 @@
                 android:text="@string/add_favorite"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:visibility="gone" />
         </RelativeLayout>
 
-        <ScrollView
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
-            <LinearLayout
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/detail_anime_poster"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="10dp"
-                android:orientation="vertical"
-                android:paddingBottom="30dp">
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/border_detail_bg"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:background="@color/title_anime_bg"
-                        android:gravity="left"
-                        android:padding="8dp"
-                        android:text="Information"
-                        android:textAllCaps="true"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                    android:layout_below="@+id/detail_anime_poster"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical"
+                    android:paddingBottom="30dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp">
+                        android:background="@drawable/border_detail_bg"
+                        android:orientation="vertical">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="30"
-                            android:text="Title"
-                            android:textColor="@color/black"
+                            android:layout_marginBottom="5dp"
+                            android:background="@color/title_anime_bg"
+                            android:gravity="left"
+                            android:padding="8dp"
+                            android:text="Information"
+                            android:textAllCaps="true"
+                            android:textColor="@color/white"
                             android:textSize="14sp"
                             android:textStyle="bold" />
 
-                        <TextView
-                            android:id="@+id/detail_anime_title"
-                            android:layout_width="0dp"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="70"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal"
                             android:paddingLeft="10dp"
-                            android:text=""
-                            android:textColor="@color/black"
-                            android:textSize="14sp" />
+                            android:paddingRight="10dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="30"
+                                android:text="Title"
+                                android:textColor="@color/black"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/detail_anime_title"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="70"
+                                android:paddingLeft="10dp"
+                                android:text=""
+                                android:textColor="@color/black"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+
+                        <LinearLayout
+                            android:id="@+id/detail_anime_new_episode_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="30"
+                                android:text="New Episode"
+                                android:textColor="@color/black"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/detail_anime_new_episode"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="70"
+                                android:paddingLeft="10dp"
+                                android:text=""
+                                android:textColor="@color/black"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+
+                        <LinearLayout
+                            android:id="@+id/detail_anime_other_title_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="30"
+                                android:text="Other Title"
+                                android:textColor="@color/black"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/detail_anime_other_title"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="70"
+                                android:paddingLeft="10dp"
+                                android:text=""
+                                android:textColor="@color/black"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="30"
+                                android:text="Year"
+                                android:textColor="@color/black"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/detail_anime_year_released"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="70"
+                                android:paddingLeft="10dp"
+                                android:text=""
+                                android:textColor="@color/black"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="30"
+                                android:text="Geners"
+                                android:textColor="@color/black"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/detail_anime_genres"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="70"
+                                android:maxLines="3"
+                                android:paddingLeft="10dp"
+                                android:text=""
+                                android:textColor="@color/black"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="5dp"
+                            android:orientation="horizontal"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="30"
+                                android:text="Duration"
+                                android:textColor="@color/black"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/detail_anime_duration"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="70"
+                                android:paddingLeft="10dp"
+                                android:text=""
+                                android:textColor="@color/black"
+                                android:textSize="14sp" />
+                        </LinearLayout>
                     </LinearLayout>
 
-
                     <LinearLayout
-                        android:id="@+id/detail_anime_new_episode_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
-                        android:visibility="gone">
+                        android:layout_marginTop="15dp"
+                        android:background="@drawable/border_detail_bg"
+                        android:orientation="vertical">
 
                         <TextView
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="30"
-                            android:text="New Episode"
-                            android:textColor="@color/black"
+                            android:layout_marginBottom="5dp"
+                            android:background="@color/title_anime_bg"
+                            android:gravity="left"
+                            android:padding="8dp"
+                            android:text="Description"
+                            android:textAllCaps="true"
+                            android:textColor="@color/white"
                             android:textSize="14sp"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/detail_anime_new_episode"
-                            android:layout_width="0dp"
+                            android:id="@+id/detail_anime_description"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="70"
+                            android:layout_marginBottom="10dp"
+                            android:layout_weight="3"
+                            android:paddingBottom="5dp"
                             android:paddingLeft="10dp"
-                            android:text=""
-                            android:textColor="@color/black"
-                            android:textSize="14sp" />
-                    </LinearLayout>
-
-
-                    <LinearLayout
-                        android:id="@+id/detail_anime_other_title_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="30"
-                            android:text="Other Title"
-                            android:textColor="@color/black"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/detail_anime_other_title"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="70"
-                            android:paddingLeft="10dp"
-                            android:text=""
-                            android:textColor="@color/black"
-                            android:textSize="14sp" />
-                    </LinearLayout>
-
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="30"
-                            android:text="Year"
-                            android:textColor="@color/black"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/detail_anime_year_released"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="70"
-                            android:paddingLeft="10dp"
-                            android:text=""
-                            android:textColor="@color/black"
-                            android:textSize="14sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="30"
-                            android:text="Geners"
-                            android:textColor="@color/black"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/detail_anime_genres"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="70"
-                            android:maxLines="3"
-                            android:paddingLeft="10dp"
-                            android:text=""
-                            android:textColor="@color/black"
-                            android:textSize="14sp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:orientation="horizontal"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="30"
-                            android:text="Duration"
-                            android:textColor="@color/black"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/detail_anime_duration"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="70"
-                            android:paddingLeft="10dp"
-                            android:text=""
+                            android:paddingRight="10dp"
+                            android:paddingTop="5dp"
                             android:textColor="@color/black"
                             android:textSize="14sp" />
                     </LinearLayout>
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:background="@drawable/border_detail_bg"
-                    android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:background="@color/title_anime_bg"
-                        android:gravity="left"
-                        android:padding="8dp"
-                        android:text="Description"
-                        android:textAllCaps="true"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+            </ScrollView>
 
-                    <TextView
-                        android:id="@+id/detail_anime_description"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
-                        android:layout_weight="3"
-                        android:paddingBottom="5dp"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
-                        android:paddingTop="5dp"
-                        android:text="Yuuki Tsumire was raised by her single mother, who always told her to keep smiling, no matter what hardships she endured. The two of them were a family, until Tsumire&#039;s mother died from illness. \nTsumire soon learned that she had a family she knew nothing about: a cold, rich family that disowned her kindhearted mother when she became pregnant. Tsumire now must go live with this family, even though none of them seem to want her there. She doesn&#039;t have to switch schools, so she at least has her friends to help her through this difficult time. However, she doesn&#039;t have the heart to confide in her friends with even more problems, so she tries to keep it bottled up inside. \nTo her surprise, the Yuuki family lawyer, a young man named Hino, soon becomes her emotional support in this difficult situation. However, Tsumire&#039;s reactions to him might mean that she wishes he were something more."
-                        android:textColor="@color/black"
-                        android:textSize="14sp" />
-                </LinearLayout>
-            </LinearLayout>
-
-        </ScrollView>
+            <com.example.doanthanhthai.mangafox.widget.ProgressAnimeView
+                android:id="@+id/progress_info_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
 
     </LinearLayout>
 
@@ -380,6 +394,5 @@
     <com.example.doanthanhthai.mangafox.widget.ProgressAnimeView
         android:id="@+id/progress_full_screen_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
+        android:layout_height="match_parent" />
 </RelativeLayout>

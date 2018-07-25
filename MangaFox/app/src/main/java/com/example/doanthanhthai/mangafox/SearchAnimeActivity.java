@@ -2,7 +2,10 @@ package com.example.doanthanhthai.mangafox;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,6 +19,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.parser.AnimeParser;
 import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
@@ -32,10 +36,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.transform.Result;
+
 public class SearchAnimeActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, ResultAnimeAdapter.OnResultAnimeAdapterListener {
     private static final String TAG = SearchAnimeActivity.class.getSimpleName();
     private WebView webView;
-//    private AppWebViewClients webViewClient;
+    //    private AppWebViewClients webViewClient;
     private MenuItem searchMenu;
     private SearchView searchView;
     private ProgressDialog progressDialog;
@@ -94,9 +100,15 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
     @Override
     public void onItemClick(Anime item, int position) {
         AnimeDataManager.getInstance().setAnime(item);
-
+        ResultAnimeAdapter.ResultAnimeViewHolder viewHolder =
+                (ResultAnimeAdapter.ResultAnimeViewHolder) resultAnimeRv.findViewHolderForPosition(position);
+        Pair<View, String> imagePair = Pair
+                .create((View) viewHolder.getPosterImg(), getString(R.string.transition_image));
+        ActivityOptionsCompat options = ActivityOptionsCompat
+                .makeSceneTransitionAnimation(this, imagePair);
+        AnimeDataManager.getInstance().setBitmapDrawable(((BitmapDrawable) viewHolder.getPosterImg().getDrawable()).getBitmap());
         Intent intent = new Intent(SearchAnimeActivity.this, DetailActivity.class);
-        startActivity(intent);
+        startActivity(intent, options.toBundle());
         Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
     }
 
@@ -117,25 +129,25 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                 e.printStackTrace();
                 Log.e(TAG, "Parse data fail: " + e.getMessage());
             }
-           return document;
+            return document;
         }
 
         @Override
         protected void onPostExecute(Document document) {
-            if(document != null){
+            if (document != null) {
                 List<Anime> resultItems = new ArrayList<>();
                 resultItems = new AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getListAnimeItem(document);
 
-                if(resultItems != null && !resultItems.isEmpty()){
+                if (resultItems != null && !resultItems.isEmpty()) {
                     mResultAnimeAdapter.setAnimeList(resultItems);
                     searchView.clearFocus();
-                }else{
+                } else {
                     emptyTv.setVisibility(View.VISIBLE);
 //                    confirmWebView.setVisibility(View.VISIBLE);
 //                    confirmWebView.loadUrl(LATEST_URL);
                 }
 
-            }else{
+            } else {
                 Log.e(TAG, "Cannot get DOCUMENT web");
                 Toast.makeText(SearchAnimeActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_LONG).show();
             }

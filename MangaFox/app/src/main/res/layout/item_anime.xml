@@ -25,22 +25,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_alignParentTop="true"
+                android:background="@drawable/border_gray"
+                android:padding="1dp"
                 android:scaleType="fitXY"
-                android:background="@drawable/border_black"
-                android:padding="1.5dp"
-                android:src="@drawable/placeholder" />
+                android:src="@drawable/placeholder"
+                android:transitionName="@string/transition_image" />
 
             <TextView
                 android:id="@+id/episode_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
+                android:layout_marginLeft="1dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="10"
                 android:background="@color/black_70"
                 android:ellipsize="end"
-                android:maxLines="1"
                 android:includeFontPadding="false"
+                android:maxLines="1"
                 android:padding="5dp"
                 android:text="Tập 1: he he hi ho"
                 android:textColor="@android:color/white" />
@@ -54,8 +56,8 @@
             android:layout_weight="20"
             android:ellipsize="end"
             android:maxLines="2"
-            android:text="Naruto"
             android:paddingTop="3dp"
+            android:text="Naruto"
             android:textColor="@color/anime_home_title"
             android:textSize="16sp" />
 

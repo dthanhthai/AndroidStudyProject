@@ -4,13 +4,20 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -20,7 +27,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
@@ -28,6 +39,7 @@ import com.example.doanthanhthai.mangafox.parser.AnimeParser;
 import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
+import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
 
 import org.jsoup.Jsoup;
@@ -46,12 +58,14 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private Button playBtn, favoriteBtn;
     private ImageView backBtn;
     private LinearLayout otherTitleLayout, newEpisodeLayout;
-    private ProgressAnimeView progressFullLayout;
+    private ProgressAnimeView progressFullLayout, progressInfoLayout;
     private WebView webView;
     private AppWebViewClients webViewClient;
     private ProgressDialog progressDialog;
 
     private boolean isFavoriteAnime = false;
+    private boolean isStartTransition = true;
+    private GetDetailAnimeTask mGetDetailAnimeTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +89,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         otherTitleLayout = findViewById(R.id.detail_anime_other_title_layout);
         newEpisodeLayout = findViewById(R.id.detail_anime_new_episode_layout);
         progressFullLayout = findViewById(R.id.progress_full_screen_view);
+        progressInfoLayout = findViewById(R.id.progress_info_view);
         backBtn = findViewById(R.id.toolbar_back_btn);
         favoriteBtn = findViewById(R.id.add_favorite_btn);
         webView = findViewById(R.id.webView);
@@ -99,12 +114,44 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         if (mCurrentAnime == null) {
             Toast.makeText(DetailActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
         } else {
+            //Postpone the enter transition until image is loaded
+            postponeEnterTransition();
+            
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    mGetDetailAnimeTask = new GetDetailAnimeTask();
+                    mGetDetailAnimeTask.startTask(mCurrentAnime.getUrl());
+                }
+            });
+
+            if (AnimeDataManager.getInstance().getBitmapDrawable() != null) {
+                progressFullLayout.setVisibility(View.GONE);
+                Glide.with(DetailActivity.this)
+                        .load(AnimeDataManager.getInstance().getBitmapDrawable())
+                        .thumbnail(0.2f)
+                        .listener(new RequestListener<Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                //Image successfully loaded into image view
+                                scheduleStartPostponedTransition(thumbnailIv);
+                                return false;
+                            }
+                        })
+                        .into(thumbnailIv);
+            } else {
+                progressFullLayout.setVisibility(View.VISIBLE);
+            }
             toolbarTitleTv.setText(mCurrentAnime.getTitle());
 
             //If anime is favorite, get data in cache favorite
             isFavoriteAnime = checkFavoriteAnime();
 //            if (!isFavoriteAnime){
-            new GetDetailAnimeTask().execute(mCurrentAnime.getUrl());
 //            } else{
 //                updateUIAnimeInfo();
 //            }
@@ -142,10 +189,20 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+//        return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            ActivityCompat.finishAfterTransition(this);
+        }
+        return true;
+    }
+
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.toolbar_back_btn:
-                DetailActivity.this.finish();
+                ActivityCompat.finishAfterTransition(this);
+//                DetailActivity.this.finish();
                 break;
             case R.id.play_btn:
                 progressDialog.show();
@@ -179,6 +236,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
             mCurrentAnime.setFavorite(true);
             boolean result = AnimeDataManager.getInstance().addFavoriteAnime(mCurrentAnime);
             if (result) {
+                AnimeDataManager.getInstance().setIndexFavoriteItem(AnimeDataManager.getInstance().getFavoriteAnimeList().size() - 1);
                 PreferenceHelper.getInstance(this).saveListFavoriteAnime(AnimeDataManager.getInstance().getFavoriteAnimeList());
             }
         }
@@ -188,6 +246,11 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
     private class GetDetailAnimeTask extends AsyncTask<String, Void, Document> {
         private final String TAG = GetDetailAnimeTask.class.getSimpleName();
+
+        public void startTask(String url) {
+            mGetDetailAnimeTask = new GetDetailAnimeTask();
+            mGetDetailAnimeTask.execute(url);
+        }
 
         @Override
         protected Document doInBackground(String... strings) {
@@ -215,49 +278,71 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 } else {
                     Log.e(TAG, "Cannot get CONTENT in document web");
                     Toast.makeText(DetailActivity.this, "Cannot get CONTENT in document web", Toast.LENGTH_LONG).show();
-//                    GetDetailAnimeTask.this.execute(mCurrentAnime.getUrl());
+                    startTask(mCurrentAnime.getUrl());
                     return;
                 }
-
-//                AnimeDataManager.getInstance().setAnime(mCurrentAnime);
 
                 Log.i(TAG, mCurrentAnime.getTitle());
 
                 updateUIAnimeInfo();
             } else {
+                startPostponedEnterTransition();
                 Log.e(TAG, "Cannot get DOCUMENT web");
                 Toast.makeText(DetailActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_LONG).show();
-//                GetDetailAnimeTask.this.execute(mCurrentAnime.getUrl());
+                startTask(mCurrentAnime.getUrl());
             }
         }
     }
 
+    private void scheduleStartPostponedTransition(final ImageView imageView) {
+        if (isStartTransition) {
+            imageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    imageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    startPostponedEnterTransition();
+                    return true;
+                }
+            });
+            isStartTransition = false;
+        }
+    }
+
     private void updateUIAnimeInfo() {
-        RequestOptions requestOptions = new RequestOptions();
-        requestOptions.placeholder(R.drawable.placeholder);
-        requestOptions.error(R.drawable.placeholder);
+        if (Utils.isValidContextForGlide(this)) {
+            RequestOptions thumbRequestOptions = new RequestOptions();
+            thumbRequestOptions.placeholder(R.drawable.placeholder);
+            thumbRequestOptions.error(R.drawable.placeholder);
+            Glide.with(DetailActivity.this)
+                    .load(mCurrentAnime.getImage())
+                    .thumbnail(0.2f)
+                    .apply(thumbRequestOptions)
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            return false;
+                        }
 
-        Glide.with(DetailActivity.this)
-                .load(mCurrentAnime.getImage())
-                .thumbnail(0.4f)
-                .apply(requestOptions)
-                .into(thumbnailIv);
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            //Image successfully loaded into image view
+                            scheduleStartPostponedTransition(thumbnailIv);
+                            return false;
+                        }
+                    })
+                    .into(thumbnailIv);
+        }
 
-        Glide.with(DetailActivity.this)
-                .load(mCurrentAnime.getCoverImage())
-                .thumbnail(0.2f)
-                .into(coverIv);
-
-//                Picasso.with(DetailActivity.this)
-//                        .load(mCurrentAnime.image)
-//                        .error(R.drawable.placeholder)
-//                        .placeholder(R.drawable.placeholder)
-//                        .into(thumbnailIv);
-//
-//                Picasso.with(DetailActivity.this)
-//                        .load(mCurrentAnime.coverImage)
-//                        .resize(750, 400)
-//                        .into(coverIv);
+        if (Utils.isValidContextForGlide(this)) {
+            RequestOptions coverRequestOptions = new RequestOptions();
+            coverRequestOptions.placeholder(R.drawable.nature_cover);
+            coverRequestOptions.error(R.drawable.nature_cover);
+            Glide.with(DetailActivity.this)
+                    .load(mCurrentAnime.getCoverImage())
+                    .apply(coverRequestOptions)
+                    .thumbnail(0.2f)
+                    .into(coverIv);
+        }
 
         if (!TextUtils.isEmpty(mCurrentAnime.getOrderTitle())) {
             otherTitleTv.setText(mCurrentAnime.getOrderTitle());
@@ -280,7 +365,10 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         durationTv.setText(mCurrentAnime.getDuration());
         descriptionTv.setText(mCurrentAnime.getDescription());
 
+        playBtn.setVisibility(View.VISIBLE);
+        favoriteBtn.setVisibility(View.VISIBLE);
         progressFullLayout.setVisibility(View.GONE);
+        progressInfoLayout.setVisibility(View.GONE);
     }
 
     private class AppWebViewClients extends WebViewClient {
@@ -381,6 +469,9 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     protected void onDestroy() {
         AnimeDataManager.getInstance().setAnime(null);
         AnimeDataManager.getInstance().resetIndexFavoriteItem();
+        AnimeDataManager.getInstance().setBitmapDrawable(null);
         super.onDestroy();
     }
+
+
 }

@@ -75,6 +75,10 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
         TextView animeTitleTv, episodeTitleTv, rateTv;
         Context mContext;
 
+        public ImageView getPosterImg() {
+            return posterImg;
+        }
+
         public LatestViewHolder(View itemView) {
             super(itemView);
             mContext = itemView.getContext();
@@ -106,7 +110,8 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
 
             animeTitleTv.setText(anime.getTitle());
             episodeTitleTv.setText(anime.getEpisodeInfo());
-            rateTv.setText(anime.getRate());
+//            rateTv.setText(anime.getRate());
+
 //            if (anime.episode.name.contains("Tập")) {
 //                if (anime.episode.name.contains("-")) {
 //                    episodeTitleTv.setText(anime.episode.name.substring(0, anime.episode.name.indexOf("-")).trim());

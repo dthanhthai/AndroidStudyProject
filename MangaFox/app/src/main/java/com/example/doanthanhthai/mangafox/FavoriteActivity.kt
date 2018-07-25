@@ -1,8 +1,11 @@
 package com.example.doanthanhthai.mangafox
 
 import android.content.Intent
+import android.graphics.drawable.BitmapDrawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.app.ActivityOptionsCompat
+import android.support.v4.util.Pair
 import android.support.v7.widget.GridLayoutManager
 import android.util.Log
 import android.view.View
@@ -84,8 +87,15 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, ResultAnimeA
         }
         tmpAnime?.episodeList = tmpEpList
         AnimeDataManager.getInstance().anime = tmpAnime
+
+        val viewHolder = result_anime_rv.findViewHolderForPosition(position) as ResultAnimeAdapter.ResultAnimeViewHolder
+        val imagePair = Pair
+                .create(viewHolder.posterImg as View, getString(R.string.transition_image))
+        val options = ActivityOptionsCompat
+                .makeSceneTransitionAnimation(this, imagePair)
         val intent = Intent(this, DetailActivity::class.java)
-        startActivity(intent)
+        AnimeDataManager.getInstance().bitmapDrawable = (viewHolder.posterImg.drawable as BitmapDrawable).bitmap
+        startActivity(intent, options.toBundle())
         Toast.makeText(this, item?.title, Toast.LENGTH_SHORT).show()
     }
 }

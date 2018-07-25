@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#F44336</color>
     <color name="colorAccent">#FF4081</color>
     <color name="list_background">#F6F5F2</color>
+    <color name="transparent">#00000000</color>
     <color name="white">#FFFFFF</color>
     <color name="white_20">#33FFFFFF</color>
     <color name="white_10">#1AFFFFFF</color>

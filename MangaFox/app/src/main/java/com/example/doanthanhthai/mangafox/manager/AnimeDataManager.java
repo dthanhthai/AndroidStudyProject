@@ -1,5 +1,8 @@
 package com.example.doanthanhthai.mangafox.manager;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 
@@ -12,6 +15,7 @@ public class AnimeDataManager {
     private Anime anime;
     private List<Anime> favoriteAnimeList;
     private int indexFavoriteItem = -1;
+    private Bitmap bitmapDrawable;
 
     public static AnimeDataManager getInstance(){
         if(instance == null){
@@ -62,5 +66,13 @@ public class AnimeDataManager {
 
     public void resetIndexFavoriteItem() {
         this.indexFavoriteItem = -1;
+    }
+
+    public Bitmap getBitmapDrawable() {
+        return bitmapDrawable;
+    }
+
+    public void setBitmapDrawable(Bitmap bitmapDrawable) {
+        this.bitmapDrawable = bitmapDrawable;
     }
 }

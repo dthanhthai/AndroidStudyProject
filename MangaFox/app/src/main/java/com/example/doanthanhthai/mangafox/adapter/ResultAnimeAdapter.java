@@ -68,6 +68,10 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
         TextView animeEpisodeInfoTv;
         Context mContext;
 
+        public ImageView getPosterImg() {
+            return posterImg;
+        }
+
         public ResultAnimeViewHolder(View itemView) {
             super(itemView);
             mContext = itemView.getContext();

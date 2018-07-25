@@ -1,5 +1,6 @@
 package com.example.doanthanhthai.mangafox.share;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.support.annotation.Nullable;
@@ -41,5 +42,18 @@ public class Utils {
         }
         int[] screenSizes = {point.x, point.y};
         return screenSizes;
+    }
+
+    public static boolean isValidContextForGlide(final Context context) {
+        if (context == null) {
+            return false;
+        }
+        if (context instanceof Activity) {
+            final Activity activity = (Activity) context;
+            if (activity.isDestroyed() || activity.isFinishing()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

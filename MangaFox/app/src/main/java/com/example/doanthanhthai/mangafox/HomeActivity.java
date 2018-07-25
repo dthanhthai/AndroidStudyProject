@@ -1,10 +1,18 @@
 package com.example.doanthanhthai.mangafox;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.Parcelable;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.SharedElementCallback;
+import android.support.v4.util.Pair;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
@@ -39,6 +47,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -144,8 +153,16 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     @Override
     public void onItemClick(Anime item, int position) {
         AnimeDataManager.getInstance().setAnime(item);
+
+        LatestEpisodeAdapter.LatestViewHolder viewHolder =
+                (LatestEpisodeAdapter.LatestViewHolder) latestEpisodeRV.findViewHolderForPosition(position);
+        Pair<View, String> imagePair = Pair
+                .create((View) viewHolder.getPosterImg(), getString(R.string.transition_image));
+        ActivityOptionsCompat options = ActivityOptionsCompat
+                .makeSceneTransitionAnimation(this, imagePair);
+        AnimeDataManager.getInstance().setBitmapDrawable(((BitmapDrawable) viewHolder.getPosterImg().getDrawable()).getBitmap());
         Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
-        startActivity(intent);
+        startActivity(intent, options.toBundle());
         Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
     }
 
@@ -254,29 +271,30 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 if (latestItems != null && !latestItems.isEmpty()) {
                     mLatestEpisodeAdapter.setAnimeList(latestItems);
                 } else {
-                    GetAnimeHomePageTask.this.execute(Constant.HOME_URL);
+                    Toast.makeText(HomeActivity.this, "Got confirm web, try again", Toast.LENGTH_SHORT).show();
+                    restartTask(Constant.HOME_URL);
                     confirmWebView.setVisibility(View.VISIBLE);
                     confirmWebView.loadUrl(Constant.HOME_URL);
 
-                    if (document.selectFirst("h4").text().equals("Nếu bạn là người Việt thì hãy điền thông tin phía bên dưới để xác minh:")) {
-                        FormElement confirmForm = (FormElement) document.selectFirst("form");
-                        Elements questionSubject = document.select("div.form-group>input");
-                        if (questionSubject != null && questionSubject.size() > 0) {
-                            questionSubject.get(0).text("20/11");
-                            questionSubject.get(1).text("S");
-
-                            // # Now send the form for login
-//                            try {
-//                                Connection.Response loginActionResponse = confirmForm.submit()
-//                                        .userAgent(USER_AGENT)
-//                                        .execute();
-//                                Log.i(TAG, loginActionResponse.parse().html());
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                                Log.e(TAG, e.getMessage());
-//                            }
-                        }
-                    }
+//                    if (document.selectFirst("h4").text().equals("Nếu bạn là người Việt thì hãy điền thông tin phía bên dưới để xác minh:")) {
+//                        FormElement confirmForm = (FormElement) document.selectFirst("form");
+//                        Elements questionSubject = document.select("div.form-group>input");
+//                        if (questionSubject != null && questionSubject.size() > 0) {
+//                            questionSubject.get(0).text("20/11");
+//                            questionSubject.get(1).text("S");
+//
+//                            // # Now send the form for login
+////                            try {
+////                                Connection.Response loginActionResponse = confirmForm.submit()
+////                                        .userAgent(USER_AGENT)
+////                                        .execute();
+////                                Log.i(TAG, loginActionResponse.parse().html());
+////                            } catch (IOException e) {
+////                                e.printStackTrace();
+////                                Log.e(TAG, e.getMessage());
+////                            }
+//                        }
+//                    }
                 }
 
                 if (bannerItems != null && !bannerItems.isEmpty()) {
@@ -287,7 +305,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 progressFullLayout.setVisibility(View.GONE);
             } else {
                 Log.e(TAG, "Cannot get DOCUMENT web");
-                Toast.makeText(HomeActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_LONG).show();
+                Toast.makeText(HomeActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_SHORT).show();
                 restartTask(Constant.HOME_URL);
                 confirmWebView.setVisibility(View.VISIBLE);
                 confirmWebView.loadUrl(Constant.HOME_URL);
