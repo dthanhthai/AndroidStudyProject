@@ -75,7 +75,6 @@
                 android:gravity="center"
                 app:fastforward_increment="10000"
                 app:resize_mode="fill"
-                app:show_timeout="0"
                 app:rewind_increment="10000" />
 
         </FrameLayout>

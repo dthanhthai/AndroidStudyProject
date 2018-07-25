@@ -102,6 +102,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private ImageView backBtn;
     private NumberEpisodeAdapter mNumberEpisodeAdapter;
     private Dialog mFullScreenDialog;
+    private PlaybackControlView playbackControlView;
     private int mResumeWindow;
     private long mResumePosition;
     private int indexPlayingItem = 0;
@@ -271,6 +272,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         progressBarLayout = mExoPlayerView.findViewById(R.id.progress_bar_layout);
         errorMsgPlayerTv = mExoPlayerView.findViewById(R.id.error_player_message_tv);
         coverPlayerIv = mExoPlayerView.findViewById(R.id.player_cover_iv);
+        playbackControlView = mExoPlayerView.findViewById(R.id.exo_controller);
     }
 
     private void initCoverImage() {
@@ -343,6 +345,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         isPrepareContent = true;
         showProgressLayout();
         coverPlayerIv.setVisibility(View.VISIBLE);
+        playbackControlView.hide();
         new Handler().post(new Runnable() {
             @Override
             public void run() {
@@ -433,6 +436,8 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     @Override
     public void onItemClick(Episode item, int position) {
         coverPlayerIv.setVisibility(View.VISIBLE);
+
+        playbackControlView.hide();
         showProgressLayout();
         indexPlayingItem = position;
         pauseVideo();
@@ -466,10 +471,12 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             showProgressLayout();
             if (isPrepareContent) {
                 coverPlayerIv.setVisibility(View.VISIBLE);
+                playbackControlView.hide();
                 isPrepareContent = false;
             }
         } else {
 //            if (isPrepareContent) {
+            playbackControlView.setVisibility(View.VISIBLE);
             coverPlayerIv.setVisibility(View.GONE);
 //                isPrepareContent = false;
 //            }

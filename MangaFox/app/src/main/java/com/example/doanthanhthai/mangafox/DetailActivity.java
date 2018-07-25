@@ -116,7 +116,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         } else {
             //Postpone the enter transition until image is loaded
             postponeEnterTransition();
-            
+
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
