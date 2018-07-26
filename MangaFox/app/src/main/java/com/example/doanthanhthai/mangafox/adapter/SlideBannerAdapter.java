@@ -53,8 +53,8 @@ public class SlideBannerAdapter extends PagerAdapter {
         Anime animeData = animeList.get(position);
 
         RequestOptions requestOptions = new RequestOptions();
-//        requestOptions.placeholder(R.drawable.placeholder);
-        requestOptions.error(R.drawable.placeholder);
+        requestOptions.placeholder(R.drawable.nature_cover);
+        requestOptions.error(R.drawable.nature_cover);
 
         Glide.with(view.getContext())
                 .load(animeData.getBannerImage())

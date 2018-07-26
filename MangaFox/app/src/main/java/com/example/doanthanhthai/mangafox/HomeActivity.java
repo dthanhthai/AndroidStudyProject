@@ -1,17 +1,12 @@
 package com.example.doanthanhthai.mangafox;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.app.SharedElementCallback;
 import android.support.v4.util.Pair;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.NestedScrollView;
@@ -32,7 +27,6 @@ import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
 import com.example.doanthanhthai.mangafox.adapter.SlideBannerAdapter;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
-import com.example.doanthanhthai.mangafox.parser.AnimeParser;
 import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.Utils;
@@ -41,13 +35,10 @@ import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.FormElement;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -160,7 +151,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 .create((View) viewHolder.getPosterImg(), getString(R.string.transition_image));
         ActivityOptionsCompat options = ActivityOptionsCompat
                 .makeSceneTransitionAnimation(this, imagePair);
-        AnimeDataManager.getInstance().setBitmapDrawable(((BitmapDrawable) viewHolder.getPosterImg().getDrawable()).getBitmap());
+        AnimeDataManager.getInstance().setThumbnailBitmap(((BitmapDrawable) viewHolder.getPosterImg().getDrawable()).getBitmap());
         Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
         startActivity(intent, options.toBundle());
         Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();

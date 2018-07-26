@@ -280,10 +280,17 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 //                .load(mCurrentAnime.coverImage)
 //                .resize(750, 400)
 //                .into(coverPlayerIv);
-        Glide.with(VideoPlayerActivity.this)
-                .load(mCurrentAnime.getCoverImage())
-                .thumbnail(0.1f)
-                .into(coverPlayerIv);
+        if (AnimeDataManager.getInstance().getCoverBitmap() != null) {
+            Glide.with(VideoPlayerActivity.this)
+                    .load(AnimeDataManager.getInstance().getCoverBitmap())
+                    .thumbnail(0.1f)
+                    .into(coverPlayerIv);
+        } else {
+            Glide.with(VideoPlayerActivity.this)
+                    .load(mCurrentAnime.getCoverImage())
+                    .thumbnail(0.1f)
+                    .into(coverPlayerIv);
+        }
 
     }
 

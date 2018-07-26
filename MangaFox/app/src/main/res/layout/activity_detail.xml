@@ -380,7 +380,8 @@
             <com.example.doanthanhthai.mangafox.widget.ProgressAnimeView
                 android:id="@+id/progress_info_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:visibility="gone"/>
         </FrameLayout>
 
     </LinearLayout>
@@ -394,5 +395,6 @@
     <com.example.doanthanhthai.mangafox.widget.ProgressAnimeView
         android:id="@+id/progress_full_screen_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
 </RelativeLayout>

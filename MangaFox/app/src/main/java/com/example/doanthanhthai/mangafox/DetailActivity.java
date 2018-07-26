@@ -4,12 +4,13 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,11 +32,12 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
-import com.example.doanthanhthai.mangafox.parser.AnimeParser;
 import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
@@ -109,7 +111,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setIndeterminate(true);
 
-        progressFullLayout.setVisibility(View.VISIBLE);
+        progressInfoLayout.setVisibility(View.VISIBLE);
         mCurrentAnime = AnimeDataManager.getInstance().getAnime();
         if (mCurrentAnime == null) {
             Toast.makeText(DetailActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
@@ -125,10 +127,10 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 }
             });
 
-            if (AnimeDataManager.getInstance().getBitmapDrawable() != null) {
+            if (AnimeDataManager.getInstance().getThumbnailBitmap() != null) {
                 progressFullLayout.setVisibility(View.GONE);
                 Glide.with(DetailActivity.this)
-                        .load(AnimeDataManager.getInstance().getBitmapDrawable())
+                        .load(AnimeDataManager.getInstance().getThumbnailBitmap())
                         .thumbnail(0.2f)
                         .listener(new RequestListener<Drawable>() {
                             @Override
@@ -213,10 +215,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                     webViewClient.setRunGetSourceWeb(true);
                     webView.loadUrl(episode.getUrl());
                 } else {
-                    Intent intent = new Intent(DetailActivity.this, VideoPlayerActivity.class);
-                    intent.putExtra(HomeActivity.ANIME_ARG, mCurrentAnime);
-                    startActivity(intent);
-                    progressDialog.dismiss();
+                   startVideoPlayerActivity();
                 }
                 break;
             case R.id.add_favorite_btn:
@@ -339,36 +338,36 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
             coverRequestOptions.error(R.drawable.nature_cover);
             Glide.with(DetailActivity.this)
                     .load(mCurrentAnime.getCoverImage())
-                    .apply(coverRequestOptions)
                     .thumbnail(0.2f)
+                    .apply(coverRequestOptions)
                     .into(coverIv);
+
+            if (!TextUtils.isEmpty(mCurrentAnime.getOrderTitle())) {
+                otherTitleTv.setText(mCurrentAnime.getOrderTitle());
+                otherTitleLayout.setVisibility(View.VISIBLE);
+            } else {
+                otherTitleLayout.setVisibility(View.GONE);
+            }
+
+            if (!TextUtils.isEmpty(mCurrentAnime.getNewEpisodeInfo())) {
+                newEpisodeTv.setText(mCurrentAnime.getNewEpisodeInfo());
+                newEpisodeLayout.setVisibility(View.VISIBLE);
+            } else {
+                newEpisodeLayout.setVisibility(View.GONE);
+            }
+
+            titleTv.setText(mCurrentAnime.getTitle());
+            toolbarTitleTv.setText(mCurrentAnime.getTitle());
+            yearTv.setText(mCurrentAnime.getYear() + "");
+            genresTv.setText(mCurrentAnime.getGenres());
+            durationTv.setText(mCurrentAnime.getDuration());
+            descriptionTv.setText(mCurrentAnime.getDescription());
+
+            playBtn.setVisibility(View.VISIBLE);
+            favoriteBtn.setVisibility(View.VISIBLE);
+            progressFullLayout.setVisibility(View.GONE);
+            progressInfoLayout.setVisibility(View.GONE);
         }
-
-        if (!TextUtils.isEmpty(mCurrentAnime.getOrderTitle())) {
-            otherTitleTv.setText(mCurrentAnime.getOrderTitle());
-            otherTitleLayout.setVisibility(View.VISIBLE);
-        } else {
-            otherTitleLayout.setVisibility(View.GONE);
-        }
-
-        if (!TextUtils.isEmpty(mCurrentAnime.getNewEpisodeInfo())) {
-            newEpisodeTv.setText(mCurrentAnime.getNewEpisodeInfo());
-            newEpisodeLayout.setVisibility(View.VISIBLE);
-        } else {
-            newEpisodeLayout.setVisibility(View.GONE);
-        }
-
-        titleTv.setText(mCurrentAnime.getTitle());
-        toolbarTitleTv.setText(mCurrentAnime.getTitle());
-        yearTv.setText(mCurrentAnime.getYear() + "");
-        genresTv.setText(mCurrentAnime.getGenres());
-        durationTv.setText(mCurrentAnime.getDuration());
-        descriptionTv.setText(mCurrentAnime.getDescription());
-
-        playBtn.setVisibility(View.VISIBLE);
-        favoriteBtn.setVisibility(View.VISIBLE);
-        progressFullLayout.setVisibility(View.GONE);
-        progressInfoLayout.setVisibility(View.GONE);
     }
 
     private class AppWebViewClients extends WebViewClient {
@@ -436,10 +435,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 //                            }else{
                             }
                             AnimeDataManager.getInstance().setAnime(mCurrentAnime);
-                            Intent intent = new Intent(DetailActivity.this, VideoPlayerActivity.class);
-                            startActivity(intent);
-                            webView.stopLoading();
-                            progressDialog.dismiss();
+                            startVideoPlayerActivity();
                         }
                     }
                 } catch (UnsupportedEncodingException e) {
@@ -464,14 +460,21 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
+    private void startVideoPlayerActivity() {
+        Intent intent = new Intent(DetailActivity.this, VideoPlayerActivity.class);
+        AnimeDataManager.getInstance().setCoverBitmap(((BitmapDrawable) coverIv.getDrawable()).getBitmap());
+        startActivity(intent);
+        webView.stopLoading();
+        progressDialog.dismiss();
+    }
 
     @Override
     protected void onDestroy() {
         AnimeDataManager.getInstance().setAnime(null);
         AnimeDataManager.getInstance().resetIndexFavoriteItem();
-        AnimeDataManager.getInstance().setBitmapDrawable(null);
+        AnimeDataManager.getInstance().resetThumbnailBitmap();
+        AnimeDataManager.getInstance().resetCoverBitmap();
         super.onDestroy();
     }
-
 
 }

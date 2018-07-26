@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
 import android.support.v4.util.Pair
 import android.support.v7.widget.GridLayoutManager
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.example.doanthanhthai.mangafox.adapter.ResultAnimeAdapter
@@ -16,7 +15,6 @@ import com.example.doanthanhthai.mangafox.model.Anime
 import com.example.doanthanhthai.mangafox.model.Episode
 import com.example.doanthanhthai.mangafox.share.Utils
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager
-import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_favorite.*;
 
 class FavoriteActivity : AppCompatActivity(), View.OnClickListener, ResultAnimeAdapter.OnResultAnimeAdapterListener {
@@ -94,7 +92,7 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, ResultAnimeA
         val options = ActivityOptionsCompat
                 .makeSceneTransitionAnimation(this, imagePair)
         val intent = Intent(this, DetailActivity::class.java)
-        AnimeDataManager.getInstance().bitmapDrawable = (viewHolder.posterImg.drawable as BitmapDrawable).bitmap
+        AnimeDataManager.getInstance().thumbnailBitmap = (viewHolder.posterImg.drawable as BitmapDrawable).bitmap
         startActivity(intent, options.toBundle())
         Toast.makeText(this, item?.title, Toast.LENGTH_SHORT).show()
     }

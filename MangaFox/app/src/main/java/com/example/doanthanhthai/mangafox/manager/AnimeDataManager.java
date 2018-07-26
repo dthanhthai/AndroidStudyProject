@@ -1,10 +1,8 @@
 package com.example.doanthanhthai.mangafox.manager;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 
 import com.example.doanthanhthai.mangafox.model.Anime;
-import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 
 import java.util.List;
 
@@ -15,10 +13,11 @@ public class AnimeDataManager {
     private Anime anime;
     private List<Anime> favoriteAnimeList;
     private int indexFavoriteItem = -1;
-    private Bitmap bitmapDrawable;
+    private Bitmap thumbnailBitmap;
+    private Bitmap coverBitmap;
 
-    public static AnimeDataManager getInstance(){
-        if(instance == null){
+    public static AnimeDataManager getInstance() {
+        if (instance == null) {
             instance = new AnimeDataManager();
         }
         return instance;
@@ -40,16 +39,16 @@ public class AnimeDataManager {
         this.favoriteAnimeList = favoriteAnimeList;
     }
 
-    public boolean addFavoriteAnime(Anime favoriteAnime){
-        if(favoriteAnimeList != null){
+    public boolean addFavoriteAnime(Anime favoriteAnime) {
+        if (favoriteAnimeList != null) {
             favoriteAnimeList.add(favoriteAnime);
             return true;
         }
         return false;
     }
 
-    public boolean removeFavoriteAnime(int indexFavoriteItem){
-        if(favoriteAnimeList != null){
+    public boolean removeFavoriteAnime(int indexFavoriteItem) {
+        if (favoriteAnimeList != null) {
             favoriteAnimeList.remove(indexFavoriteItem);
             return true;
         }
@@ -68,11 +67,27 @@ public class AnimeDataManager {
         this.indexFavoriteItem = -1;
     }
 
-    public Bitmap getBitmapDrawable() {
-        return bitmapDrawable;
+    public Bitmap getThumbnailBitmap() {
+        return thumbnailBitmap;
     }
 
-    public void setBitmapDrawable(Bitmap bitmapDrawable) {
-        this.bitmapDrawable = bitmapDrawable;
+    public void setThumbnailBitmap(Bitmap thumbnailBitmap) {
+        this.thumbnailBitmap = thumbnailBitmap;
+    }
+
+    public void resetThumbnailBitmap() {
+        this.thumbnailBitmap = null;
+    }
+
+    public Bitmap getCoverBitmap() {
+        return coverBitmap;
+    }
+
+    public void setCoverBitmap(Bitmap coverBitmap) {
+        this.coverBitmap = coverBitmap;
+    }
+
+    public void resetCoverBitmap() {
+        this.coverBitmap = null;
     }
 }
