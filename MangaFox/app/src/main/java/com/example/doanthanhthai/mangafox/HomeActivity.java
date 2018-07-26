@@ -13,6 +13,7 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -31,6 +32,7 @@ import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
+import com.example.doanthanhthai.mangafox.widget.GridSpacingItemDecoration;
 import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
 
 import org.jsoup.Jsoup;
@@ -50,6 +52,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     public static final String TAG = HomeActivity.class.getSimpleName();
     public static final String ANIME_ARG = "animeArg";
     public static final String KEYWORD_ARG = "keywordArg";
+
 
     private WebView webView;
     private WebView confirmWebView;
@@ -118,10 +121,29 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         progressFullLayout.setVisibility(View.VISIBLE);
 
         latestEpisodeRV.setNestedScrollingEnabled(false);
-        mGridLayoutManager = new AutoFitGridLayoutManager(this, Utils.convertDpToPixel(this, 150));
+//        mGridLayoutManager = new AutoFitGridLayoutManager(this, Utils.convertDpToPixel(this, 150));
+
         mLatestEpisodeAdapter = new LatestEpisodeAdapter(this);
+        int widthScreen = Utils.getScreenSize(this)[0];
+        int widthItem = (int) this.getResources().getDimension(R.dimen.min_width_item);
+
+        int colNum = widthScreen / widthItem;
+        int remain = widthScreen % widthItem;
+        int space;
+        if ((remain / (colNum * 2) > this.getResources().getDimension(R.dimen.max_spacing_item))
+                || (remain / (colNum * 2) <= 0)) {
+            space = (int) this.getResources().getDimension(R.dimen.max_spacing_item);
+        } else {
+            space = remain / (colNum * 2);
+        }
+        remain -= space * (colNum * 2);
+
+        mLatestEpisodeAdapter.setWidthItem(widthItem + (remain / colNum));
+        mLatestEpisodeAdapter.setSpacing(space);
+        mGridLayoutManager = new GridLayoutManager(this, colNum, RecyclerView.VERTICAL, false);
         latestEpisodeRV.setLayoutManager(mGridLayoutManager);
         latestEpisodeRV.setAdapter(mLatestEpisodeAdapter);
+//        latestEpisodeRV.addItemDecoration(new GridSpacingItemDecoration(colNum, space, false, 0));
 
 //        new GetAnimeHomePageTask().execute(Constant.LATEST_URL);
         mGetAnimeHomePageTask = new GetAnimeHomePageTask();

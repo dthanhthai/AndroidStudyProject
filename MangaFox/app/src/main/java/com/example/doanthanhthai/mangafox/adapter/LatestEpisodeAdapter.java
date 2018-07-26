@@ -24,6 +24,8 @@ import java.util.List;
 public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdapter.LatestViewHolder> {
     private List<Anime> animeList;
     private OnLatestEpisodeAdapterListener mListener;
+    private int widthItem = -1;
+    private int spacing = -1;
 
     public LatestEpisodeAdapter(OnLatestEpisodeAdapterListener listener) {
         this.animeList = new ArrayList<>();
@@ -33,6 +35,22 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
     public void setAnimeList(List<Anime> animeList) {
         this.animeList = animeList;
         notifyDataSetChanged();
+    }
+
+    public int getWidthItem() {
+        return widthItem;
+    }
+
+    public void setWidthItem(int widthItem) {
+        this.widthItem = widthItem;
+    }
+
+    public int getSpacing() {
+        return spacing;
+    }
+
+    public void setSpacing(int spacing) {
+        this.spacing = spacing;
     }
 
     public void addMoreAnime(List<Anime> animeList) {
@@ -53,7 +71,7 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
     @Override
     public void onBindViewHolder(LatestViewHolder holder, final int position) {
         final Anime item = animeList.get(position);
-        holder.bindView(item);
+        holder.bindView(item, position);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -88,7 +106,17 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
             rateTv = itemView.findViewById(R.id.anime_rate);
         }
 
-        public void bindView(Anime anime) {
+        public void bindView(Anime anime, int position) {
+            RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) itemView.getLayoutParams();
+            layoutParams.width = widthItem;
+            layoutParams.height = widthItem * 4 / 3;
+//            if (position % 2 == 0) {
+            layoutParams.leftMargin = spacing;
+//            }
+            layoutParams.rightMargin = spacing;
+            layoutParams.bottomMargin = spacing;
+            itemView.setLayoutParams(layoutParams);
+
             if (!TextUtils.isEmpty(anime.getImage())) {
 
 //                Picasso.with(mContext)

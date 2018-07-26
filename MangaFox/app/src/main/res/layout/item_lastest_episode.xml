@@ -4,7 +4,7 @@
     android:id="@+id/cardView"
     android:layout_width="match_parent"
     android:layout_height="250dp"
-    android:layout_margin="3dp"
+    android:layout_margin="0dp"
     card_view:cardCornerRadius="0dp"
     card_view:cardElevation="0dp"
     card_view:cardMaxElevation="0dp"
@@ -18,7 +18,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="80">
+            android:layout_weight="78">
 
             <ImageView
                 android:id="@+id/episode_poster"
@@ -69,7 +69,7 @@
             android:id="@+id/anime_title"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_weight="20"
+            android:layout_weight="22"
             android:ellipsize="end"
             android:maxLines="2"
             android:paddingTop="3dp"
