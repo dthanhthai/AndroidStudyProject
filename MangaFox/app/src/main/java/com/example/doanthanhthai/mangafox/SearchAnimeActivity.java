@@ -24,6 +24,7 @@ import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.adapter.ResultAnimeAdapter;
 import com.example.doanthanhthai.mangafox.model.Anime;
+import com.example.doanthanhthai.mangafox.share.DynamicColumnHelper;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
 
@@ -73,8 +74,11 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setIndeterminate(true);
 
-        GridLayoutManager gridLayoutManager = new AutoFitGridLayoutManager(this, Utils.convertDpToPixel(this, 150));
         mResultAnimeAdapter = new ResultAnimeAdapter(this);
+        DynamicColumnHelper dynamicColumnHelper = new DynamicColumnHelper(this);
+
+        mResultAnimeAdapter.setDynamicColumnHelper(new DynamicColumnHelper(this));
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, dynamicColumnHelper.getColNum(), RecyclerView.VERTICAL, false);
         resultAnimeRv.setLayoutManager(gridLayoutManager);
         resultAnimeRv.setAdapter(mResultAnimeAdapter);
 
@@ -100,8 +104,10 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                 (ResultAnimeAdapter.ResultAnimeViewHolder) resultAnimeRv.findViewHolderForPosition(position);
         Pair<View, String> imagePair = Pair
                 .create((View) viewHolder.getPosterImg(), getString(R.string.transition_image));
+        Pair<View, String> titlePair = Pair
+                .create((View) viewHolder.getAnimeTitleTv(), getString(R.string.transition_title));
         ActivityOptionsCompat options = ActivityOptionsCompat
-                .makeSceneTransitionAnimation(this, imagePair);
+                .makeSceneTransitionAnimation(this, imagePair, titlePair);
         AnimeDataManager.getInstance().setThumbnailBitmap(((BitmapDrawable) viewHolder.getPosterImg().getDrawable()).getBitmap());
         Intent intent = new Intent(SearchAnimeActivity.this, DetailActivity.class);
         startActivity(intent, options.toBundle());

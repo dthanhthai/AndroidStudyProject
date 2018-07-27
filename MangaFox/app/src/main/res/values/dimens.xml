@@ -4,4 +4,5 @@
     <dimen name="toolbar_height">50dp</dimen>
     <dimen name="min_width_item">150dp</dimen>
     <dimen name="max_spacing_item">3dp</dimen>
+    <dimen name="min_spacing_item">1dp</dimen>
 </resources>

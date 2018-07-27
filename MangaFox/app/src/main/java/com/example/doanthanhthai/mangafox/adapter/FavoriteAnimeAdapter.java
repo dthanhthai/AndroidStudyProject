@@ -1,20 +1,26 @@
 package com.example.doanthanhthai.mangafox.adapter;
 
 import android.content.Context;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.doanthanhthai.mangafox.R;
+import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.share.DynamicColumnHelper;
+import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +29,13 @@ import java.util.List;
  * Created by DOAN THANH THAI on 7/5/2018.
  */
 
-public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdapter.LatestViewHolder> {
+public class FavoriteAnimeAdapter extends RecyclerView.Adapter<FavoriteAnimeAdapter.FavoriteAnimeViewHolder> {
     private List<Anime> animeList;
-    private OnLatestEpisodeAdapterListener mListener;
+    private OnFavoriteAnimeAdapterListener mListener;
     private int widthItem = -1;
     private int spacing = -1;
 
-    public LatestEpisodeAdapter(OnLatestEpisodeAdapterListener listener) {
+    public FavoriteAnimeAdapter(OnFavoriteAnimeAdapterListener listener) {
         this.animeList = new ArrayList<>();
         mListener = listener;
     }
@@ -39,28 +45,25 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
         notifyDataSetChanged();
     }
 
-    public void setDynamicColumnHelper(DynamicColumnHelper helper){
+    public void setDynamicColumnHelper(DynamicColumnHelper helper) {
         widthItem = helper.getWidthItem();
         spacing = helper.getSpacing();
     }
 
-    public void addMoreAnime(List<Anime> animeList) {
-        int indexBegin = this.animeList.size();
-        for (Anime anime : animeList) {
-            this.animeList.add(anime);
-        }
-        notifyItemRangeChanged(indexBegin, animeList.size());
-//        notifyDataSetChanged();
+    public void removeItemByIndex(int index) {
+        animeList.remove(index);
+        notifyItemRemoved(index);
+        notifyItemRangeChanged(index, animeList.size());
     }
 
     @Override
-    public LatestViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_lastest_episode, parent, false);
-        return new LatestViewHolder(view);
+    public FavoriteAnimeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_anime, parent, false);
+        return new FavoriteAnimeViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(LatestViewHolder holder, final int position) {
+    public void onBindViewHolder(FavoriteAnimeViewHolder holder, final int position) {
         final Anime item = animeList.get(position);
         holder.bindView(item, position);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -79,10 +82,13 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
         return animeList.size();
     }
 
-    public class LatestViewHolder extends RecyclerView.ViewHolder {
+    public class FavoriteAnimeViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView posterImg;
-        TextView animeTitleTv, episodeTitleTv, rateTv;
+        TextView animeTitleTv;
+        TextView animeEpisodeInfoTv;
+        ImageView moreOptionIv;
         Context mContext;
+        int position;
 
         public ImageView getPosterImg() {
             return posterImg;
@@ -92,16 +98,19 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
             return animeTitleTv;
         }
 
-        public LatestViewHolder(View itemView) {
+        public FavoriteAnimeViewHolder(View itemView) {
             super(itemView);
             mContext = itemView.getContext();
-            posterImg = itemView.findViewById(R.id.episode_poster);
+            posterImg = itemView.findViewById(R.id.anime_poster);
             animeTitleTv = itemView.findViewById(R.id.anime_title);
-            episodeTitleTv = itemView.findViewById(R.id.episode_title);
-            rateTv = itemView.findViewById(R.id.anime_rate);
+            animeEpisodeInfoTv = itemView.findViewById(R.id.episode_info);
+            moreOptionIv = itemView.findViewById(R.id.anime_more_option);
+
+            moreOptionIv.setOnClickListener(this);
         }
 
         public void bindView(Anime anime, int position) {
+            this.position = position;
             RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) itemView.getLayoutParams();
             layoutParams.width = widthItem;
             layoutParams.leftMargin = spacing;
@@ -127,11 +136,40 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
             }
 
             animeTitleTv.setText(anime.getTitle());
-            episodeTitleTv.setText(anime.getEpisodeInfo());
+            animeEpisodeInfoTv.setText(anime.getEpisodeInfo());
+            Log.i("Anime result name: ", anime.getTitle());
         }
+
+        @Override
+        public void onClick(View v) {
+            if (v.getId() == R.id.anime_more_option) {
+                createPopupMenu(v);
+            }
+        }
+
+        private void createPopupMenu(final View view) {
+            //Creating the instance of PopupMenu
+            PopupMenu popup = new PopupMenu(view.getContext(), moreOptionIv);
+            //Inflating the Popup using xml file
+            popup.getMenuInflater().inflate(R.menu.favorite_poupup_menu, popup.getMenu());
+
+            //registering popup with OnMenuItemClickListener
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                public boolean onMenuItemClick(MenuItem item) {
+                    Toast.makeText(view.getContext(), "You Clicked : " + item.getTitle(), Toast.LENGTH_SHORT).show();
+                    removeItemByIndex(position);
+                    AnimeDataManager.getInstance().setFavoriteAnimeList(animeList);
+                    PreferenceHelper.getInstance(view.getContext()).saveListFavoriteAnime(animeList);
+                    return true;
+                }
+            });
+
+            popup.show();
+        }
+
     }
 
-    public interface OnLatestEpisodeAdapterListener {
+    public interface OnFavoriteAnimeAdapterListener {
         void onItemClick(Anime item, int position);
     }
 }

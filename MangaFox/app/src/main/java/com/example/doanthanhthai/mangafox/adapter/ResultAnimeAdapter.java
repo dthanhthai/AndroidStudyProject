@@ -1,19 +1,26 @@
 package com.example.doanthanhthai.mangafox.adapter;
 
 import android.content.Context;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.doanthanhthai.mangafox.R;
+import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
+import com.example.doanthanhthai.mangafox.share.DynamicColumnHelper;
+import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +32,8 @@ import java.util.List;
 public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.ResultAnimeViewHolder> {
     private List<Anime> animeList;
     private OnResultAnimeAdapterListener mListener;
+    private int widthItem = -1;
+    private int spacing = -1;
 
     public ResultAnimeAdapter(OnResultAnimeAdapterListener listener) {
         this.animeList = new ArrayList<>();
@@ -36,6 +45,17 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
         notifyDataSetChanged();
     }
 
+    public void setDynamicColumnHelper(DynamicColumnHelper helper) {
+        widthItem = helper.getWidthItem();
+        spacing = helper.getSpacing();
+    }
+
+    public void removeItemByIndex(int index) {
+        animeList.remove(index);
+        notifyItemRemoved(index);
+        notifyItemRangeChanged(index, animeList.size());
+    }
+
     @Override
     public ResultAnimeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_anime, parent, false);
@@ -45,7 +65,7 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
     @Override
     public void onBindViewHolder(ResultAnimeViewHolder holder, final int position) {
         final Anime item = animeList.get(position);
-        holder.bindView(item);
+        holder.bindView(item, position);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -62,14 +82,20 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
         return animeList.size();
     }
 
-    public class ResultAnimeViewHolder extends RecyclerView.ViewHolder {
+    public class ResultAnimeViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView posterImg;
         TextView animeTitleTv;
         TextView animeEpisodeInfoTv;
+        ImageView moreOptionIv;
         Context mContext;
+        int position;
 
         public ImageView getPosterImg() {
             return posterImg;
+        }
+
+        public TextView getAnimeTitleTv() {
+            return animeTitleTv;
         }
 
         public ResultAnimeViewHolder(View itemView) {
@@ -78,32 +104,69 @@ public class ResultAnimeAdapter extends RecyclerView.Adapter<ResultAnimeAdapter.
             posterImg = itemView.findViewById(R.id.anime_poster);
             animeTitleTv = itemView.findViewById(R.id.anime_title);
             animeEpisodeInfoTv = itemView.findViewById(R.id.episode_info);
+            moreOptionIv = itemView.findViewById(R.id.anime_more_option);
+
+            moreOptionIv.setVisibility(View.GONE);
+
+            moreOptionIv.setOnClickListener(this);
         }
 
-        public void bindView(Anime anime) {
-            if (!TextUtils.isEmpty(anime.getImage())) {
+        public void bindView(Anime anime, int position) {
+            this.position = position;
+            RecyclerView.LayoutParams layoutParams = (RecyclerView.LayoutParams) itemView.getLayoutParams();
+            layoutParams.width = widthItem;
+            layoutParams.leftMargin = spacing;
+            layoutParams.rightMargin = spacing;
+            layoutParams.bottomMargin = spacing;
+            layoutParams.topMargin = spacing;
+            itemView.setLayoutParams(layoutParams);
 
+            RelativeLayout.LayoutParams posterParams = (RelativeLayout.LayoutParams) posterImg.getLayoutParams();
+            posterParams.height = (int) (widthItem * 3.5 / 3);
+            posterImg.setLayoutParams(posterParams);
+
+            if (!TextUtils.isEmpty(anime.getImage())) {
                 RequestOptions requestOptions = new RequestOptions();
-                requestOptions.placeholder(R.drawable.placeholder);
-                requestOptions.error(R.drawable.placeholder);
+                requestOptions.placeholder(R.color.slight_gray);
+                requestOptions.error(R.color.slight_gray);
 
                 Glide.with(mContext)
                         .load(anime.getImage())
                         .thumbnail(0.4f)
                         .apply(requestOptions)
                         .into(posterImg);
-
-//                Picasso.with(mContext)
-//                        .load(anime.image)
-//                        .error(R.drawable.placeholder)
-//                        .placeholder(R.drawable.placeholder)
-//                        .into(posterImg);
             }
 
             animeTitleTv.setText(anime.getTitle());
             animeEpisodeInfoTv.setText(anime.getEpisodeInfo());
             Log.i("Anime result name: ", anime.getTitle());
         }
+
+        @Override
+        public void onClick(View v) {
+            if (v.getId() == R.id.anime_more_option) {
+                createPopupMenu(v);
+            }
+        }
+
+        private void createPopupMenu(final View view) {
+            //Creating the instance of PopupMenu
+            PopupMenu popup = new PopupMenu(view.getContext(), moreOptionIv);
+            //Inflating the Popup using xml file
+            popup.getMenuInflater().inflate(R.menu.favorite_poupup_menu, popup.getMenu());
+
+            //registering popup with OnMenuItemClickListener
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                public boolean onMenuItemClick(MenuItem item) {
+                    Toast.makeText(view.getContext(), "You Clicked : " + item.getTitle(), Toast.LENGTH_SHORT).show();
+                    removeItemByIndex(position);
+                    return true;
+                }
+            });
+
+            popup.show();
+        }
+
     }
 
     public interface OnResultAnimeAdapterListener {

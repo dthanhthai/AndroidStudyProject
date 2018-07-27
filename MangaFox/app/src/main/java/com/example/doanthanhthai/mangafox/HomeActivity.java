@@ -13,15 +13,16 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.transition.Slide;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
@@ -30,9 +31,7 @@ import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
-import com.example.doanthanhthai.mangafox.share.Utils;
-import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
-import com.example.doanthanhthai.mangafox.widget.GridSpacingItemDecoration;
+import com.example.doanthanhthai.mangafox.share.DynamicColumnHelper;
 import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
 
 import org.jsoup.Jsoup;
@@ -124,26 +123,13 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
 //        mGridLayoutManager = new AutoFitGridLayoutManager(this, Utils.convertDpToPixel(this, 150));
 
         mLatestEpisodeAdapter = new LatestEpisodeAdapter(this);
-        int widthScreen = Utils.getScreenSize(this)[0];
-        int widthItem = (int) this.getResources().getDimension(R.dimen.min_width_item);
+        DynamicColumnHelper dynamicColumnHelper = new DynamicColumnHelper(this);
 
-        int colNum = widthScreen / widthItem;
-        int remain = widthScreen % widthItem;
-        int space;
-        if ((remain / (colNum * 2) > this.getResources().getDimension(R.dimen.max_spacing_item))
-                || (remain / (colNum * 2) <= 0)) {
-            space = (int) this.getResources().getDimension(R.dimen.max_spacing_item);
-        } else {
-            space = remain / (colNum * 2);
-        }
-        remain -= space * (colNum * 2);
-
-        mLatestEpisodeAdapter.setWidthItem(widthItem + (remain / colNum));
-        mLatestEpisodeAdapter.setSpacing(space);
-        mGridLayoutManager = new GridLayoutManager(this, colNum, RecyclerView.VERTICAL, false);
+        mLatestEpisodeAdapter.setDynamicColumnHelper(dynamicColumnHelper);
+        mGridLayoutManager = new GridLayoutManager(this, dynamicColumnHelper.getColNum(), RecyclerView.VERTICAL, false);
         latestEpisodeRV.setLayoutManager(mGridLayoutManager);
         latestEpisodeRV.setAdapter(mLatestEpisodeAdapter);
-//        latestEpisodeRV.addItemDecoration(new GridSpacingItemDecoration(colNum, space, false, 0));
+//        latestEpisodeRV.addItemDecoration(new GridSpacingItemDecoration(colNum, spacing, false, 0));
 
 //        new GetAnimeHomePageTask().execute(Constant.LATEST_URL);
         mGetAnimeHomePageTask = new GetAnimeHomePageTask();
@@ -171,8 +157,10 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 (LatestEpisodeAdapter.LatestViewHolder) latestEpisodeRV.findViewHolderForPosition(position);
         Pair<View, String> imagePair = Pair
                 .create((View) viewHolder.getPosterImg(), getString(R.string.transition_image));
+        Pair<View, String> titlePair = Pair
+                .create((View) viewHolder.getAnimeTitleTv(), getString(R.string.transition_title));
         ActivityOptionsCompat options = ActivityOptionsCompat
-                .makeSceneTransitionAnimation(this, imagePair);
+                .makeSceneTransitionAnimation(this, imagePair, titlePair);
         AnimeDataManager.getInstance().setThumbnailBitmap(((BitmapDrawable) viewHolder.getPosterImg().getDrawable()).getBitmap());
         Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
         startActivity(intent, options.toBundle());
@@ -180,11 +168,24 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     }
 
     @Override
-    public void onBannerClick(Anime item, int position) {
+    public void onBannerClick(Anime item, int position, View view) {
         isAutoChangeBanner = false;
         AnimeDataManager.getInstance().setAnime(item);
+
+        TextView titleTv = view.findViewById(R.id.anime_title);
+        ActivityOptionsCompat options = null;
+        if (titleTv != null) {
+            Pair<View, String> titlePair = Pair
+                    .create(titleTv, getString(R.string.transition_title));
+            options = ActivityOptionsCompat
+                    .makeSceneTransitionAnimation(this, titlePair);
+        }
         Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
-        startActivity(intent);
+        if (options != null) {
+            startActivity(intent, options.toBundle());
+        } else {
+            startActivity(intent);
+        }
         Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
     }
 
@@ -391,7 +392,8 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     }
 
     private void startSlideBanner(final List<Anime> result) {
-        mSlideViewPager.setAdapter(new SlideBannerAdapter(result, this));
+        SlideBannerAdapter slideBannerAdapter = new SlideBannerAdapter(result, this);
+        mSlideViewPager.setAdapter(slideBannerAdapter);
         mSlideIndicator.setViewPager(mSlideViewPager);
         isAutoChangeBanner = true;
         final Handler handler = new Handler();

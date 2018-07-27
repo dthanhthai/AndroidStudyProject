@@ -2,9 +2,9 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardView"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="0dp"
+    android:layout_width="match_parent"
+    android:layout_height="250dp"
+    android:layout_margin="3dp"
     card_view:cardCornerRadius="0dp"
     card_view:cardElevation="0dp"
     card_view:cardMaxElevation="0dp"
@@ -12,15 +12,16 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="80">
 
             <ImageView
-                android:id="@+id/episode_poster"
+                android:id="@+id/anime_poster"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_alignParentTop="true"
@@ -31,12 +32,13 @@
                 android:transitionName="@string/transition_image" />
 
             <TextView
-                android:id="@+id/episode_title"
+                android:id="@+id/episode_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_marginLeft="1dp"
                 android:layout_marginTop="10dp"
+                android:layout_weight="10"
                 android:background="@color/black_70"
                 android:ellipsize="end"
                 android:includeFontPadding="false"
@@ -45,37 +47,21 @@
                 android:text="Tập 1: he he hi ho"
                 android:textColor="@android:color/white" />
 
-            <!--<TextView-->
-                <!--android:id="@+id/anime_rate"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_alignParentBottom="true"-->
-                <!--android:layout_alignParentRight="true"-->
-                <!--android:layout_marginBottom="10dp"-->
-                <!--android:layout_marginRight="1dp"-->
-                <!--android:background="@color/black_70"-->
-                <!--android:ellipsize="end"-->
-                <!--android:includeFontPadding="false"-->
-                <!--android:maxLines="1"-->
-                <!--android:padding="5dp"-->
-                <!--android:text="8.8"-->
-                <!--android:textColor="@color/title_anime"-->
-                <!--android:textSize="14sp"-->
-                <!--android:visibility="gone"/>-->
         </RelativeLayout>
 
         <TextView
             android:id="@+id/anime_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="20"
             android:ellipsize="end"
             android:maxLines="2"
             android:paddingTop="3dp"
-            android:paddingBottom="3dp"
             android:text="Naruto"
             android:textColor="@color/anime_home_title"
             android:textSize="16sp"
             android:transitionName="@string/transition_title"/>
+
 
     </LinearLayout>
 </android.support.v7.widget.CardView>

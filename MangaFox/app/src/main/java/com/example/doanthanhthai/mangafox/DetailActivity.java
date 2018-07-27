@@ -310,8 +310,8 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private void updateUIAnimeInfo() {
         if (Utils.isValidContextForGlide(this)) {
             RequestOptions thumbRequestOptions = new RequestOptions();
-            thumbRequestOptions.placeholder(R.drawable.placeholder);
-            thumbRequestOptions.error(R.drawable.placeholder);
+            thumbRequestOptions.placeholder(R.color.slight_gray);
+            thumbRequestOptions.error(R.color.slight_gray);
             Glide.with(DetailActivity.this)
                     .load(mCurrentAnime.getImage())
                     .thumbnail(0.2f)

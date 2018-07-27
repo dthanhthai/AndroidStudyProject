@@ -76,7 +76,7 @@ public class SlideBannerAdapter extends PagerAdapter {
             @Override
             public void onClick(View view) {
                 if(mListener != null){
-                    mListener.onBannerClick(animeList.get(position), position);
+                    mListener.onBannerClick(animeList.get(position), position, view);
                 }
             }
         });
@@ -91,6 +91,6 @@ public class SlideBannerAdapter extends PagerAdapter {
     }
 
     public interface OnSlideBannerAdapterListener {
-        void onBannerClick(Anime item, int position);
+        void onBannerClick(Anime item, int position, View view);
     }
 }

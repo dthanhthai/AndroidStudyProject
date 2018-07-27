@@ -2,8 +2,8 @@
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardView"
-    android:layout_width="match_parent"
-    android:layout_height="250dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:layout_margin="3dp"
     card_view:cardCornerRadius="0dp"
     card_view:cardElevation="0dp"
@@ -12,13 +12,12 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="80">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/anime_poster"
@@ -47,19 +46,31 @@
                 android:text="Tập 1: he he hi ho"
                 android:textColor="@android:color/white" />
 
+            <ImageView
+                android:id="@+id/anime_more_option"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_alignParentRight="true"
+                android:padding="3dp"
+                android:background="@drawable/border_item_more_option"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/ic_more_vert"
+                android:layout_marginRight="5dp"/>
+
         </RelativeLayout>
 
         <TextView
             android:id="@+id/anime_title"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="20"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="2"
             android:paddingTop="3dp"
             android:text="Naruto"
             android:textColor="@color/anime_home_title"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:transitionName="@string/transition_title"/>
 
 
     </LinearLayout>
