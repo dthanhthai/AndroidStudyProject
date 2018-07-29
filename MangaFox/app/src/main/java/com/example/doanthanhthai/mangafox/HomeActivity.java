@@ -15,8 +15,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.transition.Slide;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -33,6 +36,11 @@ import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.DynamicColumnHelper;
 import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
+import com.google.android.gms.cast.framework.CastButtonFactory;
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastState;
+import com.google.android.gms.cast.framework.CastStateListener;
+import com.google.android.gms.cast.framework.IntroductoryOverlay;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -72,6 +80,11 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     private GridLayoutManager mGridLayoutManager;
     private ProgressAnimeView progressFullLayout;
     private LinearLayout progressLoadMoreLayout;
+    private Toolbar mToolbar;
+    private CastContext mCastContext;
+    private MenuItem mediaRouteMenuItem;
+    private IntroductoryOverlay mIntroductoryOverlay;
+    private CastStateListener mCastStateListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,13 +93,14 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
 
         overridePendingTransition(R.anim.slide_in, R.anim.slide_out);
 
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+//        ActionBar actionBar = getSupportActionBar();
+//        actionBar.hide();
+        setupActionBar();
 
         webView = (WebView) findViewById(R.id.webView);
         searchIconIv = findViewById(R.id.search_icon_iv);
         mSlideViewPager = findViewById(R.id.slide_view_pager);
-        mangaIconIv = findViewById(R.id.manga_icon_iv);
+//        mangaIconIv = findViewById(R.id.manga_icon_iv);
         latestEpisodeRV = findViewById(R.id.latest_anime_rv);
         confirmWebView = findViewById(R.id.confirm_webView);
         nestedScrollView = findViewById(R.id.nested_scroll_view);
@@ -95,7 +109,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         favoriteIconIv = findViewById(R.id.favorite_icon_iv);
 
         nestedScrollView.setOnScrollChangeListener(this);
-        mangaIconIv.setOnClickListener(this);
+//        mangaIconIv.setOnClickListener(this);
         searchIconIv.setOnClickListener(this);
         favoriteIconIv.setOnClickListener(this);
 
@@ -117,6 +131,17 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setIndeterminate(true);
 
+        mCastStateListener = new CastStateListener() {
+            @Override
+            public void onCastStateChanged(int newState) {
+                if (newState != CastState.NO_DEVICES_AVAILABLE) {
+                    showIntroductoryOverlay();
+                }
+            }
+        };
+
+        mCastContext = CastContext.getSharedInstance(this);
+
         progressFullLayout.setVisibility(View.VISIBLE);
 
         latestEpisodeRV.setNestedScrollingEnabled(false);
@@ -135,18 +160,45 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         mGetAnimeHomePageTask = new GetAnimeHomePageTask();
         mGetAnimeByPageNumTask = new GetAnimeByPageNumTask();
         mGetAnimeHomePageTask.startTask(Constant.HOME_URL);
+
+
+    }
+
+    private void setupActionBar() {
+        mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
+        setSupportActionBar(mToolbar);
     }
 
     @Override
     protected void onResume() {
         isAutoChangeBanner = true;
+        mCastContext.addCastStateListener(mCastStateListener);
         super.onResume();
     }
 
     @Override
     protected void onPause() {
         isAutoChangeBanner = false;
+        mCastContext.removeCastStateListener(mCastStateListener);
         super.onPause();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.browse, menu);
+        mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
+                R.id.media_route_menu_item);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent i;
+        switch (item.getItemId()) {
+
+        }
+        return true;
     }
 
     @Override
@@ -176,7 +228,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         ActivityOptionsCompat options = null;
         if (titleTv != null) {
             Pair<View, String> titlePair = Pair
-                    .create(titleTv, getString(R.string.transition_title));
+                    .create((View) titleTv, getString(R.string.transition_title));
             options = ActivityOptionsCompat
                     .makeSceneTransitionAnimation(this, titlePair);
         }
@@ -198,10 +250,10 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 intent.putExtra(KEYWORD_ARG, "");
                 startActivity(intent);
                 break;
-            case R.id.manga_icon_iv:
-                intent = new Intent(this, MangaFoxActivity.class);
-                startActivity(intent);
-                break;
+//            case R.id.manga_icon_iv:
+//                intent = new Intent(this, MangaFoxActivity.class);
+//                startActivity(intent);
+//                break;
             case R.id.favorite_icon_iv:
                 intent = new Intent(this, FavoriteActivity.class);
                 startActivity(intent);
@@ -490,5 +542,29 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         }
     }
 
-
+    private void showIntroductoryOverlay() {
+        if (mIntroductoryOverlay != null) {
+            mIntroductoryOverlay.remove();
+        }
+        if ((mediaRouteMenuItem != null) && mediaRouteMenuItem.isVisible()) {
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    mIntroductoryOverlay = new IntroductoryOverlay.Builder(
+                            HomeActivity.this, mediaRouteMenuItem)
+                            .setTitleText("Introducing Cast")
+                            .setSingleTime()
+                            .setOnOverlayDismissedListener(
+                                    new IntroductoryOverlay.OnOverlayDismissedListener() {
+                                        @Override
+                                        public void onOverlayDismissed() {
+                                            mIntroductoryOverlay = null;
+                                        }
+                                    })
+                            .build();
+                    mIntroductoryOverlay.show();
+                }
+            });
+        }
+    }
 }

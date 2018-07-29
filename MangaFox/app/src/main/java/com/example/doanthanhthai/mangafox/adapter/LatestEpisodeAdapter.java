@@ -39,7 +39,7 @@ public class LatestEpisodeAdapter extends RecyclerView.Adapter<LatestEpisodeAdap
         notifyDataSetChanged();
     }
 
-    public void setDynamicColumnHelper(DynamicColumnHelper helper){
+    public void setDynamicColumnHelper(DynamicColumnHelper helper) {
         widthItem = helper.getWidthItem();
         spacing = helper.getSpacing();
     }

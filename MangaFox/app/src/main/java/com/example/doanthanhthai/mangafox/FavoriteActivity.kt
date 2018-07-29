@@ -8,6 +8,7 @@ import android.support.v4.app.ActivityOptionsCompat
 import android.support.v4.util.Pair
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.Toolbar
 import android.view.View
 import android.widget.Toast
 import com.example.doanthanhthai.mangafox.adapter.FavoriteAnimeAdapter
@@ -27,7 +28,8 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, FavoriteAnim
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_favorite)
-        supportActionBar?.hide()
+//        supportActionBar?.hide()
+        setupActionBar()
 
         toolbar_back_btn.setOnClickListener(this)
 
@@ -39,6 +41,10 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, FavoriteAnim
         result_anime_rv.layoutManager = gridLayoutManager
         result_anime_rv.adapter = mFavoriteAnimeAdapter
 
+    }
+
+    private fun setupActionBar() {
+        setSupportActionBar(toolbar_layout)
     }
 
     override fun onResume() {

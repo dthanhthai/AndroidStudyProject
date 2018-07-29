@@ -1,6 +1,7 @@
 package com.example.doanthanhthai.mangafox;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -11,9 +12,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -21,6 +25,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,6 +73,15 @@ import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.ErrorMessageProvider;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaMetadata;
+import com.google.android.gms.cast.framework.CastButtonFactory;
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastSession;
+import com.google.android.gms.cast.framework.SessionManagerListener;
+import com.google.android.gms.cast.framework.media.RemoteMediaClient;
+import com.google.android.gms.common.images.WebImage;
+import com.google.gson.Gson;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -112,7 +126,29 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private final String STATE_RESUME_POSITION = "resumePosition";
     private final String STATE_PLAYER_FULLSCREEN = "playerFullscreen";
     private final String STATE_INDEX_PLAYING_ITEM = "indexPlayItem";
+    private Toolbar mToolbar;
+    private CastContext mCastContext;
+    private CastSession mCastSession;
+    private MenuItem mediaRouteMenuItem;
+    private SessionManagerListener<CastSession> mSessionManagerListener;
+    private PlaybackState mPlaybackState;
+    private PlaybackLocation mLocation;
+    private RelativeLayout castOverlayView;
 
+    /**
+     * indicates whether we are doing a local or a remote playback
+     */
+    public enum PlaybackLocation {
+        LOCAL,
+        REMOTE
+    }
+
+    /**
+     * List of various states that we can be in
+     */
+    public enum PlaybackState {
+        PLAYING, PAUSED, BUFFERING, IDLE
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,8 +158,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_video_player);
 
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+        setupActionBar();
 
         if (savedInstanceState != null) {
             mResumeWindow = savedInstanceState.getInt(STATE_RESUME_WINDOW);
@@ -139,6 +174,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         episodeNameTv = findViewById(R.id.episode_name_tv);
         backBtn = findViewById(R.id.toolbar_back_btn);
         toolbarTitleTv = findViewById(R.id.toolbar_title);
+        castOverlayView = findViewById(R.id.cast_overlay_view);
 
         backBtn.setOnClickListener(this);
 
@@ -154,6 +190,11 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         numberEpisodeRv.setNestedScrollingEnabled(false);
 
         mExoPlayerView.setErrorMessageProvider(new PlayerErrorMessageProvider());
+
+        setupCastListener();
+        mCastContext = CastContext.getSharedInstance(this);
+        mCastContext.registerLifecycleCallbacksBeforeIceCreamSandwich(this, savedInstanceState);
+        mCastSession = mCastContext.getSessionManager().getCurrentCastSession();
 
         mCurrentAnime = AnimeDataManager.getInstance().getAnime();
         if (mCurrentAnime == null) {
@@ -178,6 +219,11 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         }
     }
 
+    private void setupActionBar() {
+        mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
+        setSupportActionBar(mToolbar);
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
@@ -192,26 +238,61 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     @Override
     public void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart() was called");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        resumeVideo();
+        Log.d(TAG, "onResume() was called");
+        mCastContext.getSessionManager().addSessionManagerListener(
+                mSessionManagerListener, CastSession.class);
+        if (mCastSession == null || (mCastSession != null && mCastSession.isConnected())) {
+//            updatePlaybackLocation(PlaybackLocation.REMOTE);
+//        } else {
+            updatePlaybackLocation(PlaybackLocation.LOCAL);
+        }
+//        resumeVideo();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        pauseVideo();
-        if (mExoPlayerView != null && mExoPlayerView.getPlayer() != null) {
-            mResumeWindow = mExoPlayerView.getPlayer().getCurrentWindowIndex();
-            mResumePosition = Math.max(0, mExoPlayerView.getPlayer().getContentPosition());
+        Log.d(TAG, "onPause() was called");
+        if (mLocation == PlaybackLocation.LOCAL) {
+            pauseVideo();
+            if (mExoPlayerView != null && mExoPlayerView.getPlayer() != null) {
+                mResumeWindow = mExoPlayerView.getPlayer().getCurrentWindowIndex();
+                mResumePosition = Math.max(0, mExoPlayerView.getPlayer().getContentPosition());
+            }
+
+            if (mFullScreenDialog != null) {
+                mFullScreenDialog.dismiss();
+            }
         }
 
-        if (mFullScreenDialog != null)
-            mFullScreenDialog.dismiss();
+        mCastContext.getSessionManager().removeSessionManagerListener(
+                mSessionManagerListener, CastSession.class);
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.browse, menu);
+        mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
+                R.id.media_route_menu_item);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent i;
+        switch (item.getItemId()) {
+
+        }
+        return true;
+    }
+
 
     @Override
     public void onStop() {
@@ -295,6 +376,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     }
 
     private void showErrorMessage(String msg) {
+        errorMsgPlayerTv.setVisibility(View.VISIBLE);
         if (!TextUtils.isEmpty(msg)) {
             errorMsgPlayerTv.setText(msg);
         } else {
@@ -337,14 +419,44 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             player.addListener(this);
             mExoPlayerView.setPlayer(player);
 
+            //Prepare video content
             prepareContentPlayer(mCurrentAnime.getEpisodeList().get(indexPlayingItem));
 
+            if (mCastSession != null && mCastSession.isConnected()) {
+                updatePlaybackLocation(PlaybackLocation.REMOTE);
+            }
+//            } else {
+//                updatePlaybackLocation(PlaybackLocation.LOCAL);
+//            }
+//            mPlaybackState = PlaybackState.IDLE;
+//            updatePlayButton(mPlaybackState);
         }
         if (mExoPlayerFullscreen) {
             ((ViewGroup) mExoPlayerView.getParent()).removeView(mExoPlayerView);
             mFullScreenDialog.addContentView(mExoPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             mFullScreenIcon.setImageDrawable(VideoPlayerActivity.this.getResources().getDrawable(R.drawable.ic_fullscreen_skrink));
             mFullScreenDialog.show();
+        }
+    }
+
+    private void updatePlaybackLocation(PlaybackLocation location) {
+        mLocation = location;
+        Log.i(TAG, "[updatePlaybackLocation] - " + mLocation.name());
+        switch (location) {
+            case LOCAL:
+                castOverlayView.setVisibility(View.GONE);
+                resumeVideo();
+                break;
+            case REMOTE:
+                castOverlayView.setVisibility(View.VISIBLE);
+                coverPlayerIv.setVisibility(View.VISIBLE);
+                pauseVideo();
+                if (mCastSession != null && mCastSession.isConnected()) {
+                    loadRemoteMedia((int) player.getCurrentPosition(), true);
+                }
+                break;
+            default:
+                break;
         }
     }
 
@@ -360,7 +472,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
                 mediaSource = buildMediaSource(Uri.parse(episode.getDirectUrl()), null);
                 player.prepare(mediaSource);
-                player.setPlayWhenReady(true);
+//                player.setPlayWhenReady(true);
 
                 if (haveResumePosition) {
                     if (mResumePosition <= 1000) {
@@ -388,6 +500,13 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             player.setPlayWhenReady(true);
         }
         return 0;
+    }
+
+    public void stopVideo() {
+        if (player != null) {
+            player.seekTo(0);
+            player.stop();
+        }
     }
 
     private MediaSource buildMediaSource(Uri uri, @Nullable String overrideExtension) {
@@ -442,17 +561,20 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
 
     @Override
     public void onItemClick(Episode item, int position) {
-        coverPlayerIv.setVisibility(View.VISIBLE);
-
-        playbackControlView.hide();
-        showProgressLayout();
         indexPlayingItem = position;
-        pauseVideo();
-
-        mExoPlayerView.clearFocus();
+        stopVideo();
+        coverPlayerIv.setVisibility(View.VISIBLE);
+        showProgressLayout();
+        playbackControlView.hide();
 
         if (!TextUtils.isEmpty(item.getDirectUrl())) {
+            animeTitleTv.setText(item.getFullName());
             prepareContentPlayer(item);
+            if (mCastSession != null && mCastSession.isConnected()) {
+                updatePlaybackLocation(PlaybackLocation.REMOTE);
+            } else {
+                updatePlaybackLocation(PlaybackLocation.LOCAL);
+            }
         } else {
             webViewClient.setRunGetSourceWeb(true);
             webView.loadUrl(item.getUrl());
@@ -475,19 +597,18 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     @Override
     public void onLoadingChanged(boolean isLoading) {
         if (isLoading) {
-            showProgressLayout();
-            if (isPrepareContent) {
-                coverPlayerIv.setVisibility(View.VISIBLE);
-                playbackControlView.hide();
-                isPrepareContent = false;
-            }
-        } else {
+            Log.i(TAG, "onLoadingChanged TRUE");
+//            showProgressLayout();
 //            if (isPrepareContent) {
-            playbackControlView.setVisibility(View.VISIBLE);
-            coverPlayerIv.setVisibility(View.GONE);
+//                coverPlayerIv.setVisibility(View.VISIBLE);
+//                playbackControlView.hide();
 //                isPrepareContent = false;
 //            }
-            hideProgressLayout();
+        } else {
+            Log.i(TAG, "onLoadingChanged FALSE");
+//            playbackControlView.setVisibility(View.VISIBLE);
+//            coverPlayerIv.setVisibility(View.GONE);
+//            hideProgressLayout();
         }
     }
 
@@ -499,16 +620,31 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         switch (playbackState) {
             case Player.STATE_IDLE:
+                mPlaybackState = PlaybackState.IDLE;
                 showProgressLayout();
+//                if (isPrepareContent) {
+                coverPlayerIv.setVisibility(View.VISIBLE);
+                playbackControlView.hide();
+//                    isPrepareContent = false;
+//                }
+                Log.i(TAG, "STATE_IDLE");
                 break;
             case Player.STATE_BUFFERING:
+                mPlaybackState = PlaybackState.BUFFERING;
+                Log.i(TAG, "STATE_BUFFERING");
                 hideErrorMessage();
                 showProgressLayout();
+                break;
             case Player.STATE_READY:
+                mPlaybackState = PlaybackState.PLAYING;
+                Log.i(TAG, "STATE_READY");
                 coverPlayerIv.setVisibility(View.GONE);
                 hideProgressLayout();
                 hideErrorMessage();
+                break;
             case Player.STATE_ENDED:
+//                showProgressLayout();
+                Log.i(TAG, "STATE_ENDED");
                 break;
         }
     }
@@ -632,6 +768,11 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                             Episode episode = ep;
                             animeTitleTv.setText(ep.getFullName());
                             prepareContentPlayer(episode);
+                            if (mCastSession != null && mCastSession.isConnected()) {
+                                updatePlaybackLocation(PlaybackLocation.REMOTE);
+                            } else {
+                                updatePlaybackLocation(PlaybackLocation.LOCAL);
+                            }
                         }
                     }
                 } catch (UnsupportedEncodingException e) {
@@ -657,4 +798,148 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     }
 
 
+    private MediaInfo buildMediaInfo() {
+        Episode ep = mCurrentAnime.getEpisodeList().get(indexPlayingItem);
+        MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
+
+//        movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, mSelectedMedia.getStudio());
+        movieMetadata.putString(MediaMetadata.KEY_TITLE, ep.getFullName());
+        movieMetadata.addImage(new WebImage(Uri.parse(mCurrentAnime.getImage())));
+        if (!TextUtils.isEmpty(mCurrentAnime.getCoverImage())) {
+            movieMetadata.addImage(new WebImage(Uri.parse(mCurrentAnime.getCoverImage())));
+        }
+
+        return new MediaInfo.Builder(ep.getDirectUrl())
+                .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                .setContentType("videos/mp4")
+                .setMetadata(movieMetadata)
+//                .setStreamDuration((24 * 60 + 27) * 1000)
+                .build();
+    }
+
+    private void setupCastListener() {
+        mSessionManagerListener = new SessionManagerListener<CastSession>() {
+
+            @Override
+            public void onSessionEnded(CastSession session, int error) {
+                Log.i(TAG, "[SessionManagerListener][onSessionEnded]");
+                onApplicationDisconnected();
+            }
+
+            @Override
+            public void onSessionResumed(CastSession session, boolean wasSuspended) {
+                Log.i(TAG, "[SessionManagerListener][onSessionResumed]");
+                onApplicationConnected(session);
+            }
+
+            @Override
+            public void onSessionResumeFailed(CastSession session, int error) {
+                Log.i(TAG, "[SessionManagerListener][onSessionResumeFailed]");
+                onApplicationDisconnected();
+            }
+
+            @Override
+            public void onSessionStarted(CastSession session, String sessionId) {
+                Log.i(TAG, "[SessionManagerListener][onSessionStarted]");
+                onApplicationConnected(session);
+            }
+
+            @Override
+            public void onSessionStartFailed(CastSession session, int error) {
+                Log.i(TAG, "[SessionManagerListener][onSessionStartFailed]");
+                onApplicationDisconnected();
+            }
+
+            @Override
+            public void onSessionStarting(CastSession session) {
+                Log.i(TAG, "[SessionManagerListener][onSessionStarting]");
+            }
+
+            @Override
+            public void onSessionEnding(CastSession session) {
+                Log.i(TAG, "[SessionManagerListener][onSessionEnding]");
+            }
+
+            @Override
+            public void onSessionResuming(CastSession session, String sessionId) {
+                Log.i(TAG, "[SessionManagerListener][onSessionResuming]");
+            }
+
+            @Override
+            public void onSessionSuspended(CastSession session, int reason) {
+                Log.i(TAG, "[SessionManagerListener][onSessionSuspended]");
+            }
+
+            private void onApplicationConnected(CastSession castSession) {
+                mCastSession = castSession;
+                if (null != mCurrentAnime) {
+
+//                    if (mPlaybackState == PlaybackState.PLAYING) {
+                    pauseVideo();
+                    updatePlaybackLocation(PlaybackLocation.REMOTE);
+//                        loadRemoteMedia((int) player.getCurrentPosition(), true);
+//                    return;
+//                    } else {
+//                        mPlaybackState = PlaybackState.IDLE;
+//                        updatePlaybackLocation(PlaybackLocation.REMOTE);
+//                    }
+                }
+//                updatePlayButton(mPlaybackState);
+                supportInvalidateOptionsMenu();
+            }
+
+            private void onApplicationDisconnected() {
+                updatePlaybackLocation(PlaybackLocation.LOCAL);
+                mPlaybackState = PlaybackState.IDLE;
+                mLocation = PlaybackLocation.LOCAL;
+//                updatePlayButton(mPlaybackState);
+                supportInvalidateOptionsMenu();
+            }
+        };
+    }
+
+    private void loadRemoteMedia(int position, boolean autoPlay) {
+        if (mCastSession == null) {
+            return;
+        }
+        final RemoteMediaClient remoteMediaClient = mCastSession.getRemoteMediaClient();
+        if (remoteMediaClient == null) {
+            return;
+        }
+        remoteMediaClient.addListener(new RemoteMediaClient.Listener() {
+            @Override
+            public void onStatusUpdated() {
+                Intent intent = new Intent(VideoPlayerActivity.this, ExpandedControlsActivity.class);
+                startActivity(intent);
+                remoteMediaClient.removeListener(this);
+                Log.i(TAG, "[RemoteMediaClient][onStatusUpdated]");
+            }
+
+            @Override
+            public void onMetadataUpdated() {
+                Log.i(TAG, "[RemoteMediaClient][onMetadataUpdated]");
+            }
+
+            @Override
+            public void onQueueStatusUpdated() {
+                Log.i(TAG, "[RemoteMediaClient][onQueueStatusUpdated]");
+            }
+
+            @Override
+            public void onPreloadStatusUpdated() {
+                Log.i(TAG, "[RemoteMediaClient][onPreloadStatusUpdated]");
+            }
+
+            @Override
+            public void onSendingRemoteMediaRequest() {
+                Log.i(TAG, "[RemoteMediaClient][onSendingRemoteMediaRequest]");
+            }
+
+            @Override
+            public void onAdBreakStatusUpdated() {
+                Log.i(TAG, "[RemoteMediaClient][onAdBreakStatusUpdated]");
+            }
+        });
+        remoteMediaClient.load(buildMediaInfo(), autoPlay, position);
+    }
 }

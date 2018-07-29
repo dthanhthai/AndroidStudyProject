@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,14 +46,14 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
     private RecyclerView resultAnimeRv;
     private ResultAnimeAdapter mResultAnimeAdapter;
     private TextView emptyTv;
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_anime);
 
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+        setupActionBar();
 
         searchView = findViewById(R.id.anime_search_view);
         resultAnimeRv = findViewById(R.id.result_anime_rv);
@@ -82,6 +83,11 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
         resultAnimeRv.setLayoutManager(gridLayoutManager);
         resultAnimeRv.setAdapter(mResultAnimeAdapter);
 
+    }
+
+    private void setupActionBar() {
+        mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
+        setSupportActionBar(mToolbar);
     }
 
     @Override

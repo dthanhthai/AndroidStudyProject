@@ -14,8 +14,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -43,6 +45,7 @@ import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
+import com.google.android.gms.cast.framework.CastButtonFactory;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -68,14 +71,17 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private boolean isFavoriteAnime = false;
     private boolean isStartTransition = true;
     private GetDetailAnimeTask mGetDetailAnimeTask;
+    private Toolbar mToolbar;
+    private MenuItem mediaRouteMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+//        ActionBar actionBar = getSupportActionBar();
+//        actionBar.hide();
+        setupActionBar();
 
         thumbnailIv = findViewById(R.id.anime_thumbnail_iv);
         coverIv = findViewById(R.id.anime_cover_iv);
@@ -160,6 +166,29 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.browse, menu);
+        mediaRouteMenuItem = CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
+                R.id.media_route_menu_item);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+//        return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            ActivityCompat.finishAfterTransition(this);
+        }
+        return true;
+    }
+
+    private void setupActionBar() {
+        mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
+        setSupportActionBar(mToolbar);
+    }
+
     private boolean checkFavoriteAnime() {
         boolean isFavorite = false;
         List<Anime> favoriteAnimeList = AnimeDataManager.getInstance().getFavoriteAnimeList();
@@ -188,15 +217,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
             favoriteBtn.setBackground(resources.getDrawable(R.drawable.round_corner_border_remove_favorite));
             favoriteBtn.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
         }
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-//        return super.onOptionsItemSelected(item);
-        if (item.getItemId() == android.R.id.home) {
-            ActivityCompat.finishAfterTransition(this);
-        }
-        return true;
     }
 
     @Override

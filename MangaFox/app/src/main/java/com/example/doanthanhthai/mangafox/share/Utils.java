@@ -2,6 +2,7 @@ package com.example.doanthanhthai.mangafox.share;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.support.annotation.Nullable;
 import android.view.Display;
@@ -55,5 +56,13 @@ public class Utils {
             }
         }
         return true;
+    }
+
+    /**
+     * Returns {@code true} if and only if the screen orientation is portrait.
+     */
+    public static boolean isOrientationPortrait(Context context) {
+        return context.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT;
     }
 }
