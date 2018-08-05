@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -112,6 +113,8 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private RecyclerView numberEpisodeRv;
     private FrameLayout progressBarLayout;
     private TextView errorMsgPlayerTv;
+    private RelativeLayout errorPlayerLayout;
+    private Button errorPlayerBtn;
     private ImageView coverPlayerIv;
     private ImageView backBtn;
     private NumberEpisodeAdapter mNumberEpisodeAdapter;
@@ -247,7 +250,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         Log.d(TAG, "onResume() was called");
         mCastContext.getSessionManager().addSessionManagerListener(
                 mSessionManagerListener, CastSession.class);
-        if (mCastSession == null || (mCastSession != null && mCastSession.isConnected())) {
+        if (mCastSession == null || (mCastSession != null && !mCastSession.isConnected())) {
 //            updatePlaybackLocation(PlaybackLocation.REMOTE);
 //        } else {
             updatePlaybackLocation(PlaybackLocation.LOCAL);
@@ -266,9 +269,9 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                 mResumePosition = Math.max(0, mExoPlayerView.getPlayer().getContentPosition());
             }
 
-            if (mFullScreenDialog != null) {
-                mFullScreenDialog.dismiss();
-            }
+//            if (mFullScreenDialog != null) {
+//                mFullScreenDialog.dismiss();
+//            }
         }
 
         mCastContext.getSessionManager().removeSessionManagerListener(
@@ -352,15 +355,20 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private void playerMapView() {
         progressBarLayout = mExoPlayerView.findViewById(R.id.progress_bar_layout);
         errorMsgPlayerTv = mExoPlayerView.findViewById(R.id.error_player_message_tv);
+        errorPlayerLayout = mExoPlayerView.findViewById(R.id.error_player_message_layout);
+        errorPlayerBtn = mExoPlayerView.findViewById(R.id.error_player_try_again_btn);
         coverPlayerIv = mExoPlayerView.findViewById(R.id.player_cover_iv);
         playbackControlView = mExoPlayerView.findViewById(R.id.exo_controller);
+
+        errorPlayerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                handleLoadVideoError();
+            }
+        });
     }
 
     private void initCoverImage() {
-//        Picasso.with(VideoPlayerActivity.this)
-//                .load(mCurrentAnime.coverImage)
-//                .resize(750, 400)
-//                .into(coverPlayerIv);
         if (AnimeDataManager.getInstance().getCoverBitmap() != null) {
             Glide.with(VideoPlayerActivity.this)
                     .load(AnimeDataManager.getInstance().getCoverBitmap())
@@ -376,7 +384,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     }
 
     private void showErrorMessage(String msg) {
-        errorMsgPlayerTv.setVisibility(View.VISIBLE);
+        errorPlayerLayout.setVisibility(View.VISIBLE);
         if (!TextUtils.isEmpty(msg)) {
             errorMsgPlayerTv.setText(msg);
         } else {
@@ -385,7 +393,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     }
 
     private void hideErrorMessage() {
-        errorMsgPlayerTv.setVisibility(View.GONE);
+        errorPlayerLayout.setVisibility(View.GONE);
     }
 
     private void showProgressLayout() {
@@ -612,10 +620,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         }
     }
 
-    //Buffer -> True -> Buffer - > false
-    //Buffer - > Buffer ->buffer ->buffer -> true ->buffer->false
-
-    //Ready -> Buffer -> Ready -> Buffer -> true
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
         switch (playbackState) {
@@ -662,6 +666,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     @Override
     public void onPlayerError(ExoPlaybackException error) {
         showErrorMessage(error.getMessage());
+//        handleLoadVideoError();
     }
 
     @Override
@@ -685,6 +690,21 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                 VideoPlayerActivity.this.finish();
                 break;
         }
+    }
+
+    private void handleLoadVideoError() {
+        stopVideo();
+        coverPlayerIv.setVisibility(View.VISIBLE);
+        showProgressLayout();
+        playbackControlView.hide();
+
+        Episode errorEp = mCurrentAnime.getEpisodeList().get(indexPlayingItem);
+
+        webViewClient.setRunGetSourceWeb(true);
+        webView.loadUrl(errorEp.getUrl());
+        mNumberEpisodeAdapter.setCurrentNum(errorEp.getName());
+        mNumberEpisodeAdapter.notifyDataSetChanged();
+        Toast.makeText(this, "Try again: " + mCurrentAnime.getTitle() + " - Episode: " + errorEp.getName(), Toast.LENGTH_SHORT).show();
     }
 
     private class PlayerErrorMessageProvider implements ErrorMessageProvider<ExoPlaybackException> {
@@ -761,7 +781,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
                                 //Save data
                                 PreferenceHelper.getInstance(VideoPlayerActivity.this)
                                         .saveListFavoriteAnime(favoriteAnimeList);
-                                Log.i(TAG, "hello");
                             }
 
                             webView.stopLoading();

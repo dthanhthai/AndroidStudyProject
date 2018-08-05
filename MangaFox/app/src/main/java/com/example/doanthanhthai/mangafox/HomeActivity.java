@@ -60,7 +60,6 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     public static final String ANIME_ARG = "animeArg";
     public static final String KEYWORD_ARG = "keywordArg";
 
-
     private WebView webView;
     private WebView confirmWebView;
     private AppWebViewClients webViewClient;
@@ -85,6 +84,8 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     private MenuItem mediaRouteMenuItem;
     private IntroductoryOverlay mIntroductoryOverlay;
     private CastStateListener mCastStateListener;
+
+    private Handler mTaskHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +116,11 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
 
         mSlideIndicator = findViewById(R.id.slide_indicator);
 
+        mTaskHandler = new Handler();
+
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setBlockNetworkImage(true);
+        webView.getSettings().setLoadsImagesAutomatically(false);
         webView.clearHistory();
         webViewClient = new AppWebViewClients();
         webView.setWebViewClient(webViewClient);
@@ -181,6 +186,15 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         isAutoChangeBanner = false;
         mCastContext.removeCastStateListener(mCastStateListener);
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mTaskHandler != null) {
+            mTaskHandler.removeCallbacksAndMessages(null);
+            mTaskHandler = null;
+        }
     }
 
     @Override
@@ -294,8 +308,10 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         }
 
         public void restartTask(String url) {
-            mGetAnimeHomePageTask.cancel(true);
-            mGetAnimeHomePageTask = null;
+            if (mGetAnimeHomePageTask != null) {
+                mGetAnimeHomePageTask.cancel(true);
+                mGetAnimeHomePageTask = null;
+            }
 
             mGetAnimeHomePageTask = new GetAnimeHomePageTask();
             mGetAnimeHomePageTask.execute(url);
@@ -338,7 +354,12 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                     mLatestEpisodeAdapter.setAnimeList(latestItems);
                 } else {
                     Toast.makeText(HomeActivity.this, "Got confirm web, try again", Toast.LENGTH_SHORT).show();
-                    restartTask(Constant.HOME_URL);
+                    mTaskHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            restartTask(Constant.HOME_URL);
+                        }
+                    }, 3 * 1000);
                     confirmWebView.setVisibility(View.VISIBLE);
                     confirmWebView.loadUrl(Constant.HOME_URL);
 
@@ -372,7 +393,12 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
             } else {
                 Log.e(TAG, "Cannot get DOCUMENT web");
                 Toast.makeText(HomeActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_SHORT).show();
-                restartTask(Constant.HOME_URL);
+                mTaskHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        restartTask(Constant.HOME_URL);
+                    }
+                }, 3 * 1000);
                 confirmWebView.setVisibility(View.VISIBLE);
                 confirmWebView.loadUrl(Constant.HOME_URL);
             }
@@ -384,6 +410,11 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         private final String TAG = GetAnimeHomePageTask.class.getSimpleName();
 
         public void startTask(String url) {
+            if (mGetAnimeByPageNumTask != null) {
+                mGetAnimeByPageNumTask.cancel(true);
+                mGetAnimeByPageNumTask = null;
+            }
+
             mGetAnimeByPageNumTask = new GetAnimeByPageNumTask();
             mGetAnimeByPageNumTask.execute(url);
         }
@@ -426,7 +457,12 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
                 if (moreItems != null && !moreItems.isEmpty()) {
                     mLatestEpisodeAdapter.addMoreAnime(moreItems);
                 } else {
-                    restartTask(Constant.HOME_URL);
+                    mTaskHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            restartTask(Constant.HOME_URL);
+                        }
+                    }, 3 * 1000);
                     confirmWebView.setVisibility(View.VISIBLE);
                     confirmWebView.loadUrl(Constant.HOME_URL);
                 }
@@ -435,7 +471,12 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
             } else {
                 Log.e(TAG, "Cannot get DOCUMENT web");
                 Toast.makeText(HomeActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_LONG).show();
-                restartTask(Constant.HOME_URL);
+                mTaskHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        restartTask(Constant.HOME_URL);
+                    }
+                }, 3 * 1000);
                 confirmWebView.setVisibility(View.VISIBLE);
                 confirmWebView.loadUrl(Constant.HOME_URL);
             }

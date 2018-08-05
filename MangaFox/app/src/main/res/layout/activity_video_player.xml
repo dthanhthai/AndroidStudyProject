@@ -84,13 +84,23 @@
                 android:background="@color/black_80"
                 android:visibility="gone">
 
-                <ImageButton
-                    android:id="@+id/play_circle"
+                <!--<ImageButton-->
+                <!--android:id="@+id/play_circle"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_centerInParent="true"-->
+                <!--android:background="@color/transparent"-->
+                <!--android:src="@drawable/ic_play_circle_filled_white_56dp" />-->
+
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_above="@+id/error_player_try_again_btn"
                     android:layout_centerInParent="true"
-                    android:background="@color/transparent"
-                    android:src="@drawable/ic_play_circle_filled_white_56dp" />
+                    android:gravity="center"
+                    android:text="@string/player_cast_mode_notify"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
 
             </RelativeLayout>
 

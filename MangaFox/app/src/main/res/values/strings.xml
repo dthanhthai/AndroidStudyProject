@@ -22,7 +22,8 @@
     <string name="error_unsupported_video">Media includes video tracks, but none are playable by this device</string>
 
     <string name="error_unsupported_audio">Media includes audio tracks, but none are playable by this device</string>
-    <string name="default_msg_player_error">An error occurred. Try again later"</string>
+    <string name="default_msg_player_error">An error occurred. Try again later</string>
+    <string name="player_cast_mode_notify">Video content is casting...</string>
     <string name="remove_favorite">Remove Favorite</string>
     <string name="add_favorite">Add Favorite</string>
     <string name="transition_image">transition-image</string>

@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBar;
@@ -47,6 +48,9 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
     private ResultAnimeAdapter mResultAnimeAdapter;
     private TextView emptyTv;
     private Toolbar mToolbar;
+    private Handler mTaskHandler;
+    private GetResultListAnimeTask mGetResultListAnimeTask;
+    private String mCurQueryLink;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +73,7 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
         searchView.requestFocus();
         searchView.setOnQueryTextListener(this);
 
+        mTaskHandler = new Handler();
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
         progressDialog.setMessage("Data loading...");
@@ -91,10 +96,22 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mTaskHandler != null) {
+            mTaskHandler.removeCallbacksAndMessages(null);
+            mTaskHandler = null;
+        }
+    }
+
+    @Override
     public boolean onQueryTextSubmit(String query) {
         emptyTv.setVisibility(View.GONE);
         progressDialog.show();
-        new GetResultListAnimeTask().execute(Constant.SEARCH_URL + query);
+
+        mGetResultListAnimeTask = new GetResultListAnimeTask();
+        mCurQueryLink = Constant.SEARCH_URL + query;
+        mGetResultListAnimeTask.startTask(mCurQueryLink);
         return false;
     }
 
@@ -125,6 +142,16 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
 
         private final String TAG = GetResultListAnimeTask.class.getSimpleName();
 
+        public void startTask(String url) {
+            if (mGetResultListAnimeTask != null) {
+                mGetResultListAnimeTask.cancel(true);
+                mGetResultListAnimeTask = null;
+            }
+
+            mGetResultListAnimeTask = new GetResultListAnimeTask();
+            mGetResultListAnimeTask.execute(url);
+        }
+
         @Override
         protected Document doInBackground(String... strings) {
             Document document = null;
@@ -151,13 +178,17 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
                     searchView.clearFocus();
                 } else {
                     emptyTv.setVisibility(View.VISIBLE);
-//                    confirmWebView.setVisibility(View.VISIBLE);
-//                    confirmWebView.loadUrl(LATEST_URL);
                 }
 
             } else {
                 Log.e(TAG, "Cannot get DOCUMENT web");
                 Toast.makeText(SearchAnimeActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_LONG).show();
+                mTaskHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startTask(mCurQueryLink);
+                    }
+                }, 3 * 1000);
             }
             progressDialog.dismiss();
 

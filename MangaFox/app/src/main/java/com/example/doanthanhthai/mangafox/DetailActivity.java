@@ -73,6 +73,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private GetDetailAnimeTask mGetDetailAnimeTask;
     private Toolbar mToolbar;
     private MenuItem mediaRouteMenuItem;
+    private Handler mTaskHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,9 +108,13 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         backBtn.setOnClickListener(this);
 
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setBlockNetworkImage(true);
+        webView.getSettings().setLoadsImagesAutomatically(false);
         webView.clearHistory();
         webViewClient = new AppWebViewClients();
         webView.setWebViewClient(webViewClient);
+
+        mTaskHandler = new Handler();
 
         progressDialog = new ProgressDialog(this);
 //        progressDialog.setCancelable(false);
@@ -165,6 +170,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 //            }
         }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -235,7 +241,7 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                     webViewClient.setRunGetSourceWeb(true);
                     webView.loadUrl(episode.getUrl());
                 } else {
-                   startVideoPlayerActivity();
+                    startVideoPlayerActivity();
                 }
                 break;
             case R.id.add_favorite_btn:
@@ -267,6 +273,11 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         private final String TAG = GetDetailAnimeTask.class.getSimpleName();
 
         public void startTask(String url) {
+            if (mGetDetailAnimeTask != null) {
+                mGetDetailAnimeTask.cancel(true);
+                mGetDetailAnimeTask = null;
+            }
+
             mGetDetailAnimeTask = new GetDetailAnimeTask();
             mGetDetailAnimeTask.execute(url);
         }
@@ -297,7 +308,12 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 } else {
                     Log.e(TAG, "Cannot get CONTENT in document web");
                     Toast.makeText(DetailActivity.this, "Cannot get CONTENT in document web", Toast.LENGTH_LONG).show();
-                    startTask(mCurrentAnime.getUrl());
+                    mTaskHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            startTask(mCurrentAnime.getUrl());
+                        }
+                    }, 3 * 1000);
                     return;
                 }
 
@@ -308,7 +324,12 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
                 startPostponedEnterTransition();
                 Log.e(TAG, "Cannot get DOCUMENT web");
                 Toast.makeText(DetailActivity.this, "Cannot get DOCUMENT web", Toast.LENGTH_LONG).show();
-                startTask(mCurrentAnime.getUrl());
+                mTaskHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startTask(mCurrentAnime.getUrl());
+                    }
+                }, 3 * 1000);
             }
         }
     }
@@ -490,6 +511,11 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     protected void onDestroy() {
+        if (mTaskHandler != null) {
+            mTaskHandler.removeCallbacksAndMessages(null);
+            mTaskHandler = null;
+        }
+
         AnimeDataManager.getInstance().setAnime(null);
         AnimeDataManager.getInstance().resetIndexFavoriteItem();
         AnimeDataManager.getInstance().resetThumbnailBitmap();
