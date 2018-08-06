@@ -59,7 +59,7 @@
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="180dp"
+            android:layout_height="250dp"
             android:background="@drawable/drop_shadow">
 
             <ImageView
@@ -77,8 +77,8 @@
 
             <ImageView
                 android:id="@+id/anime_thumbnail_iv"
-                android:layout_width="120dp"
-                android:layout_height="150dp"
+                android:layout_width="150dp"
+                android:layout_height="200dp"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:background="@drawable/border_gray"
@@ -115,7 +115,7 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/anime_thumbnail_iv"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.92" />
+                app:layout_constraintVertical_bias="0.9" />
 
             <Button
                 android:id="@+id/add_favorite_btn"
@@ -139,7 +139,7 @@
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toEndOf="@+id/play_btn"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.92" />
+                app:layout_constraintVertical_bias="0.9" />
         </android.support.constraint.ConstraintLayout>
 
         <FrameLayout

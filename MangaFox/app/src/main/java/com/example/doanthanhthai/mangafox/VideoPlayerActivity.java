@@ -107,7 +107,7 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     private MediaSource mediaSource;
     private boolean mExoPlayerFullscreen = false;
     private FrameLayout mFullScreenButton;
-    private ImageView mFullScreenIcon;
+    private ImageView mFullScreenIcon, shareIcon;
     private TextView animeTitleTv, toolbarTitleTv;
     private TextView episodeNameTv;
     private RecyclerView numberEpisodeRv;
@@ -359,11 +359,21 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         errorPlayerBtn = mExoPlayerView.findViewById(R.id.error_player_try_again_btn);
         coverPlayerIv = mExoPlayerView.findViewById(R.id.player_cover_iv);
         playbackControlView = mExoPlayerView.findViewById(R.id.exo_controller);
+        shareIcon = mExoPlayerView.findViewById(R.id.exo_share_icon_iv);
 
         errorPlayerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 handleLoadVideoError();
+            }
+        });
+
+        shareIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pauseVideo();
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mCurrentAnime.episodeList.get(indexPlayingItem).getDirectUrl()));
+                startActivity(intent);
             }
         });
     }

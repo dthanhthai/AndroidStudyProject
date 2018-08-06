@@ -17,44 +17,70 @@
     android:layoutDirection="ltr"
     android:orientation="vertical">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingTop="4dp">
+        android:layout_height="wrap_content">
 
-        <!--<ImageButton-->
-        <!--android:id="@id/exo_prev"-->
-        <!--style="@style/ExoMediaButton.Previous"-->
-        <!--android:visibility="gone"/>-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="0dp">
 
-        <ImageButton
-            android:id="@id/exo_rew"
-            style="@style/ExoMediaButton.Rewind" />
+            <!--<ImageButton-->
+            <!--android:id="@id/exo_prev"-->
+            <!--style="@style/ExoMediaButton.Previous"-->
+            <!--android:visibility="gone"/>-->
 
-        <ImageButton
-            android:id="@id/exo_repeat_toggle"
-            style="@style/ExoMediaButton" />
+            <ImageButton
+                android:id="@id/exo_rew"
+                style="@style/ExoMediaButton.Rewind" />
 
-        <ImageButton
-            android:id="@id/exo_play"
-            style="@style/ExoMediaButton.Play" />
+            <ImageButton
+                android:id="@id/exo_repeat_toggle"
+                style="@style/ExoMediaButton" />
 
-        <ImageButton
-            android:id="@id/exo_pause"
-            style="@style/ExoMediaButton.Pause" />
+            <ImageButton
+                android:id="@id/exo_play"
+                style="@style/ExoMediaButton.Play" />
 
-        <ImageButton
-            android:id="@id/exo_ffwd"
-            style="@style/ExoMediaButton.FastForward" />
+            <ImageButton
+                android:id="@id/exo_pause"
+                style="@style/ExoMediaButton.Pause" />
 
-        <!--<ImageButton-->
-        <!--android:id="@id/exo_next"-->
-        <!--style="@style/ExoMediaButton.Next"-->
-        <!--android:visibility="gone"/>-->
+            <ImageButton
+                android:id="@id/exo_ffwd"
+                style="@style/ExoMediaButton.FastForward" />
 
-    </LinearLayout>
+
+            <!--<ImageButton-->
+            <!--android:id="@id/exo_next"-->
+            <!--style="@style/ExoMediaButton.Next"-->
+            <!--android:visibility="gone"/>-->
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/exo_share_layout"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="2dp">
+
+            <ImageView
+                android:id="@+id/exo_share_icon_iv"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_screen_share_white_24dp" />
+
+        </FrameLayout>
+
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
