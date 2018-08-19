@@ -29,4 +29,6 @@
     <string name="transition_image">transition-image</string>
     <string name="transition_title">transition-text</string>
     <string name="media_route_menu_title">Play on&#8230;</string>
+    <string name="navigation_drawer_open">open drawer</string>
+    <string name="navigation_drawer_close">close drawer</string>
 </resources>

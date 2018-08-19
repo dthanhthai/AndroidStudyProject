@@ -1,6 +1,7 @@
 <resources>
     <!-- Base application theme. -->
     <style name="AppTheme.Base" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <!-- Customize your theme here. -->
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">true</item>
         <item name="android:windowAnimationStyle">@style/CustomActivityAnimation</item>
@@ -21,6 +22,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="primaryBackgroundColor">@color/primaryBackgroundColor</item>
+        <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
     </style>
 
     <!-- Base Night application theme. -->
@@ -50,5 +52,9 @@
 
     <style name="CustomMediaRouteButtonStyle" parent="Widget.MediaRouter.Light.MediaRouteButton">
         <item name="mediaRouteButtonTint">@color/white</item>
+    </style>
+
+    <style name="DrawerArrowStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@android:color/white</item>
     </style>
 </resources>

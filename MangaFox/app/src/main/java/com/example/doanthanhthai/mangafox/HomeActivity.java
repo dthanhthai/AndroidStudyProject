@@ -1,5 +1,6 @@
 package com.example.doanthanhthai.mangafox;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -8,13 +9,17 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Slide;
@@ -30,10 +35,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
+import com.example.doanthanhthai.mangafox.adapter.NavigationAdapter;
 import com.example.doanthanhthai.mangafox.adapter.SlideBannerAdapter;
 import com.example.doanthanhthai.mangafox.base.BaseActivity;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
+import com.example.doanthanhthai.mangafox.model.NavigationModel;
 import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.DynamicColumnHelper;
@@ -86,6 +93,9 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
     private MenuItem mediaRouteMenuItem;
     private IntroductoryOverlay mIntroductoryOverlay;
     private CastStateListener mCastStateListener;
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle actionBarDrawerToggle;
+    private RecyclerView navigationRv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,8 +145,11 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         progressLoadMoreLayout = findViewById(R.id.progress_load_more_layout);
         favoriteIconIv = findViewById(R.id.favorite_icon_iv);
         mSlideIndicator = findViewById(R.id.slide_indicator);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationRv = findViewById(R.id.rvNavigation);
     }
 
+    @SuppressLint("RestrictedApi")
     @Override
     public void initData() {
         super.initData();
@@ -176,11 +189,36 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
 
         progressFullLayout.setVisibility(View.VISIBLE);
 
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+        getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayShowCustomEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayUseLogoEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setIcon(null);
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
+        getSupportActionBar().setIcon(android.R.color.transparent);
+
         latestEpisodeRV.setNestedScrollingEnabled(false);
 //        mGridLayoutManager = new AutoFitGridLayoutManager(this, Utils.convertDpToPixel(this, 150));
 
         mLatestEpisodeAdapter = new LatestEpisodeAdapter(this);
         DynamicColumnHelper dynamicColumnHelper = new DynamicColumnHelper(this);
+
+        List<NavigationModel> navigationModelList = new ArrayList<>();
+        navigationModelList.add(new NavigationModel(1, R.drawable.ic_add_white_18dp, "Item 1"));
+        navigationModelList.add(new NavigationModel(2, R.drawable.ic_add_white_18dp, "Item 2"));
+        navigationModelList.add(new NavigationModel(3, R.drawable.ic_add_white_18dp, "Item 3"));
+        navigationModelList.add(new NavigationModel(4, R.drawable.ic_add_white_18dp, "Item 4"));
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
+        NavigationAdapter navigationAdapter = new NavigationAdapter(navigationModelList);
+        navigationRv.setLayoutManager(linearLayoutManager);
+        navigationRv.setAdapter(navigationAdapter);
 
         mLatestEpisodeAdapter.setDynamicColumnHelper(dynamicColumnHelper);
         mGridLayoutManager = new GridLayoutManager(this, dynamicColumnHelper.getColNum(), RecyclerView.VERTICAL, false);
@@ -212,6 +250,9 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent i;
         switch (item.getItemId()) {
+            case android.R.id.home:
+                drawerLayout.openDrawer(GravityCompat.START);  // OPEN DRAWER
+                return true;
         }
         return true;
     }
