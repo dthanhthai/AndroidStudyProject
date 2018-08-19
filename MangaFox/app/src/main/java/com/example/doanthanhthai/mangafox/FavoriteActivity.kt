@@ -13,14 +13,14 @@ import android.view.View
 import android.widget.Toast
 import com.example.doanthanhthai.mangafox.adapter.FavoriteAnimeAdapter
 import com.example.doanthanhthai.mangafox.adapter.ResultAnimeAdapter
+import com.example.doanthanhthai.mangafox.base.BaseActivity
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager
 import com.example.doanthanhthai.mangafox.model.Anime
 import com.example.doanthanhthai.mangafox.model.Episode
 import com.example.doanthanhthai.mangafox.share.DynamicColumnHelper
 import kotlinx.android.synthetic.main.activity_favorite.*;
 
-class FavoriteActivity : AppCompatActivity(), View.OnClickListener, FavoriteAnimeAdapter.OnFavoriteAnimeAdapterListener {
-
+class FavoriteActivity : BaseActivity(), View.OnClickListener, FavoriteAnimeAdapter.OnFavoriteAnimeAdapterListener {
     val TAG: String = FavoriteActivity::class.java.simpleName!!
     var gridLayoutManager: GridLayoutManager? = null
     var mFavoriteAnimeAdapter: FavoriteAnimeAdapter? = null
@@ -28,9 +28,21 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, FavoriteAnim
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_favorite)
-//        supportActionBar?.hide()
-        setupActionBar()
+        preConfig(savedInstanceState)
+        mapView()
+        initData()
+    }
 
+    override fun preConfig(savedInstanceState: Bundle?) {
+        super.preConfig(savedInstanceState)
+    }
+
+    override fun mapView() {
+        super.mapView()
+    }
+
+    override fun initData() {
+        super.initData()
         toolbar_back_btn.setOnClickListener(this)
 
         mFavoriteAnimeAdapter = FavoriteAnimeAdapter(this)
@@ -40,11 +52,6 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, FavoriteAnim
         gridLayoutManager = GridLayoutManager(this, columnHelper.colNum, RecyclerView.VERTICAL, false)
         result_anime_rv.layoutManager = gridLayoutManager
         result_anime_rv.adapter = mFavoriteAnimeAdapter
-
-    }
-
-    private fun setupActionBar() {
-        setSupportActionBar(toolbar_layout)
     }
 
     override fun onResume() {
@@ -86,7 +93,7 @@ class FavoriteActivity : AppCompatActivity(), View.OnClickListener, FavoriteAnim
         tmpAnime?.isFavorite = item?.isFavorite
         tmpAnime?.isFavorite = item?.isFavorite
         item?.episodeList.forEach {
-            var tmpEp: Episode = Episode()
+            var tmpEp = Episode()
             tmpEp.name = it.name
             tmpEp.url = it.url
             tmpEp.directUrl = it.directUrl

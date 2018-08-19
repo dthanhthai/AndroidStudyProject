@@ -38,6 +38,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.doanthanhthai.mangafox.base.BaseActivity;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
@@ -56,7 +57,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
 
-public class DetailActivity extends AppCompatActivity implements View.OnClickListener {
+public class DetailActivity extends BaseActivity implements View.OnClickListener {
     private static final String TAG = DetailActivity.class.getSimpleName();
     private Anime mCurrentAnime;
     private ImageView thumbnailIv, coverIv;
@@ -74,17 +75,24 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
     private GetDetailAnimeTask mGetDetailAnimeTask;
     private Toolbar mToolbar;
     private MenuItem mediaRouteMenuItem;
-    private Handler mTaskHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        preConfig(savedInstanceState);
+        mapView();
+        initData();
+    }
 
-//        ActionBar actionBar = getSupportActionBar();
-//        actionBar.hide();
-        setupActionBar();
+    @Override
+    public void preConfig(Bundle savedInstanceState) {
+        super.preConfig(savedInstanceState);
+    }
 
+    @Override
+    public void mapView() {
+        super.mapView();
         thumbnailIv = findViewById(R.id.anime_thumbnail_iv);
         coverIv = findViewById(R.id.anime_cover_iv);
         playBtn = findViewById(R.id.play_btn);
@@ -103,7 +111,11 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
         backBtn = findViewById(R.id.toolbar_back_btn);
         favoriteBtn = findViewById(R.id.add_favorite_btn);
         webView = findViewById(R.id.webView);
+    }
 
+    @Override
+    public void initData() {
+        super.initData();
         playBtn.setOnClickListener(this);
         favoriteBtn.setOnClickListener(this);
         backBtn.setOnClickListener(this);
@@ -165,13 +177,8 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
             //If anime is favorite, get data in cache favorite
             isFavoriteAnime = checkFavoriteAnime();
-//            if (!isFavoriteAnime){
-//            } else{
-//                updateUIAnimeInfo();
-//            }
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -512,11 +519,6 @@ public class DetailActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     protected void onDestroy() {
-        if (mTaskHandler != null) {
-            mTaskHandler.removeCallbacksAndMessages(null);
-            mTaskHandler = null;
-        }
-
         AnimeDataManager.getInstance().setAnime(null);
         AnimeDataManager.getInstance().resetIndexFavoriteItem();
         AnimeDataManager.getInstance().resetThumbnailBitmap();

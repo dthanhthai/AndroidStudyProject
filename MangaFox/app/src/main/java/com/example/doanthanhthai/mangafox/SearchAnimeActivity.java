@@ -21,6 +21,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.doanthanhthai.mangafox.base.BaseActivity;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
@@ -37,7 +38,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchAnimeActivity extends AppCompatActivity implements SearchView.OnQueryTextListener, ResultAnimeAdapter.OnResultAnimeAdapterListener {
+public class SearchAnimeActivity extends BaseActivity implements SearchView.OnQueryTextListener, ResultAnimeAdapter.OnResultAnimeAdapterListener {
     private static final String TAG = SearchAnimeActivity.class.getSimpleName();
     private WebView webView;
     //    private AppWebViewClients webViewClient;
@@ -48,7 +49,6 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
     private ResultAnimeAdapter mResultAnimeAdapter;
     private TextView emptyTv;
     private Toolbar mToolbar;
-    private Handler mTaskHandler;
     private GetResultListAnimeTask mGetResultListAnimeTask;
     private String mCurQueryLink;
 
@@ -56,15 +56,29 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_anime);
+        preConfig(savedInstanceState);
+        mapView();
+        initData();
+    }
 
-        setupActionBar();
+    @Override
+    public void preConfig(Bundle savedInstanceState) {
+        super.preConfig(savedInstanceState);
+    }
 
+    @Override
+    public void mapView() {
+        super.mapView();
         searchView = findViewById(R.id.anime_search_view);
         resultAnimeRv = findViewById(R.id.result_anime_rv);
         webView = (WebView) findViewById(R.id.webView);
         emptyTv = findViewById(R.id.empty_result_tv);
+    }
 
-//        webView.getSettings().setJavaScriptEnabled(true);
+    @Override
+    public void initData() {
+        super.initData();
+        //        webView.getSettings().setJavaScriptEnabled(true);
 //        webView.clearHistory();
 //        webViewClient = new AppWebViewClients();
 //        webView.setWebViewClient(webViewClient);
@@ -73,7 +87,6 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
         searchView.requestFocus();
         searchView.setOnQueryTextListener(this);
 
-        mTaskHandler = new Handler();
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
         progressDialog.setMessage("Data loading...");
@@ -87,21 +100,11 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, dynamicColumnHelper.getColNum(), RecyclerView.VERTICAL, false);
         resultAnimeRv.setLayoutManager(gridLayoutManager);
         resultAnimeRv.setAdapter(mResultAnimeAdapter);
-
-    }
-
-    private void setupActionBar() {
-        mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
-        setSupportActionBar(mToolbar);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mTaskHandler != null) {
-            mTaskHandler.removeCallbacksAndMessages(null);
-            mTaskHandler = null;
-        }
     }
 
     @Override
@@ -136,7 +139,6 @@ public class SearchAnimeActivity extends AppCompatActivity implements SearchView
         startActivity(intent, options.toBundle());
         Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
     }
-
 
     private class GetResultListAnimeTask extends AsyncTask<String, Void, Document> {
 

@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.doanthanhthai.mangafox.adapter.NumberEpisodeAdapter;
+import com.example.doanthanhthai.mangafox.base.BaseActivity;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
@@ -91,7 +92,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
 
-public class VideoPlayerActivity extends AppCompatActivity implements NumberEpisodeAdapter.OnNumberEpisodeAdapterListener, Player.EventListener, View.OnClickListener {
+public class VideoPlayerActivity extends BaseActivity implements NumberEpisodeAdapter.OnNumberEpisodeAdapterListener, Player.EventListener, View.OnClickListener {
     private static final String TAG = VideoPlayerActivity.class.getSimpleName();
     private Anime mCurrentAnime;
 
@@ -156,12 +157,22 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 //        this.requestWindowFeature(Window.FEATURE_NO_TITLE); //Remove title bar
 //        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); //Remove notification bar
-        this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_video_player);
+        preConfig(savedInstanceState);
+        mapView();
+        initData();
+    }
 
-        setupActionBar();
+    @Override
+    public void preConfig(Bundle savedInstanceState) {
+        super.preConfig(savedInstanceState);
+        setupCastListener();
+        mCastContext = CastContext.getSharedInstance(this);
+        mCastContext.registerLifecycleCallbacksBeforeIceCreamSandwich(this, savedInstanceState);
+        mCastSession = mCastContext.getSessionManager().getCurrentCastSession();
 
         if (savedInstanceState != null) {
             mResumeWindow = savedInstanceState.getInt(STATE_RESUME_WINDOW);
@@ -169,7 +180,11 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
             mExoPlayerFullscreen = savedInstanceState.getBoolean(STATE_PLAYER_FULLSCREEN);
             indexPlayingItem = savedInstanceState.getInt(STATE_INDEX_PLAYING_ITEM);
         }
+    }
 
+    @Override
+    public void mapView() {
+        super.mapView();
         mExoPlayerView = findViewById(R.id.exoplayer);
         numberEpisodeRv = findViewById(R.id.number_episode_rv);
         webView = (WebView) findViewById(R.id.webView);
@@ -178,6 +193,11 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         backBtn = findViewById(R.id.toolbar_back_btn);
         toolbarTitleTv = findViewById(R.id.toolbar_title);
         castOverlayView = findViewById(R.id.cast_overlay_view);
+    }
+
+    @Override
+    public void initData() {
+        super.initData();
 
         backBtn.setOnClickListener(this);
 
@@ -193,11 +213,6 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         numberEpisodeRv.setNestedScrollingEnabled(false);
 
         mExoPlayerView.setErrorMessageProvider(new PlayerErrorMessageProvider());
-
-        setupCastListener();
-        mCastContext = CastContext.getSharedInstance(this);
-        mCastContext.registerLifecycleCallbacksBeforeIceCreamSandwich(this, savedInstanceState);
-        mCastSession = mCastContext.getSessionManager().getCurrentCastSession();
 
         mCurrentAnime = AnimeDataManager.getInstance().getAnime();
         if (mCurrentAnime == null) {
@@ -222,14 +237,8 @@ public class VideoPlayerActivity extends AppCompatActivity implements NumberEpis
         }
     }
 
-    private void setupActionBar() {
-        mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
-        setSupportActionBar(mToolbar);
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
-
         outState.putInt(STATE_RESUME_WINDOW, mResumeWindow);
         outState.putLong(STATE_RESUME_POSITION, mResumePosition);
         outState.putBoolean(STATE_PLAYER_FULLSCREEN, mExoPlayerFullscreen);

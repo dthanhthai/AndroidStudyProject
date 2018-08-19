@@ -29,15 +29,6 @@
             android:layout_height="match_parent"
             android:padding="5dp">
 
-            <ImageView
-                android:id="@+id/favorite_icon_iv"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="15dp"
-                android:layout_alignParentLeft="true"
-                android:src="@drawable/ic_favorite_white_24dp"
-                android:visibility="visible" />
 
             <TextView
                 android:id="@+id/toolbar_title"
@@ -59,6 +50,16 @@
                 <!--android:layout_toStartOf="@+id/search_icon_iv"-->
                 <!--android:src="@drawable/ic_book_white"-->
                 <!--android:visibility="visible" />-->
+
+            <ImageView
+                android:id="@+id/favorite_icon_iv"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="15dp"
+                android:src="@drawable/ic_favorite_white_24dp"
+                android:layout_toStartOf="@+id/search_icon_iv"
+                android:visibility="visible" />
 
 
             <ImageView

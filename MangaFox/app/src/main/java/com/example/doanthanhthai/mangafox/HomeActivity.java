@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
 import com.example.doanthanhthai.mangafox.adapter.SlideBannerAdapter;
+import com.example.doanthanhthai.mangafox.base.BaseActivity;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
@@ -54,7 +55,7 @@ import java.util.TimerTask;
 
 import me.relex.circleindicator.CircleIndicator;
 
-public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdapter.OnLatestEpisodeAdapterListener,
+public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.OnLatestEpisodeAdapterListener,
         View.OnClickListener, SlideBannerAdapter.OnSlideBannerAdapterListener, NestedScrollView.OnScrollChangeListener {
 
     public static final String TAG = HomeActivity.class.getSimpleName();
@@ -86,20 +87,43 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     private IntroductoryOverlay mIntroductoryOverlay;
     private CastStateListener mCastStateListener;
 
-    private Handler mTaskHandler;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         setContentView(R.layout.activity_home);
+        preConfig(savedInstanceState);
+        mapView();
+        initData();
+    }
 
-        overridePendingTransition(R.anim.slide_in, R.anim.slide_out);
+    @Override
+    protected void onResume() {
+        isAutoChangeBanner = true;
+        mCastContext.addCastStateListener(mCastStateListener);
+        super.onResume();
+    }
 
-//        ActionBar actionBar = getSupportActionBar();
-//        actionBar.hide();
-        setupActionBar();
+    @Override
+    protected void onPause() {
+        isAutoChangeBanner = false;
+        mCastContext.removeCastStateListener(mCastStateListener);
+        super.onPause();
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void preConfig(Bundle savedInstanceState) {
+        super.preConfig(savedInstanceState);
+    }
+
+    @Override
+    public void mapView() {
+        super.mapView();
         webView = (WebView) findViewById(R.id.webView);
         searchIconIv = findViewById(R.id.search_icon_iv);
         mSlideViewPager = findViewById(R.id.slide_view_pager);
@@ -110,15 +134,16 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         progressFullLayout = findViewById(R.id.progress_full_screen_view);
         progressLoadMoreLayout = findViewById(R.id.progress_load_more_layout);
         favoriteIconIv = findViewById(R.id.favorite_icon_iv);
+        mSlideIndicator = findViewById(R.id.slide_indicator);
+    }
 
+    @Override
+    public void initData() {
+        super.initData();
         nestedScrollView.setOnScrollChangeListener(this);
 //        mangaIconIv.setOnClickListener(this);
         searchIconIv.setOnClickListener(this);
         favoriteIconIv.setOnClickListener(this);
-
-        mSlideIndicator = findViewById(R.id.slide_indicator);
-
-        mTaskHandler = new Handler();
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setBlockNetworkImage(true);
@@ -167,39 +192,13 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         mGetAnimeHomePageTask = new GetAnimeHomePageTask();
         mGetAnimeByPageNumTask = new GetAnimeByPageNumTask();
         mGetAnimeHomePageTask.startTask(Constant.HOME_URL);
-
-
     }
 
     private void setupActionBar() {
         mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
         setSupportActionBar(mToolbar);
     }
-
-    @Override
-    protected void onResume() {
-        isAutoChangeBanner = true;
-        mCastContext.addCastStateListener(mCastStateListener);
-
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        isAutoChangeBanner = false;
-        mCastContext.removeCastStateListener(mCastStateListener);
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mTaskHandler != null) {
-            mTaskHandler.removeCallbacksAndMessages(null);
-            mTaskHandler = null;
-        }
-    }
-
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -213,7 +212,6 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     public boolean onOptionsItemSelected(MenuItem item) {
         Intent i;
         switch (item.getItemId()) {
-
         }
         return true;
     }
@@ -234,6 +232,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
         Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
         startActivity(intent, options.toBundle());
         Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
