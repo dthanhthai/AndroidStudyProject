@@ -86,10 +86,10 @@ public class NumberEpisodeAdapter extends RecyclerView.Adapter<NumberEpisodeAdap
                 wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.cyan));
                 itemView.setEnabled(false);
             } else if (!TextUtils.isEmpty(episode.getDirectUrl())) {
-                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.black_70));
+                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.numEpViewedColor));
                 itemView.setEnabled(true);
             } else {
-                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.black_50));
+                wrapperLayout.setBackgroundColor(mContext.getResources().getColor(R.color.light_gray));
                 itemView.setEnabled(true);
             }
             Log.i("Episode episode: ", episode.getName() + "");

@@ -8,7 +8,8 @@
     card_view:cardCornerRadius="0dp"
     card_view:cardElevation="0dp"
     card_view:cardMaxElevation="0dp"
-    card_view:contentPadding="5dp">
+    card_view:contentPadding="5dp"
+    card_view:cardBackgroundColor="@color/primaryBackgroundColor">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -39,7 +40,7 @@
                 android:layout_marginLeft="1dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="10"
-                android:background="@color/black_80"
+                android:background="@color/itemEpBgColor"
                 android:ellipsize="end"
                 android:includeFontPadding="false"
                 android:maxLines="1"
@@ -58,7 +59,7 @@
             android:maxLines="2"
             android:paddingTop="3dp"
             android:text="Naruto"
-            android:textColor="@color/anime_home_title"
+            android:textColor="@color/itemTitleColor"
             android:textSize="16sp"
             android:transitionName="@string/transition_title"/>
 

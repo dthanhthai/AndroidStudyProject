@@ -13,6 +13,7 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -90,6 +91,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         setContentView(R.layout.activity_home);
 
         overridePendingTransition(R.anim.slide_in, R.anim.slide_out);
@@ -178,6 +180,7 @@ public class HomeActivity extends AppCompatActivity implements LatestEpisodeAdap
     protected void onResume() {
         isAutoChangeBanner = true;
         mCastContext.addCastStateListener(mCastStateListener);
+
         super.onResume();
     }
 

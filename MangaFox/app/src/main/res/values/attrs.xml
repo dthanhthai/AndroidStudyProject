@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="primaryBackgroundColor" format="color"/>
+    <attr name="primaryTitleColor" format="color"/>
+
+    <attr name="itemEpBgColor" format="color"/>
+    <attr name="itemTitleColor" format="color"/>
+    <attr name="textColor" format="color"/>
+    <attr name="tintColor" format="color"/>
+    <attr name="iconBookmark" format="integer"/>
+</resources>

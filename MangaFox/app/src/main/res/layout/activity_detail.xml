@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/toolbar_height"
         android:layout_alignParentTop="true"
-        android:background="@color/title_anime_bg"
+        android:background="@color/colorPrimary"
         android:contentInsetEnd="0dp"
         android:contentInsetRight="0dp"
         android:contentInsetStart="0dp"
@@ -145,6 +145,7 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/primaryBackgroundColor"
             android:layout_marginTop="-6dp">
 
             <ScrollView
@@ -193,7 +194,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="30"
                                 android:text="Title"
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -204,7 +205,7 @@
                                 android:layout_weight="70"
                                 android:paddingLeft="10dp"
                                 android:text=""
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp" />
                         </LinearLayout>
 
@@ -224,7 +225,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="30"
                                 android:text="New Episode"
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -235,7 +236,7 @@
                                 android:layout_weight="70"
                                 android:paddingLeft="10dp"
                                 android:text=""
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp" />
                         </LinearLayout>
 
@@ -255,7 +256,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="30"
                                 android:text="Other Title"
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -266,7 +267,7 @@
                                 android:layout_weight="70"
                                 android:paddingLeft="10dp"
                                 android:text=""
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp" />
                         </LinearLayout>
 
@@ -284,7 +285,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="30"
                                 android:text="Year"
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -295,7 +296,7 @@
                                 android:layout_weight="70"
                                 android:paddingLeft="10dp"
                                 android:text=""
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp" />
                         </LinearLayout>
 
@@ -312,7 +313,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="30"
                                 android:text="Geners"
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -324,7 +325,7 @@
                                 android:maxLines="3"
                                 android:paddingLeft="10dp"
                                 android:text=""
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp" />
                         </LinearLayout>
 
@@ -341,7 +342,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="30"
                                 android:text="Duration"
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
@@ -352,7 +353,7 @@
                                 android:layout_weight="70"
                                 android:paddingLeft="10dp"
                                 android:text=""
-                                android:textColor="@color/black"
+                                android:textColor="@color/textColor"
                                 android:textSize="14sp" />
                         </LinearLayout>
                     </LinearLayout>
@@ -387,7 +388,7 @@
                             android:paddingLeft="10dp"
                             android:paddingRight="10dp"
                             android:paddingTop="5dp"
-                            android:textColor="@color/black"
+                            android:textColor="@color/textColor"
                             android:textSize="14sp" />
                     </LinearLayout>
                 </LinearLayout>

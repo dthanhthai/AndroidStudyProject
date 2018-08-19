@@ -3,6 +3,16 @@
     <color name="colorPrimary">#FF5252</color>
     <color name="colorPrimaryDark">#F44336</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="primaryBackgroundColor">#F6F5F2</color>
+    <color name="primaryTitleColor">#000000</color>
+    <color name="primaryDividerColor">#000000</color>
+    <color name="textColor">#414141</color>
+    <color name="tintColor">#000000</color>
+    <color name="itemTitleColor">#1565C0</color>
+    <color name="itemEpBgColor">#CC000000</color>
+    <color name="numEpViewedColor">#333333</color>
+
+
     <color name="list_background">#F6F5F2</color>
     <color name="transparent">#00000000</color>
     <color name="white">#FFFFFF</color>
@@ -58,5 +68,8 @@
     <color name="remove_favorite_anime_bg">#43A047</color>
     <color name="anime_home_title">#1565C0</color>
     <color name="dark_gray">#646464</color>
+    <color name="dark_gray_333">#333333</color>
+    <color name="dark_gray_d4d">#4d4d4d</color>
+    <color name="dark_gray_a1a">#1a1a1a</color>
     <color name="progress_anime_bg">#FFFFFD</color>
 </resources>
