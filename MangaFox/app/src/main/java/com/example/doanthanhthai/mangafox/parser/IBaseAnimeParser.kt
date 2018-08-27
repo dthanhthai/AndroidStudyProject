@@ -2,6 +2,7 @@ package com.example.doanthanhthai.mangafox.parser
 
 import android.webkit.WebView
 import com.example.doanthanhthai.mangafox.model.Anime
+import com.example.doanthanhthai.mangafox.model.Category
 import org.jsoup.nodes.Document
 
 /**
@@ -15,4 +16,6 @@ interface IBaseAnimeParser {
     fun getPaginationAnime(document: Document?): Int
     fun getDirectLinkPlayer(document: Document, webView: WebView, curAnime: Anime, indexPlayingItem: Int): Anime?
     fun getDirectLinkDetail(document: Document, webView: WebView, curAnime: Anime): Anime?
+    fun getListAnimeGenre(document: Document?): List<Category>
+    fun getListCNGenre(document: Document?): List<Category>
 }

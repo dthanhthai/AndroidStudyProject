@@ -49,6 +49,7 @@ import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -56,6 +57,9 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class DetailActivity extends BaseActivity implements View.OnClickListener {
     private static final String TAG = DetailActivity.class.getSimpleName();
@@ -75,6 +79,9 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     private GetDetailAnimeTask mGetDetailAnimeTask;
     private Toolbar mToolbar;
     private MenuItem mediaRouteMenuItem;
+    private Handler adTimerHandler;
+    private Timer timer = null;
+    private boolean adReceived = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +123,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     @Override
     public void initData() {
         super.initData();
+        startTimer();
         playBtn.setOnClickListener(this);
         favoriteBtn.setOnClickListener(this);
         backBtn.setOnClickListener(this);
@@ -155,23 +163,30 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
                 progressFullLayout.setVisibility(View.GONE);
                 Glide.with(DetailActivity.this)
                         .load(AnimeDataManager.getInstance().getThumbnailBitmap())
+                        .apply(new RequestOptions().override(Utils.convertDpToPixel(DetailActivity.this, 60), Utils.convertDpToPixel(DetailActivity.this, 75)))
                         .thumbnail(0.2f)
                         .listener(new RequestListener<Drawable>() {
                             @Override
                             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                adReceived = true;
+                                thumbnailIv.setBackgroundColor(DetailActivity.this.getResources().getColor(R.color.slight_gray));
+                                scheduleStartPostponedTransition(thumbnailIv);
                                 return false;
                             }
 
                             @Override
                             public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                                 //Image successfully loaded into image view
+                                adReceived = true;
                                 scheduleStartPostponedTransition(thumbnailIv);
                                 return false;
                             }
                         })
                         .into(thumbnailIv);
             } else {
-                progressFullLayout.setVisibility(View.VISIBLE);
+                adReceived = true;
+                thumbnailIv.setBackgroundColor(this.getResources().getColor(R.color.slight_gray));
+                scheduleStartPostponedTransition(thumbnailIv);
             }
             toolbarTitleTv.setText(mCurrentAnime.getTitle());
 
@@ -293,11 +308,17 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         @Override
         protected Document doInBackground(String... strings) {
             Document document = null;
+            Map<String, String> webCookies = PreferenceHelper.getInstance(DetailActivity.this).getCookie();
             try {
-                document = Jsoup.connect(strings[0])
+                Connection.Response response = Jsoup.connect(strings[0])
                         .timeout(Constant.INSTANCE.getTIME_OUT())
                         .userAgent(Constant.USER_AGENT)
-                        .get();
+                        .cookies(webCookies)
+                        .execute();
+                document = response.parse();
+
+                webCookies = response.cookies();
+                PreferenceHelper.getInstance(DetailActivity.this).saveCookie(webCookies);
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.e(TAG, "Parse data fail: " + e.getMessage());
@@ -357,7 +378,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void updateUIAnimeInfo() {
-        if (Utils.isValidContextForGlide(this)) {
+        if (Utils.isValidContextForGlide(this) && AnimeDataManager.getInstance().getThumbnailBitmap() == null) {
             RequestOptions thumbRequestOptions = new RequestOptions();
             thumbRequestOptions.placeholder(R.color.slight_gray);
             thumbRequestOptions.error(R.color.slight_gray);
@@ -374,7 +395,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             //Image successfully loaded into image view
-                            scheduleStartPostponedTransition(thumbnailIv);
+//                            scheduleStartPostponedTransition(thumbnailIv);
                             return false;
                         }
                     })
@@ -515,6 +536,48 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         startActivity(intent);
         webView.stopLoading();
         progressDialog.dismiss();
+    }
+
+    public void stopTimer() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null; // remove old timer
+        }
+    }
+
+    public void startTimer() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null; // remove old timer
+        }
+        timer = new Timer();
+        adTimerHandler = new Handler();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                adTimerHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        stopTimer();
+                        if (!adReceived) { // 1 sec and thumb image isn't loaded successfully
+                            thumbnailIv.setBackgroundColor(DetailActivity.this.getResources().getColor(R.color.slight_gray));
+                            scheduleStartPostponedTransition(thumbnailIv);
+                        }
+                    }
+                });
+            }
+        }, 300);
+
+        if (adReceived) {
+            thumbnailIv.setBackgroundColor(this.getResources().getColor(R.color.slight_gray));
+            scheduleStartPostponedTransition(thumbnailIv);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopTimer();
     }
 
     @Override

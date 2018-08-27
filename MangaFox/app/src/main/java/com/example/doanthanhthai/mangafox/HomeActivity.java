@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -15,14 +16,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.transition.Slide;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,12 +38,16 @@ import com.example.doanthanhthai.mangafox.adapter.LatestEpisodeAdapter;
 import com.example.doanthanhthai.mangafox.adapter.NavigationAdapter;
 import com.example.doanthanhthai.mangafox.adapter.SlideBannerAdapter;
 import com.example.doanthanhthai.mangafox.base.BaseActivity;
+import com.example.doanthanhthai.mangafox.fragment.AnimeGenreFragment;
+import com.example.doanthanhthai.mangafox.fragment.CNGenreFragment;
+import com.example.doanthanhthai.mangafox.fragment.SettingFragment;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.NavigationModel;
 import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.DynamicColumnHelper;
+import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
@@ -51,19 +55,23 @@ import com.google.android.gms.cast.framework.CastState;
 import com.google.android.gms.cast.framework.CastStateListener;
 import com.google.android.gms.cast.framework.IntroductoryOverlay;
 
+import org.jetbrains.annotations.NotNull;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import me.relex.circleindicator.CircleIndicator;
 
 public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.OnLatestEpisodeAdapterListener,
-        View.OnClickListener, SlideBannerAdapter.OnSlideBannerAdapterListener, NestedScrollView.OnScrollChangeListener {
+        View.OnClickListener, SlideBannerAdapter.OnSlideBannerAdapterListener, NestedScrollView.OnScrollChangeListener, NavigationAdapter.NavigationAdapterListener {
 
     public static final String TAG = HomeActivity.class.getSimpleName();
     public static final String ANIME_ARG = "animeArg";
@@ -100,7 +108,11 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        if(PreferenceHelper.getInstance(this).getNightMode()){
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }else{
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
         setContentView(R.layout.activity_home);
         preConfig(savedInstanceState);
         mapView();
@@ -203,22 +215,22 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM | ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP);
         getSupportActionBar().setIcon(android.R.color.transparent);
 
-        latestEpisodeRV.setNestedScrollingEnabled(false);
-//        mGridLayoutManager = new AutoFitGridLayoutManager(this, Utils.convertDpToPixel(this, 150));
-
-        mLatestEpisodeAdapter = new LatestEpisodeAdapter(this);
-        DynamicColumnHelper dynamicColumnHelper = new DynamicColumnHelper(this);
-
         List<NavigationModel> navigationModelList = new ArrayList<>();
-        navigationModelList.add(new NavigationModel(1, R.drawable.ic_add_white_18dp, "Item 1"));
-        navigationModelList.add(new NavigationModel(2, R.drawable.ic_add_white_18dp, "Item 2"));
-        navigationModelList.add(new NavigationModel(3, R.drawable.ic_add_white_18dp, "Item 3"));
-        navigationModelList.add(new NavigationModel(4, R.drawable.ic_add_white_18dp, "Item 4"));
+        navigationModelList.add(new NavigationModel(Constant.FAVORITE_NAVIGATION_ID, R.drawable.ic_arrow_left, "Favorite", false));
+        navigationModelList.add(new NavigationModel(Constant.ANIME_GENRE_NAVIGATION_ID, R.drawable.ic_arrow_left, "Anime", false));
+        navigationModelList.add(new NavigationModel(Constant.CN_GENRE_NAVIGATION_ID, R.drawable.ic_arrow_left, "CN Animation", false));
+        navigationModelList.add(new NavigationModel(Constant.YEAR_NAVIGATION_ID, R.drawable.ic_arrow_left, "Year", false));
+        navigationModelList.add(new NavigationModel(Constant.SETTING_NAVIGATION_ID, R.drawable.ic_arrow_left, "Setting", false));
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
-        NavigationAdapter navigationAdapter = new NavigationAdapter(navigationModelList);
+        NavigationAdapter navigationAdapter = new NavigationAdapter(navigationModelList, this);
         navigationRv.setLayoutManager(linearLayoutManager);
         navigationRv.setAdapter(navigationAdapter);
+
+        latestEpisodeRV.setNestedScrollingEnabled(false);
+//        mGridLayoutManager = new AutoFitGridLayoutManager(this, Utils.convertDpToPixel(this, 150));
+        mLatestEpisodeAdapter = new LatestEpisodeAdapter(this);
+        DynamicColumnHelper dynamicColumnHelper = new DynamicColumnHelper(this);
 
         mLatestEpisodeAdapter.setDynamicColumnHelper(dynamicColumnHelper);
         mGridLayoutManager = new GridLayoutManager(this, dynamicColumnHelper.getColNum(), RecyclerView.VERTICAL, false);
@@ -236,7 +248,7 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         mToolbar = (Toolbar) findViewById(R.id.toolbar_layout);
         setSupportActionBar(mToolbar);
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -269,11 +281,14 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
                 .create((View) viewHolder.getAnimeTitleTv(), getString(R.string.transition_title));
         ActivityOptionsCompat options = ActivityOptionsCompat
                 .makeSceneTransitionAnimation(this, imagePair, titlePair);
-        AnimeDataManager.getInstance().setThumbnailBitmap(((BitmapDrawable) viewHolder.getPosterImg().getDrawable()).getBitmap());
+        if (viewHolder.getPosterImg().getDrawable() instanceof BitmapDrawable) {
+            AnimeDataManager.getInstance().setThumbnailBitmap(((BitmapDrawable) viewHolder.getPosterImg().getDrawable()).getBitmap());
+        } else {
+            AnimeDataManager.getInstance().setThumbnailBitmap(null);
+        }
         Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
         startActivity(intent, options.toBundle());
         Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
-
     }
 
     @Override
@@ -343,6 +358,47 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         super.onBackPressed();
     }
 
+    @Override
+    public void onItemClicked(@NotNull NavigationModel item) {
+        Fragment fragment = null;
+        String fragmentTag = "";
+        drawerLayout.closeDrawers();
+        switch (item.getId()) {
+            case Constant.FAVORITE_NAVIGATION_ID:
+                Intent intent = new Intent(this, FavoriteActivity.class);
+                startActivity(intent);
+                Toast.makeText(HomeActivity.this, "FAVORITE_NAVIGATION_ID", Toast.LENGTH_SHORT).show();
+                break;
+            case Constant.ANIME_GENRE_NAVIGATION_ID:
+                fragment = new AnimeGenreFragment();
+                fragmentTag = AnimeGenreFragment.TAG;
+                Toast.makeText(HomeActivity.this, "ANIME_GENRE_NAVIGATION_ID", Toast.LENGTH_SHORT).show();
+                break;
+            case Constant.CN_GENRE_NAVIGATION_ID:
+                fragment = new CNGenreFragment();
+                fragmentTag = CNGenreFragment.TAG;
+                Toast.makeText(HomeActivity.this, "CN_GENRE_NAVIGATION_ID", Toast.LENGTH_SHORT).show();
+                break;
+            case Constant.YEAR_NAVIGATION_ID:
+                Toast.makeText(HomeActivity.this, "YEAR_NAVIGATION_ID", Toast.LENGTH_SHORT).show();
+                break;
+            case Constant.SETTING_NAVIGATION_ID:
+                fragment = new SettingFragment();
+                fragmentTag = SettingFragment.TAG;
+                Toast.makeText(HomeActivity.this, "SETTING_NAVIGATION_ID", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+        }
+        if (fragment != null && !TextUtils.isEmpty(fragmentTag)) {
+            getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_right, R.anim.slide_in_right, R.anim.slide_out_right)
+                    .replace(R.id.fragment_container, fragment, fragmentTag)
+                    .addToBackStack(fragmentTag)
+                    .commit();
+        }
+    }
+
     private class GetAnimeHomePageTask extends AsyncTask<String, Void, Document> {
         private final String TAG = GetAnimeHomePageTask.class.getSimpleName();
 
@@ -363,11 +419,25 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         @Override
         protected Document doInBackground(String... strings) {
             Document document = null;
+            Map<String, String> webCookies = PreferenceHelper.getInstance(HomeActivity.this).getCookie();
             try {
-                document = Jsoup.connect(strings[0])
+//                if (webCookies != null && !webCookies.isEmpty()) {
+                Connection.Response response = Jsoup.connect(strings[0])
                         .timeout(Constant.INSTANCE.getTIME_OUT())
                         .userAgent(Constant.USER_AGENT)
-                        .get();
+                        .cookies(webCookies)
+                        .execute();
+//                } else {
+//                    response = Jsoup.connect(strings[0])
+//                            .timeout(Constant.INSTANCE.getTIME_OUT())
+//                            .userAgent(Constant.USER_AGENT)
+//                            .execute();
+//                }
+                document = response.parse();
+
+                webCookies = response.cookies();
+                PreferenceHelper.getInstance(HomeActivity.this).saveCookie(webCookies);
+
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.e(TAG, "Parse data fail: " + e.getMessage());
@@ -476,11 +546,17 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         @Override
         protected Document doInBackground(String... strings) {
             Document document = null;
+            Map<String, String> webCookies = PreferenceHelper.getInstance(HomeActivity.this).getCookie();
             try {
-                document = Jsoup.connect(strings[0])
+                Connection.Response response = Jsoup.connect(strings[0])
                         .timeout(Constant.INSTANCE.getTIME_OUT())
                         .userAgent(Constant.USER_AGENT)
-                        .get();
+                        .cookies(webCookies)
+                        .execute();
+                document = response.parse();
+
+                webCookies = response.cookies();
+                PreferenceHelper.getInstance(HomeActivity.this).saveCookie(webCookies);
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.e(TAG, "Parse data fail: " + e.getMessage());
@@ -567,49 +643,7 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             if (url.startsWith("source://")) {
-//                try {
-//                    String html = URLDecoder.decode(url, "UTF-8").substring(9);
-//
-//                    Document playerDocument = Jsoup.parse(html);
-//                    if (playerDocument != null) {
-//                        Episode episode = new Episode();
-//                        Element playerSubject = playerDocument.select("div.player").first();
-//                        if (playerSubject != null) {
-//                            Element videoSubject = playerSubject.getElementsByClass("player-video").first();
-//                            if (videoSubject != null) {
-//                                Log.d("Direct link: ", videoSubject.attr("src"));
-//                                mAnimeSelected.episode.directUrl = videoSubject.attr("src");
-//                            }
-//                            Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
-//                            if (titleSubject != null) {
-//                                mAnimeSelected.episode.name = titleSubject.text();
-//                            }
-//                        }
-//
-//                        Element episodeSelectorSubject = playerDocument.select("div.episode-selector").first();
-//                        if (episodeSelectorSubject != null) {
-//                            Element inputEpisodeSubject = episodeSelectorSubject.getElementsByTag("input").first();
-//                            if (inputEpisodeSubject != null) {
-//                                mAnimeSelected.maxEpisode = Integer.parseInt(inputEpisodeSubject.attr("max"));
-//                                mAnimeSelected.minEpisode = Integer.parseInt(inputEpisodeSubject.attr("min"));
-//                            }
-//                        }
-//
-////                        mAnimeSelected.episode = episode;
-//                        if (!TextUtils.isEmpty(mAnimeSelected.episode.directUrl)) {
-//                            Intent intent = new Intent(HomeActivity.this, VideoPlayerActivity.class);
-//                            intent.putExtra(HomeActivity.ANIME_ARG, mAnimeSelected);
-//                            startActivity(intent);
-//                            progressDialog.dismiss();
-//                        } else {
-//                            Toast.makeText(HomeActivity.this, "Can not get link episode", Toast.LENGTH_LONG).show();
-//                        }
-//                    }
-//                    webView.stopLoading();
-//                } catch (UnsupportedEncodingException e) {
-//                    Log.e("example", "failed to decode source", e);
-//                    Toast.makeText(HomeActivity.this, "[" + TAG + "] - " + "Can not get link episode", Toast.LENGTH_LONG).show();
-//                }
+
                 return true;
             }
             return false;

@@ -31,6 +31,7 @@
                 android:layout_centerVertical="true"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_arrow_left"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
                 android:visibility="visible" />
 
             <TextView
@@ -84,7 +85,7 @@
                 android:background="@drawable/border_gray"
                 android:padding="1dp"
                 android:scaleType="fitXY"
-                android:src="@drawable/placeholder"
+                android:src="@color/slight_gray"
                 android:transitionName="@string/transition_image"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/play_btn"

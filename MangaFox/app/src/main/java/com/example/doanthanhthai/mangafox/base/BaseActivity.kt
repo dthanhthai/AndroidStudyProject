@@ -19,7 +19,7 @@ open abstract class BaseActivity : AppCompatActivity() {
     var mTaskHandler: Handler? = null
 
     open fun preConfig(savedInstanceState: Bundle?) {
-        overridePendingTransition(R.anim.slide_in, R.anim.slide_out)
+//        overridePendingTransition(R.anim.slide_in, R.anim.slide_out)
         setupActionBar()
     }
 

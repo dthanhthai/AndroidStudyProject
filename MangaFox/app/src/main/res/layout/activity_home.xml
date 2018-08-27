@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/toolbar_height"
             android:layout_alignParentTop="true"
-            android:background="@color/title_anime_bg"
+            android:background="@color/colorPrimary"
             android:contentInsetEnd="0dp"
             android:contentInsetRight="0dp"
             android:contentInsetStart="0dp"
@@ -36,17 +36,16 @@
                 android:layout_height="match_parent"
                 android:padding="5dp">
 
-
-                <TextView
-                    android:id="@+id/toolbar_title"
-                    style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_marginLeft="15dp"
-                    android:text="VuiGhe Anime"
-                    android:textColor="@android:color/white"
-                    android:textSize="20sp" />
+                <!--<TextView-->
+                <!--android:id="@+id/toolbar_title"-->
+                <!--style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_centerInParent="true"-->
+                <!--android:layout_marginLeft="15dp"-->
+                <!--android:text="VuiGhe Anime"-->
+                <!--android:textColor="@android:color/white"-->
+                <!--android:textSize="20sp" />-->
 
                 <!--<ImageView-->
                 <!--android:id="@+id/manga_icon_iv"-->
@@ -66,7 +65,7 @@
                     android:layout_marginRight="15dp"
                     android:layout_toStartOf="@+id/search_icon_iv"
                     android:src="@drawable/ic_favorite_white_24dp"
-                    android:visibility="visible" />
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/search_icon_iv"
@@ -151,13 +150,14 @@
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:text="No more data"
+                        android:textColor="@color/textColor"
                         android:textSize="16dp" />
 
                     <LinearLayout
                         android:id="@+id/progress_load_more_layout"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@color/list_background"
+                        android:background="@color/primaryBackgroundColor"
                         android:gravity="center"
                         android:orientation="horizontal"
                         android:visibility="gone">
@@ -172,6 +172,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"
                             android:text="Loading more data"
+                            android:textColor="@color/textColor"
                             android:textSize="16dp" />
                     </LinearLayout>
 
@@ -194,17 +195,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </FrameLayout>
+
     </RelativeLayout>
-
-    <!--<android.support.design.widget.NavigationView-->
-    <!--android:id="@+id/nav_view"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:layout_gravity="start"-->
-    <!--app:headerLayout="@layout/nav_header_main">-->
-
-    <!--</android.support.design.widget.NavigationView>-->
-
 
     <RelativeLayout
         android:layout_width="240dp"
@@ -246,7 +244,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/nav_header"
-            android:background="@color/list_background" />
+            android:background="@color/primaryBackgroundColor" />
     </RelativeLayout>
 
 

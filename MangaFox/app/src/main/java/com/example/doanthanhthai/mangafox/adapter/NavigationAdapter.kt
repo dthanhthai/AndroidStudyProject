@@ -13,11 +13,13 @@ import kotlinx.android.synthetic.main.item_navigation.view.*;
 /**
  * Created by ThaiDT1 on 8/16/2018.
  */
-class NavigationAdapter(listItem: MutableList<NavigationModel>) : RecyclerView.Adapter<NavigationAdapter.ViewHolder>() {
+class NavigationAdapter(listItem: MutableList<NavigationModel>, listener: NavigationAdapterListener?) : RecyclerView.Adapter<NavigationAdapter.ViewHolder>() {
     private var listItem: MutableList<NavigationModel>? = mutableListOf()
+    private var mListener: NavigationAdapterListener? = null
 
     init {
         this.listItem?.addAll(listItem)
+        mListener = listener
         notifyDataSetChanged()
     }
 
@@ -31,8 +33,11 @@ class NavigationAdapter(listItem: MutableList<NavigationModel>) : RecyclerView.A
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        var item:NavigationModel = listItem?.get(position)!!
+        val item: NavigationModel = listItem?.get(position)!!
         holder.bindView(item)
+        holder.itemView.setOnClickListener {
+            mListener?.onItemClicked(item)
+        }
     }
 
     class ViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView) {
@@ -40,8 +45,16 @@ class NavigationAdapter(listItem: MutableList<NavigationModel>) : RecyclerView.A
         var nameTv: TextView = itemView?.tvNavigationName!!
 
         fun bindView(data: NavigationModel) {
-            nameTv?.text = data.name
-            iconIv.setBackgroundResource(data.iconRes!!)
+            nameTv.text = data.name
+            if (data.isShowIcon) {
+                iconIv.setImageResource(data.iconRes)
+            } else {
+                iconIv.visibility = View.INVISIBLE
+            }
         }
+    }
+
+    interface NavigationAdapterListener {
+        fun onItemClicked(item: NavigationModel)
     }
 }

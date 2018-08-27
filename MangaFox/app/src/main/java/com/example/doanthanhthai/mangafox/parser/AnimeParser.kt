@@ -5,6 +5,7 @@ import android.util.Log
 import android.webkit.WebView
 
 import com.example.doanthanhthai.mangafox.model.Anime
+import com.example.doanthanhthai.mangafox.model.Category
 import com.example.doanthanhthai.mangafox.model.Episode
 import com.example.doanthanhthai.mangafox.share.Constant
 
@@ -22,6 +23,7 @@ import java.util.StringTokenizer
  */
 
 class AnimeParser : IBaseAnimeParser {
+
 
     companion object {
         private val TAG = AnimeParser::class.java.simpleName
@@ -116,7 +118,7 @@ class AnimeParser : IBaseAnimeParser {
         val fullNameSubject = document.select("div.ah-wf-title>h1")
 
 
-        val episode = curAnime.episodeList!![indexPlayingItem]
+        val episode = curAnime.episodeList[indexPlayingItem]
 
         if (videoSubject != null) {
             episode.directUrl = videoSubject.attr("src")
@@ -143,7 +145,7 @@ class AnimeParser : IBaseAnimeParser {
         val listEpisodeSubject = document.select("div.ah-wf-le>ul>li>a")
         val fullNameSubject = document.select("div.ah-wf-title>h1")
 
-        val firstEpisode = curAnime.episodeList!![0]
+        val firstEpisode = curAnime.episodeList[0]
 
         if (videoSubject != null) {
             firstEpisode.directUrl = videoSubject.attr("src")
@@ -251,4 +253,66 @@ class AnimeParser : IBaseAnimeParser {
         return totalPage
     }
 
+    override fun getListAnimeGenre(document: Document?): List<Category> {
+        val genreList = ArrayList<Category>()
+        document?.let {
+            val parentElement = it.select("ul.ah-ulsm>li>a.non-routed")
+            val allElement = it.select("ul.ah-ulsm>li")
+            var isIgnoreValue = true
+            if (allElement != null && !allElement.isEmpty()
+                    && parentElement != null && !parentElement.isEmpty()) {
+                for (element in allElement) {
+                    if (element.text().equals(parentElement.get(0).text())) {
+                        isIgnoreValue = false
+                        continue
+                    }
+                    if (!isIgnoreValue) {
+                        if (element.text().equals(parentElement.get(1).text())) {
+                            break
+                        }
+                        var category = Category()
+                        category.name = element.text()
+                        category.url = element.getElementsByTag("a").first().attr("href")
+                        genreList.add(category)
+                        Log.i(TAG, "Genre link: " + category.url)
+
+                    }
+                }
+            }
+        }
+        Log.i(TAG, "List genre: " + genreList.size)
+        return genreList
+    }
+
+    override fun getListCNGenre(document: Document?): List<Category> {
+        val genreList = ArrayList<Category>()
+        document?.let {
+            val parentElement = it.select("ul.ah-ulsm>li>a.non-routed")
+            val allElement = it.select("ul.ah-ulsm>li")
+            var isIgnoreValue = true
+            if (allElement != null && !allElement.isEmpty()
+                    && parentElement != null && !parentElement.isEmpty()) {
+                for (element in allElement) {
+                    if (element.text().equals(parentElement.get(1).text())) {
+                        isIgnoreValue = false
+                        continue
+                    }
+                    if (!isIgnoreValue) {
+                        if (element.text().equals(parentElement.get(2).text())) {
+                            break
+                        }
+
+                        var category = Category()
+                        category.name = element.text()
+                        category.url = element.getElementsByTag("a").first().attr("href")
+                        genreList.add(category)
+                        Log.i(TAG, "Genre link: " + category.url)
+
+                    }
+                }
+            }
+        }
+        Log.i(TAG, "List genre: " + genreList.size)
+        return genreList
+    }
 }

@@ -2,17 +2,14 @@ package com.example.doanthanhthai.mangafox
 
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
 import android.support.v4.util.Pair
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
 import android.view.View
 import android.widget.Toast
 import com.example.doanthanhthai.mangafox.adapter.FavoriteAnimeAdapter
-import com.example.doanthanhthai.mangafox.adapter.ResultAnimeAdapter
 import com.example.doanthanhthai.mangafox.base.BaseActivity
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager
 import com.example.doanthanhthai.mangafox.model.Anime
@@ -21,9 +18,14 @@ import com.example.doanthanhthai.mangafox.share.DynamicColumnHelper
 import kotlinx.android.synthetic.main.activity_favorite.*;
 
 class FavoriteActivity : BaseActivity(), View.OnClickListener, FavoriteAnimeAdapter.OnFavoriteAnimeAdapterListener {
-    val TAG: String = FavoriteActivity::class.java.simpleName!!
+
     var gridLayoutManager: GridLayoutManager? = null
     var mFavoriteAnimeAdapter: FavoriteAnimeAdapter? = null
+
+    companion object {
+        @JvmField
+        val TAG: String = FavoriteActivity::class.java.simpleName!!
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,8 +77,8 @@ class FavoriteActivity : BaseActivity(), View.OnClickListener, FavoriteAnimeAdap
     }
 
     override fun onItemClick(item: Anime?, position: Int) {
-        var tmpAnime: Anime? = Anime()
-        var tmpEpList: MutableList<Episode> = mutableListOf<Episode>()
+        val tmpAnime: Anime? = Anime()
+        val tmpEpList: MutableList<Episode> = mutableListOf<Episode>()
         tmpAnime?.title = item?.title
         tmpAnime?.url = item?.url
         tmpAnime?.orderTitle = item?.orderTitle
@@ -86,14 +88,14 @@ class FavoriteActivity : BaseActivity(), View.OnClickListener, FavoriteAnimeAdap
         tmpAnime?.episodeInfo = item?.episodeInfo
         tmpAnime?.rate = item?.rate
         tmpAnime?.year = item?.year!!
-        tmpAnime?.description = item?.description
-        tmpAnime?.genres = item?.genres
-        tmpAnime?.duration = item?.duration
-        tmpAnime?.newEpisodeInfo = item?.newEpisodeInfo
-        tmpAnime?.isFavorite = item?.isFavorite
-        tmpAnime?.isFavorite = item?.isFavorite
-        item?.episodeList.forEach {
-            var tmpEp = Episode()
+        tmpAnime?.description = item.description
+        tmpAnime?.genres = item.genres
+        tmpAnime?.duration = item.duration
+        tmpAnime?.newEpisodeInfo = item.newEpisodeInfo
+        tmpAnime?.isFavorite = item.isFavorite
+        tmpAnime?.isFavorite = item.isFavorite
+        item.episodeList.forEach {
+            val tmpEp = Episode()
             tmpEp.name = it.name
             tmpEp.url = it.url
             tmpEp.directUrl = it.directUrl
@@ -113,6 +115,6 @@ class FavoriteActivity : BaseActivity(), View.OnClickListener, FavoriteAnimeAdap
         val intent = Intent(this, DetailActivity::class.java)
         AnimeDataManager.getInstance().thumbnailBitmap = (viewHolder.posterImg.drawable as BitmapDrawable).bitmap
         startActivity(intent, options.toBundle())
-        Toast.makeText(this, item?.title, Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show()
     }
 }

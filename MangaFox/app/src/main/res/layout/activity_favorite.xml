@@ -46,6 +46,7 @@
                     android:layout_centerVertical="true"
                     android:scaleType="fitXY"
                     android:src="@drawable/ic_arrow_left"
+                    android:foreground="?attr/selectableItemBackgroundBorderless"
                     android:visibility="visible" />
 
                 <TextView

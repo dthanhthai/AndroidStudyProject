@@ -2,6 +2,7 @@ package com.example.doanthanhthai.mangafox.repository
 
 import android.webkit.WebView
 import com.example.doanthanhthai.mangafox.model.Anime
+import com.example.doanthanhthai.mangafox.model.Category
 import com.example.doanthanhthai.mangafox.parser.AnimeParser
 import com.example.doanthanhthai.mangafox.parser.IBaseAnimeParser
 import org.jsoup.nodes.Document
@@ -47,5 +48,13 @@ class AnimeRepository(type: WEB_TYPE) {
 
     fun getDirectLinkDetail(document: Document, webView: WebView, curAnime: Anime): Anime? {
         return baseParser?.getDirectLinkDetail(document, webView, curAnime)
+    }
+
+    fun getListAnimeGenre(document: Document?): List<Category>? {
+        return baseParser?.getListAnimeGenre(document)
+    }
+
+    fun getListCNGenre(document: Document?): List<Category>? {
+        return baseParser?.getListCNGenre(document)
     }
 }

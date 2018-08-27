@@ -19,11 +19,17 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        android.applicationVariants.all { variant ->
+            variant.outputs.all {
+                def formattedDate = new Date().format('yyyyMMdd')
+                outputFileName = "ANIME_${variant.name}_v${variant.versionName}_${formattedDate}.apk"
+            }
+        }
     }
     sourceSets {
         main {
             assets.srcDirs = ['src/main/assets', 'src/main/menu/']
-            res.srcDirs = ['src/main/res', 'src/main/res/anim']
+            res.srcDirs = ['src/main/res', 'src/main/res/anim', 'src/main/res/animator']
         }
     }
     compileOptions {

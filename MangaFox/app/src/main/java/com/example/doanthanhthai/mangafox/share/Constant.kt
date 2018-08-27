@@ -12,4 +12,10 @@ object Constant {
     const val PAGE_PARAM = "?page="
 
     val TIME_OUT = 8 * 1000
+
+    const val FAVORITE_NAVIGATION_ID = 0
+    const val ANIME_GENRE_NAVIGATION_ID = 1
+    const val CN_GENRE_NAVIGATION_ID = 2
+    const val YEAR_NAVIGATION_ID = 3
+    const val SETTING_NAVIGATION_ID = 4
 }

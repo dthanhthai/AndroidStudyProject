@@ -28,15 +28,18 @@ import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.adapter.ResultAnimeAdapter;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.share.DynamicColumnHelper;
+import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.AutoFitGridLayoutManager;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SearchAnimeActivity extends BaseActivity implements SearchView.OnQueryTextListener, ResultAnimeAdapter.OnResultAnimeAdapterListener {
     private static final String TAG = SearchAnimeActivity.class.getSimpleName();
@@ -157,11 +160,17 @@ public class SearchAnimeActivity extends BaseActivity implements SearchView.OnQu
         @Override
         protected Document doInBackground(String... strings) {
             Document document = null;
+            Map<String, String> webCookies = PreferenceHelper.getInstance(SearchAnimeActivity.this).getCookie();
             try {
-                document = Jsoup.connect(strings[0])
+                Connection.Response response = Jsoup.connect(strings[0])
                         .timeout(Constant.INSTANCE.getTIME_OUT())
                         .userAgent(Constant.USER_AGENT)
-                        .get();
+                        .cookies(webCookies)
+                        .execute();
+                document = response.parse();
+
+                webCookies = response.cookies();
+                PreferenceHelper.getInstance(SearchAnimeActivity.this).saveCookie(webCookies);
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.e(TAG, "Parse data fail: " + e.getMessage());
