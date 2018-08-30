@@ -2,6 +2,7 @@ package com.example.doanthanhthai.mangafox;
 
 import android.app.Application;
 import android.support.multidex.MultiDexApplication;
+import android.support.v7.app.AppCompatDelegate;
 
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
@@ -31,7 +32,13 @@ public class MyApplication extends MultiDexApplication {
 
     @Override
     public void onCreate() {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
         super.onCreate();
+//        if (PreferenceHelper.getInstance(this).getNightMode()) {
+//        } else {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+//        }
         userAgent = Util.getUserAgent(this, "ExoPlayerDemo");
 
         //Load favorite anime

@@ -108,15 +108,11 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(PreferenceHelper.getInstance(this).getNightMode()){
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        }else{
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
         setContentView(R.layout.activity_home);
         preConfig(savedInstanceState);
         mapView();
         initData();
+        Log.d(TAG, "onCreate");
     }
 
     @Override
@@ -124,6 +120,7 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         isAutoChangeBanner = true;
         mCastContext.addCastStateListener(mCastStateListener);
         super.onResume();
+        Log.d(TAG, "onResume");
     }
 
     @Override
@@ -131,11 +128,26 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         isAutoChangeBanner = false;
         mCastContext.removeCastStateListener(mCastStateListener);
         super.onPause();
+        Log.d(TAG, "onPause");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(mTaskHandler != null){
+            mTaskHandler.removeCallbacksAndMessages(null);
+            mTaskHandler = null;
+        }
+        if (mGetAnimeHomePageTask != null) {
+            mGetAnimeHomePageTask.cancel(true);
+            mGetAnimeHomePageTask = null;
+        }
+        if (mGetAnimeByPageNumTask != null) {
+            mGetAnimeByPageNumTask.cancel(true);
+            mGetAnimeByPageNumTask = null;
+        }
+
+        Log.d(TAG, "onDestroy");
     }
 
     @Override
@@ -462,7 +474,7 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
                 if (mTotalPage > 5) {
                     mTotalPage = 5;
                 }
-
+                Log.d(TAG, "onPostExecute");
                 if (latestItems != null && !latestItems.isEmpty()) {
                     mLatestEpisodeAdapter.setAnimeList(latestItems);
                 } else {

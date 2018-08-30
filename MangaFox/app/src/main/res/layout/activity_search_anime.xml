@@ -52,13 +52,13 @@
                 <!--android:textColor="@android:color/white"-->
                 <!--android:textSize="20sp" />-->
 
-                <android.support.v7.widget.SearchView
+                <SearchView
                     android:id="@+id/anime_search_view"
+                    style="@style/SearchViewStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:clickable="true"
-                    style="@style/SearchViewStyle"
                     android:iconifiedByDefault="false"
                     android:queryHint="Tìm theo tên phim"
                     android:showAsAction="ifRoom|collapseActionView" />

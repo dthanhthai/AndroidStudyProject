@@ -32,8 +32,10 @@ open abstract class BaseActivity : AppCompatActivity() {
     }
 
     private fun setupActionBar() {
-        mToolbar = findViewById<View>(R.id.toolbar_layout) as Toolbar
-        setSupportActionBar(mToolbar)
+        findViewById<View>(R.id.toolbar_layout)?.let {
+            mToolbar = it as Toolbar
+            setSupportActionBar(mToolbar)
+        }
     }
 
     override fun onDestroy() {

@@ -90,6 +90,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         preConfig(savedInstanceState);
         mapView();
         initData();
+        Log.d(TAG, "onCreate");
     }
 
     @Override
