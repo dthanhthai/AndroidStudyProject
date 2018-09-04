@@ -39,7 +39,7 @@ class ProgressAnimeView : FrameLayout {
     fun createUI() {
         LayoutInflater.from(context).inflate(R.layout.progress_anime_view, this, true)
 
-        Glide.with(context!!).load(R.raw.loading).into(progress_iv)
+        Glide.with(context!!).load(R.raw.round_loading).into(progress_iv)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

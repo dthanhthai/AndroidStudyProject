@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:opacity="opaque">
+
+    <item android:drawable="@drawable/anime_logo_single" />
+
+    <item android:drawable="@color/light_gray_10" />
+    <item
+        android:gravity="center"
+        android:bottom="200dp">
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/anime_logo_full" />
+    </item>
+
+</layer-list>

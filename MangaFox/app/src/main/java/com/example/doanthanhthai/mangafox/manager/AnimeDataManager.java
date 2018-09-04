@@ -15,6 +15,9 @@ public class AnimeDataManager {
     private int indexFavoriteItem = -1;
     private Bitmap thumbnailBitmap;
     private Bitmap coverBitmap;
+    private List<Anime> bannerList;
+    private List<Anime> homeList;
+    private int homeTotalPage;
 
     public static AnimeDataManager getInstance() {
         if (instance == null) {
@@ -89,5 +92,29 @@ public class AnimeDataManager {
 
     public void resetCoverBitmap() {
         this.coverBitmap = null;
+    }
+
+    public List<Anime> getBannerList() {
+        return bannerList;
+    }
+
+    public void setBannerList(List<Anime> bannerList) {
+        this.bannerList = bannerList;
+    }
+
+    public List<Anime> getHomeList() {
+        return homeList;
+    }
+
+    public void setHomeList(List<Anime> homeList) {
+        this.homeList = homeList;
+    }
+
+    public int getHomeTotalPage() {
+        return homeTotalPage;
+    }
+
+    public void setHomeTotalPage(int homeTotalPage) {
+        this.homeTotalPage = homeTotalPage;
     }
 }

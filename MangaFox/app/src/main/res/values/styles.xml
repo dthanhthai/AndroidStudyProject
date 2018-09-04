@@ -25,6 +25,18 @@
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
     </style>
 
+    <style name="SplashTheme" parent="AppTheme.Base">
+        <item name="android:windowBackground">@drawable/splash_background_blank</item>
+    </style>
+
+    <style name="SplashThemeDay" parent="AppTheme.Base">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+
+    <style name="SplashThemeNight" parent="AppTheme.Base">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+
     <!-- Base Night application theme. -->
     <!--<style name="AppTheme.Base.Night" parent="AppTheme.Base">-->
         <!--&lt;!&ndash; Customize your theme here. &ndash;&gt;-->

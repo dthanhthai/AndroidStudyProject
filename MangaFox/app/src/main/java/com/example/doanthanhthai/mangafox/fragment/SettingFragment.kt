@@ -57,7 +57,7 @@ class SettingFragment : Fragment(), View.OnClickListener, CompoundButton.OnCheck
         when (v?.id) {
             R.id.toolbar_back_btn -> {
                 val fm: FragmentManager? = activity?.supportFragmentManager
-                fm?.popBackStack(SettingFragment.TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                fm?.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             }
         }
     }

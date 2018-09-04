@@ -57,4 +57,12 @@ class AnimeRepository(type: WEB_TYPE) {
     fun getListCNGenre(document: Document?): List<Category>? {
         return baseParser?.getListCNGenre(document)
     }
+
+    fun getListYearGenre(document: Document?): List<Category>? {
+        return baseParser?.getYearGenre(document)
+    }
+
+    fun getListCartoon(document: Document?): List<Category>? {
+        return baseParser?.getListCartoon(document)
+    }
 }

@@ -59,6 +59,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:clickable="true"
+                    android:layout_margin="2dp"
+                    android:background="@drawable/round_corner_search_view"
                     android:iconifiedByDefault="false"
                     android:queryHint="Tìm theo tên phim"
                     android:showAsAction="ifRoom|collapseActionView" />

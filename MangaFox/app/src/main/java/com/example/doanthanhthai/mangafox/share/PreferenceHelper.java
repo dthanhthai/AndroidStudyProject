@@ -75,7 +75,7 @@ public class PreferenceHelper {
             if (!TextUtils.isEmpty(json)) {
                 cookies = (new Gson()).fromJson(json, new TypeToken<Map<String, String>>() {
                 }.getType());
-                if (cookies != null && !cookies.isEmpty() && cookies.get("check_vn") == null) {
+                if (cookies.get("check_vn") == null) {
                     cookies.put("check_vn", "1");
                 }
             }

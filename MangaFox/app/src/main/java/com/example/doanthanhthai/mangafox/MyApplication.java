@@ -30,20 +30,21 @@ import java.util.List;
 public class MyApplication extends MultiDexApplication {
     protected String userAgent;
 
+
+
     @Override
     public void onCreate() {
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+//        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
+        if (PreferenceHelper.getInstance(this).getNightMode()) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
         super.onCreate();
-//        if (PreferenceHelper.getInstance(this).getNightMode()) {
-//        } else {
-//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-//        }
-        userAgent = Util.getUserAgent(this, "ExoPlayerDemo");
+//        userAgent = Util.getUserAgent(this, "ExoPlayerDemo");
 
-        //Load favorite anime
-        List<Anime> favoriteList = PreferenceHelper.getInstance(this).getListFavoriteAnime();
-        AnimeDataManager.getInstance().setFavoriteAnimeList(favoriteList);
+
     }
 
 }

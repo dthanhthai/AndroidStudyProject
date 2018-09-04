@@ -18,4 +18,5 @@ object Constant {
     const val CN_GENRE_NAVIGATION_ID = 2
     const val YEAR_NAVIGATION_ID = 3
     const val SETTING_NAVIGATION_ID = 4
+    const val CARTOON_NAVIGATION_ID = 5
 }

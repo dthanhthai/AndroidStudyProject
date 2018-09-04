@@ -23,8 +23,6 @@ import java.util.StringTokenizer
  */
 
 class AnimeParser : IBaseAnimeParser {
-
-
     companion object {
         private val TAG = AnimeParser::class.java.simpleName
     }
@@ -273,7 +271,11 @@ class AnimeParser : IBaseAnimeParser {
                         var category = Category()
                         category.name = element.text()
                         category.url = element.getElementsByTag("a").first().attr("href")
-                        genreList.add(category)
+                        if (category.name.equals("ecchi", ignoreCase = true)) {
+                            genreList.add(0, category)
+                        } else {
+                            genreList.add(category)
+                        }
                         Log.i(TAG, "Genre link: " + category.url)
 
                     }
@@ -315,4 +317,69 @@ class AnimeParser : IBaseAnimeParser {
         Log.i(TAG, "List genre: " + genreList.size)
         return genreList
     }
+
+    override fun getYearGenre(document: Document?): List<Category> {
+        val genreList = ArrayList<Category>()
+        document?.let {
+            val parentElement = it.select("ul.ah-ulsm>li>a.non-routed")
+            val allElement = it.select("ul.ah-ulsm>li")
+            var isIgnoreValue = true
+            if (allElement != null && !allElement.isEmpty()
+                    && parentElement != null && !parentElement.isEmpty()) {
+                for (element in allElement) {
+                    if (element.text().equals(parentElement.get(3).text())) {
+                        isIgnoreValue = false
+                        continue
+                    }
+                    if (!isIgnoreValue) {
+                        if (element.text().equals(parentElement.get(4).text())) {
+                            break
+                        }
+
+                        var category = Category()
+                        category.name = element.text()
+                        category.url = element.getElementsByTag("a").first().attr("href")
+                        genreList.add(category)
+                        Log.i(TAG, "Genre link: " + category.url)
+
+                    }
+                }
+            }
+        }
+        Log.i(TAG, "List genre: " + genreList.size)
+        return genreList
+    }
+
+    override fun getListCartoon(document: Document?): List<Category> {
+        val genreList = ArrayList<Category>()
+        document?.let {
+            val parentElement = it.select("ul.ah-ulsm>li>a.non-routed")
+            val allElement = it.select("ul.ah-ulsm>li")
+            var isIgnoreValue = true
+            if (allElement != null && !allElement.isEmpty()
+                    && parentElement != null && !parentElement.isEmpty()) {
+                for (element in allElement) {
+                    if (element.text().equals(parentElement.get(2).text())) {
+                        isIgnoreValue = false
+                        continue
+                    }
+                    if (!isIgnoreValue) {
+                        if (element.text().equals(parentElement.get(3).text())) {
+                            break
+                        }
+
+                        var category = Category()
+                        category.name = element.text()
+                        category.url = element.getElementsByTag("a").first().attr("href")
+                        genreList.add(category)
+                        Log.i(TAG, "Genre link: " + category.url)
+
+                    }
+                }
+            }
+        }
+        Log.i(TAG, "List genre: " + genreList.size)
+        return genreList
+    }
+
 }

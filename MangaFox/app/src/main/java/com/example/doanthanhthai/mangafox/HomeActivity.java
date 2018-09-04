@@ -39,7 +39,9 @@ import com.example.doanthanhthai.mangafox.adapter.NavigationAdapter;
 import com.example.doanthanhthai.mangafox.adapter.SlideBannerAdapter;
 import com.example.doanthanhthai.mangafox.base.BaseActivity;
 import com.example.doanthanhthai.mangafox.fragment.AnimeGenreFragment;
+import com.example.doanthanhthai.mangafox.fragment.AnimeYearFragment;
 import com.example.doanthanhthai.mangafox.fragment.CNGenreFragment;
+import com.example.doanthanhthai.mangafox.fragment.CartoonFragment;
 import com.example.doanthanhthai.mangafox.fragment.SettingFragment;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
@@ -134,10 +136,10 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mTaskHandler != null){
-            mTaskHandler.removeCallbacksAndMessages(null);
-            mTaskHandler = null;
-        }
+//        if(mTaskHandler != null){
+//            mTaskHandler.removeCallbacksAndMessages(null);
+//            mTaskHandler = null;
+//        }
         if (mGetAnimeHomePageTask != null) {
             mGetAnimeHomePageTask.cancel(true);
             mGetAnimeHomePageTask = null;
@@ -232,6 +234,7 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         navigationModelList.add(new NavigationModel(Constant.ANIME_GENRE_NAVIGATION_ID, R.drawable.ic_arrow_left, "Anime", false));
         navigationModelList.add(new NavigationModel(Constant.CN_GENRE_NAVIGATION_ID, R.drawable.ic_arrow_left, "CN Animation", false));
         navigationModelList.add(new NavigationModel(Constant.YEAR_NAVIGATION_ID, R.drawable.ic_arrow_left, "Year", false));
+        navigationModelList.add(new NavigationModel(Constant.CARTOON_NAVIGATION_ID, R.drawable.ic_arrow_left, "Cartoon", false));
         navigationModelList.add(new NavigationModel(Constant.SETTING_NAVIGATION_ID, R.drawable.ic_arrow_left, "Setting", false));
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
@@ -253,7 +256,26 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
 //        new GetAnimeHomePageTask().execute(Constant.LATEST_URL);
         mGetAnimeHomePageTask = new GetAnimeHomePageTask();
         mGetAnimeByPageNumTask = new GetAnimeByPageNumTask();
-        mGetAnimeHomePageTask.startTask(Constant.HOME_URL);
+
+        List<Anime> latestItems = AnimeDataManager.getInstance().getHomeList();
+        List<Anime> bannerItems = AnimeDataManager.getInstance().getBannerList();
+        mTotalPage = AnimeDataManager.getInstance().getHomeTotalPage();
+        if (latestItems != null && !latestItems.isEmpty() && bannerItems != null && !bannerItems.isEmpty()) {
+            mLatestEpisodeAdapter.setAnimeList(latestItems);
+            startSlideBanner(bannerItems);
+            AnimeDataManager.getInstance().setHomeList(null);
+            AnimeDataManager.getInstance().setBannerList(null);
+            //Scroll to top
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    nestedScrollView.scrollTo(0, 0);
+                }
+            });
+            progressFullLayout.setVisibility(View.GONE);
+        } else {
+            mGetAnimeHomePageTask.startTask(Constant.HOME_URL);
+        }
     }
 
     private void setupActionBar() {
@@ -392,12 +414,19 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
                 Toast.makeText(HomeActivity.this, "CN_GENRE_NAVIGATION_ID", Toast.LENGTH_SHORT).show();
                 break;
             case Constant.YEAR_NAVIGATION_ID:
+                fragment = new AnimeYearFragment();
+                fragmentTag = AnimeYearFragment.TAG;
                 Toast.makeText(HomeActivity.this, "YEAR_NAVIGATION_ID", Toast.LENGTH_SHORT).show();
                 break;
             case Constant.SETTING_NAVIGATION_ID:
                 fragment = new SettingFragment();
                 fragmentTag = SettingFragment.TAG;
                 Toast.makeText(HomeActivity.this, "SETTING_NAVIGATION_ID", Toast.LENGTH_SHORT).show();
+                break;
+            case Constant.CARTOON_NAVIGATION_ID:
+                fragment = new CartoonFragment();
+                fragmentTag = CartoonFragment.TAG;
+                Toast.makeText(HomeActivity.this, "CARTOON_NAVIGATION_ID", Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;
@@ -485,28 +514,8 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
                             restartTask(Constant.HOME_URL);
                         }
                     }, 3 * 1000);
-                    confirmWebView.setVisibility(View.VISIBLE);
-                    confirmWebView.loadUrl(Constant.HOME_URL);
-
-//                    if (document.selectFirst("h4").text().equals("Nếu bạn là người Việt thì hãy điền thông tin phía bên dưới để xác minh:")) {
-//                        FormElement confirmForm = (FormElement) document.selectFirst("form");
-//                        Elements questionSubject = document.select("div.form-group>input");
-//                        if (questionSubject != null && questionSubject.size() > 0) {
-//                            questionSubject.get(0).text("20/11");
-//                            questionSubject.get(1).text("S");
-//
-//                            // # Now send the form for login
-////                            try {
-////                                Connection.Response loginActionResponse = confirmForm.submit()
-////                                        .userAgent(USER_AGENT)
-////                                        .execute();
-////                                Log.i(TAG, loginActionResponse.parse().html());
-////                            } catch (IOException e) {
-////                                e.printStackTrace();
-////                                Log.e(TAG, e.getMessage());
-////                            }
-//                        }
-//                    }
+//                    confirmWebView.setVisibility(View.VISIBLE);
+//                    confirmWebView.loadUrl(Constant.HOME_URL);
                 }
 
                 if (bannerItems != null && !bannerItems.isEmpty()) {
@@ -524,8 +533,8 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
                         restartTask(Constant.HOME_URL);
                     }
                 }, 3 * 1000);
-                confirmWebView.setVisibility(View.VISIBLE);
-                confirmWebView.loadUrl(Constant.HOME_URL);
+//                confirmWebView.setVisibility(View.VISIBLE);
+//                confirmWebView.loadUrl(Constant.HOME_URL);
             }
             super.onPostExecute(document);
         }

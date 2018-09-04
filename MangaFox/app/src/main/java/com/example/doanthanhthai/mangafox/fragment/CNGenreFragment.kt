@@ -36,6 +36,7 @@ import kotlinx.android.synthetic.main.fragment_anime_genre.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.IOException
+import java.net.URL
 
 /**
  * Created by ThaiDT1 on 8/20/2018.
@@ -46,7 +47,7 @@ class CNGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapterL
         when (v?.id) {
             R.id.toolbar_back_btn -> {
                 val fm: FragmentManager? = activity?.supportFragmentManager
-                fm?.popBackStack(CNGenreFragment.TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                fm?.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             }
 
             R.id.menu_btn -> {
@@ -162,6 +163,9 @@ class CNGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapterL
                     Toast.makeText(activity, "Error filter", Toast.LENGTH_SHORT).show()
                 }
 
+                //Scroll to top
+                nested_scroll_view.scrollTo(0, 0)
+
                 dialog.dismiss()
             })
 
@@ -264,7 +268,13 @@ class CNGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapterL
             var document: Document? = null
             var webCookies = PreferenceHelper.getInstance(activity).cookie
             try {
-                val response = Jsoup.connect(strings[0])
+                var urlText = strings[0]
+                try {
+                    val url = URL(strings[0])
+                } catch (e: Exception) {
+                    urlText = "http://animehay.tv" + strings[0]
+                }
+                val response = Jsoup.connect(urlText)
                         .timeout(Constant.TIME_OUT)
                         .userAgent(Constant.USER_AGENT)
                         .cookies(webCookies)

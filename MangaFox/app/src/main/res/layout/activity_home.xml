@@ -74,10 +74,36 @@
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
                     android:layout_marginRight="10dp"
+                    android:foreground="?attr/selectableItemBackground"
                     android:src="@drawable/ic_search" />
 
             </RelativeLayout>
         </android.support.v7.widget.Toolbar>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/toolbar_height"
+            android:layout_alignParentTop="true"
+            android:orientation="horizontal">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_weight="40"
+                android:layout_height="match_parent"/>
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="20"
+                android:layout_centerInParent="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/anime_logo_brief" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_weight="40"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/nested_scroll_view"
@@ -228,14 +254,14 @@
                 android:id="@+id/nav_header_imageView"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
-                android:src="@mipmap/ic_launcher_manga_fox" />
+                android:scaleType="fitXY"
+                android:src="@mipmap/ic_anime_launcher_round" />
 
             <TextView
                 android:id="@+id/nav_header_textView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="16dp"
-                android:text="HI HI HA HA"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
         </LinearLayout>
 

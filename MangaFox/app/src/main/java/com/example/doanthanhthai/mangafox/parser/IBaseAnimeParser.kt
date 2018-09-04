@@ -18,4 +18,6 @@ interface IBaseAnimeParser {
     fun getDirectLinkDetail(document: Document, webView: WebView, curAnime: Anime): Anime?
     fun getListAnimeGenre(document: Document?): List<Category>
     fun getListCNGenre(document: Document?): List<Category>
+    fun getYearGenre(document: Document?): List<Category>
+    fun getListCartoon(document: Document?): List<Category>
 }

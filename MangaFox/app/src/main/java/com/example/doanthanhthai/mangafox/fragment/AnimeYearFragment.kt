@@ -41,7 +41,7 @@ import java.net.URL
 /**
  * Created by ThaiDT1 on 8/20/2018.
  */
-class AnimeGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapterListener, View.OnClickListener, NestedScrollView.OnScrollChangeListener {
+class AnimeYearFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapterListener, View.OnClickListener, NestedScrollView.OnScrollChangeListener {
 
     override fun onClick(v: View?) {
         when (v?.id) {
@@ -58,7 +58,7 @@ class AnimeGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapt
 
     companion object {
         @JvmField
-        val TAG = AnimeGenreFragment::class.java.simpleName
+        val TAG = AnimeYearFragment::class.java.simpleName
     }
 
     private var mGetAnimeGenreTask: GetAnimeGenreTask? = null
@@ -150,7 +150,7 @@ class AnimeGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapt
     private fun showFilterSortDialog() {
         val builder = AlertDialog.Builder(activity!!)
         builder.setTitle("List Genres")
-        if (genreItemsArray != null && genreItemsArray!!.size > 0) {
+        if (genreItemsArray != null && genreItemsArray!!.isNotEmpty()) {
             builder.setSingleChoiceItems(genreItemsArray, previousSelectedSort, DialogInterface.OnClickListener { dialog, which ->
                 val orderByTxt = genreItemsArray!![which]
                 if (!Utils.isTextEmpty(orderByTxt)) {
@@ -218,9 +218,7 @@ class AnimeGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapt
         override fun onPostExecute(document: Document?) {
             if (document != null) {
 
-                genreItems = AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getListAnimeGenre(document)
-
-                mTotalPage = AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getPaginationAnime(document)!!
+                genreItems = AnimeRepository(AnimeRepository.WEB_TYPE.ANIMEHAY).getListYearGenre(document)
 
                 if (genreItems != null && genreItems?.size!! > 0) {
 //                    mLatestEpisodeAdapter.setAnimeList(genreItems)

@@ -27,7 +27,7 @@ public class AnimeProgressDialog extends Dialog {
         layout.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         iv = new ImageView(context);
-        Glide.with(context).load(R.raw.loading).into(iv);
+        Glide.with(context).load(R.raw.levi_loading).into(iv);
 
         layout.addView(iv, params);
         addContentView(layout, params);
