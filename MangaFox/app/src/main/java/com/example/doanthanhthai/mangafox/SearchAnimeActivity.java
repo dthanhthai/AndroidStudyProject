@@ -12,12 +12,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
-import android.widget.SearchView;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,7 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class SearchAnimeActivity extends BaseActivity implements SearchView.OnQueryTextListener, ResultAnimeAdapter.OnResultAnimeAdapterListener {
+public class SearchAnimeActivity extends BaseActivity implements SearchView.OnQueryTextListener, ResultAnimeAdapter.OnResultAnimeAdapterListener, View.OnClickListener {
     private static final String TAG = SearchAnimeActivity.class.getSimpleName();
     private WebView webView;
     //    private AppWebViewClients webViewClient;
@@ -52,6 +54,7 @@ public class SearchAnimeActivity extends BaseActivity implements SearchView.OnQu
     private ResultAnimeAdapter mResultAnimeAdapter;
     private TextView emptyTv;
     private Toolbar mToolbar;
+    private ImageView backBtn;
     private GetResultListAnimeTask mGetResultListAnimeTask;
     private String mCurQueryLink;
 
@@ -76,6 +79,7 @@ public class SearchAnimeActivity extends BaseActivity implements SearchView.OnQu
         resultAnimeRv = findViewById(R.id.result_anime_rv);
         webView = (WebView) findViewById(R.id.webView);
         emptyTv = findViewById(R.id.empty_result_tv);
+        backBtn = findViewById(R.id.toolbar_back_btn);
     }
 
     @Override
@@ -86,9 +90,14 @@ public class SearchAnimeActivity extends BaseActivity implements SearchView.OnQu
 //        webViewClient = new AppWebViewClients();
 //        webView.setWebViewClient(webViewClient);
 
+        backBtn.setOnClickListener(this);
+
         searchView.onActionViewExpanded();
         searchView.requestFocus();
         searchView.setOnQueryTextListener(this);
+        EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        searchEditText.setTextColor(getResources().getColor(R.color.black));
+        searchEditText.setHintTextColor(getResources().getColor(R.color.black));
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
@@ -141,6 +150,17 @@ public class SearchAnimeActivity extends BaseActivity implements SearchView.OnQu
         Intent intent = new Intent(SearchAnimeActivity.this, DetailActivity.class);
         startActivity(intent, options.toBundle());
         Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.toolbar_back_btn:
+                this.finish();
+                break;
+            default:
+                return;
+        }
     }
 
     private class GetResultListAnimeTask extends AsyncTask<String, Void, Document> {
@@ -239,13 +259,13 @@ public class SearchAnimeActivity extends BaseActivity implements SearchView.OnQu
 ////                                mAnimeSelected.episode.directUrl = videoSubject.attr("src");
 ////                            }
 ////
-////                            Element titleSubject = playerSubject.getElementsByClass("player-title").first().getElementsByTag("span").first();
+////                            Element titleSubject = playerSubject.getElementsByClass("player-name").first().getElementsByTag("span").first();
 ////                            if (titleSubject != null) {
 ////                                mAnimeSelected.episode.name = titleSubject.text();
 ////                            }
 ////                        }
 ////
-//////                        Element titleSubject = playerDocument.selectFirst("h1.film-info-title");
+//////                        Element titleSubject = playerDocument.selectFirst("h1.film-info-name");
 //////                        if (titleSubject != null) {
 //////                            episode.name = titleSubject.text();
 //////                        }

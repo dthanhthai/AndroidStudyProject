@@ -322,7 +322,7 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         }
         Intent intent = new Intent(HomeActivity.this, DetailActivity.class);
         startActivity(intent, options.toBundle());
-        Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, item.getTitle(), Toast.LENGTH_SHORT).show();
     }
 
     @Override

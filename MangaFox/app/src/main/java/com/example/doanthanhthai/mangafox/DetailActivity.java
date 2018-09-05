@@ -15,6 +15,9 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -27,6 +30,7 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,17 +42,23 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.doanthanhthai.mangafox.adapter.RelatedContentAdapter;
 import com.example.doanthanhthai.mangafox.base.BaseActivity;
 import com.example.doanthanhthai.mangafox.manager.AnimeDataManager;
 import com.example.doanthanhthai.mangafox.model.Anime;
 import com.example.doanthanhthai.mangafox.model.Episode;
+import com.example.doanthanhthai.mangafox.model.NavigationModel;
+import com.example.doanthanhthai.mangafox.model.RelatedContent;
 import com.example.doanthanhthai.mangafox.repository.AnimeRepository;
 import com.example.doanthanhthai.mangafox.share.Constant;
 import com.example.doanthanhthai.mangafox.share.PreferenceHelper;
 import com.example.doanthanhthai.mangafox.share.Utils;
 import com.example.doanthanhthai.mangafox.widget.ProgressAnimeView;
+import com.example.doanthanhthai.mangafox.widget.RelatedItemDecoration;
+import com.example.doanthanhthai.mangafox.widget.StartSnapHelper;
 import com.google.android.gms.cast.framework.CastButtonFactory;
 
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -61,7 +71,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class DetailActivity extends BaseActivity implements View.OnClickListener {
+public class DetailActivity extends BaseActivity implements View.OnClickListener, RelatedContentAdapter.RelatedAdapterListener {
     private static final String TAG = DetailActivity.class.getSimpleName();
     private Anime mCurrentAnime;
     private ImageView thumbnailIv, coverIv;
@@ -73,6 +83,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     private WebView webView;
     private AppWebViewClients webViewClient;
     private ProgressDialog progressDialog;
+    private RecyclerView relatedContentRv;
 
     private boolean isFavoriteAnime = false;
     private boolean isStartTransition = true;
@@ -119,6 +130,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         backBtn = findViewById(R.id.toolbar_back_btn);
         favoriteBtn = findViewById(R.id.add_favorite_btn);
         webView = findViewById(R.id.webView);
+        relatedContentRv = findViewById(R.id.related_rv);
     }
 
     @Override
@@ -293,6 +305,18 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         setFavoriteUI(isFavoriteAnime);
     }
 
+    @Override
+    public void onItemClicked(@NotNull RelatedContent item) {
+//        new Handler().post(new Runnable() {
+//            @Override
+//            public void run() {
+        progressFullLayout.setVisibility(View.VISIBLE);
+        mCurrentAnime = new Anime();
+        mGetDetailAnimeTask.startTask(item.getUrl());
+//            }
+//        });
+    }
+
     private class GetDetailAnimeTask extends AsyncTask<String, Void, Document> {
         private final String TAG = GetDetailAnimeTask.class.getSimpleName();
 
@@ -379,6 +403,26 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     }
 
     private void updateUIAnimeInfo() {
+        if (mCurrentAnime.getRelatedContents() != null && !mCurrentAnime.getRelatedContents().isEmpty()) {
+            RelatedContentAdapter relatedContentAdapter = new RelatedContentAdapter(mCurrentAnime.getRelatedContents(), this);
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+            relatedContentRv.setLayoutManager(linearLayoutManager);
+            relatedContentRv.setAdapter(relatedContentAdapter);
+            for (int i = 0; i < mCurrentAnime.getRelatedContents().size(); i++) {
+                if (mCurrentAnime.getRelatedContents().get(i).isCurrent()) {
+                    relatedContentRv.scrollToPosition(i);
+                    break;
+                }
+            }
+            relatedContentRv.setOnFlingListener(null);
+            StartSnapHelper startSnapHelper = new StartSnapHelper();
+            startSnapHelper.attachToRecyclerView(relatedContentRv);
+
+            relatedContentRv.addItemDecoration(new RelatedItemDecoration());
+        }else{
+            relatedContentRv.setVisibility(View.GONE);
+        }
+
         if (Utils.isValidContextForGlide(this) && AnimeDataManager.getInstance().getThumbnailBitmap() == null) {
             RequestOptions thumbRequestOptions = new RequestOptions();
             thumbRequestOptions.placeholder(R.color.slight_gray);
@@ -434,10 +478,18 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
             durationTv.setText(mCurrentAnime.getDuration());
             descriptionTv.setText(mCurrentAnime.getDescription());
 
+
             playBtn.setVisibility(View.VISIBLE);
             favoriteBtn.setVisibility(View.VISIBLE);
             progressFullLayout.setVisibility(View.GONE);
             progressInfoLayout.setVisibility(View.GONE);
+
+            //Margin toolbar_height size to see toolbar when progress view is shown again
+            RelativeLayout.LayoutParams layoutParam = (RelativeLayout.LayoutParams) progressFullLayout.getLayoutParams();
+            layoutParam.topMargin = (int) this.getResources().getDimension(R.dimen.toolbar_height);
+            progressFullLayout.setLayoutParams(layoutParam);
+
+            AnimeDataManager.getInstance().resetThumbnailBitmap();
         }
     }
 

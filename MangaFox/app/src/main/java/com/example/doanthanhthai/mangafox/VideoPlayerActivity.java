@@ -158,7 +158,7 @@ public class VideoPlayerActivity extends BaseActivity implements NumberEpisodeAd
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-//        this.requestWindowFeature(Window.FEATURE_NO_TITLE); //Remove title bar
+//        this.requestWindowFeature(Window.FEATURE_NO_TITLE); //Remove name bar
 //        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); //Remove notification bar
         setContentView(R.layout.activity_video_player);
         preConfig(savedInstanceState);
@@ -218,7 +218,6 @@ public class VideoPlayerActivity extends BaseActivity implements NumberEpisodeAd
         if (mCurrentAnime == null) {
             Toast.makeText(VideoPlayerActivity.this, "[" + TAG + "] - " + "Don't have direct link!!!", Toast.LENGTH_SHORT).show();
         } else {
-
             animeTitleTv.setText(mCurrentAnime.getEpisodeList().get(indexPlayingItem).getFullName());
             toolbarTitleTv.setText(mCurrentAnime.getTitle());
 //            episodeNameTv.setText(mCurrentAnime.episode.name);

@@ -76,8 +76,7 @@ class AnimeGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapt
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_anime_genre, container, false)
-        return view
+        return inflater.inflate(R.layout.fragment_anime_genre, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -100,20 +99,20 @@ class AnimeGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapt
         mGetAnimeTask = GetAnimeTask()
         mGetAnimeByPageNumTask = GetAnimeByPageNumTask()
         mTaskHandler = Handler()
-        mGetAnimeGenreTask?.startTask("http://animehay.tv/")
+        mGetAnimeGenreTask?.startTask(Constant.HOME_URL)
     }
 
     override fun onScrollChange(v: NestedScrollView?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int) {
-        if (v?.getChildAt(v.getChildCount() - 1) != null) {
-            if (scrollY >= v.getChildAt(v.getChildCount() - 1).measuredHeight - v.measuredHeight && scrollY > oldScrollY) {
+        if (v?.getChildAt(v.childCount - 1) != null) {
+            if (scrollY >= v.getChildAt(v.childCount - 1).measuredHeight - v.measuredHeight && scrollY > oldScrollY) {
                 mGridLayoutManager?.let {
 
-                    val visibleItemCount: Int = it.getChildCount()
-                    val totalItemCount: Int = it.getItemCount()
-                    val pastVisiblesItems: Int = it.findFirstVisibleItemPosition()
+                    val visibleItemCount: Int = it.childCount
+                    val totalItemCount: Int = it.itemCount
+                    val pastVisibleItems: Int = it.findFirstVisibleItemPosition()
                     if (mCurrentPage < mTotalPage) {
 
-                        if (visibleItemCount + pastVisiblesItems >= totalItemCount) {
+                        if (visibleItemCount + pastVisibleItems >= totalItemCount) {
                             mGetAnimeByPageNumTask?.startTask(currentUrl + Constant.PAGE_PARAM + ++mCurrentPage)
                             Log.i(TAG, "Load more")
                         }
@@ -150,7 +149,7 @@ class AnimeGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapt
     private fun showFilterSortDialog() {
         val builder = AlertDialog.Builder(activity!!)
         builder.setTitle("List Genres")
-        if (genreItemsArray != null && genreItemsArray!!.size > 0) {
+        if (genreItemsArray != null && genreItemsArray!!.isNotEmpty()) {
             builder.setSingleChoiceItems(genreItemsArray, previousSelectedSort, DialogInterface.OnClickListener { dialog, which ->
                 val orderByTxt = genreItemsArray!![which]
                 if (!Utils.isTextEmpty(orderByTxt)) {
@@ -169,7 +168,7 @@ class AnimeGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapt
                 dialog.dismiss()
             })
 
-            builder.setNegativeButton("Close") { dialog, which -> dialog.dismiss() }
+            builder.setNegativeButton("Close") { dialog, _ -> dialog.dismiss() }
             builder.show()
         } else {
             Toast.makeText(activity, "Error filter", Toast.LENGTH_SHORT).show()
@@ -310,7 +309,7 @@ class AnimeGenreFragment : Fragment(), LatestEpisodeAdapter.OnLatestEpisodeAdapt
                 progress_full_screen_view.visibility = View.GONE
                 //Margin toolbar_height size to see toolbar when progress view is shown again
                 val layoutParam: RelativeLayout.LayoutParams = progress_full_screen_view.layoutParams as RelativeLayout.LayoutParams
-                layoutParam.topMargin = activity!!.resources.getDimension(R.dimen.toolbar_height).toInt();
+                layoutParam.topMargin = activity!!.resources.getDimension(R.dimen.toolbar_height).toInt()
                 progress_full_screen_view.layoutParams = layoutParam
             } else {
                 Log.e(TAG, "Cannot get DOCUMENT web")

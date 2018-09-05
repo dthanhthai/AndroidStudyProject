@@ -10,5 +10,5 @@
     <color name="itemTitleColor">#FF7043</color>
     <color name="itemEpBgColor">#CC1565C0</color>
     <color name="numEpViewedColor">#000</color>
-    <color name="search_view_bg">#00000000</color>
+    <color name="search_view_bg">#E6FFFFFF</color>
 </resources>

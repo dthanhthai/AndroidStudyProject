@@ -29,7 +29,11 @@ class NavigationAdapter(listItem: MutableList<NavigationModel>, listener: Naviga
     }
 
     override fun getItemCount(): Int {
-        return listItem?.size!!
+        if (listItem != null && listItem?.isNotEmpty()!!) {
+            return listItem?.size!!
+        } else {
+            return 0
+        }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

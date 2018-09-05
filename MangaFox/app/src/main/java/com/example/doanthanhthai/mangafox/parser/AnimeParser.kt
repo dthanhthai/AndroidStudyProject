@@ -7,16 +7,14 @@ import android.webkit.WebView
 import com.example.doanthanhthai.mangafox.model.Anime
 import com.example.doanthanhthai.mangafox.model.Category
 import com.example.doanthanhthai.mangafox.model.Episode
-import com.example.doanthanhthai.mangafox.share.Constant
+import com.example.doanthanhthai.mangafox.model.RelatedContent
+import com.example.doanthanhthai.mangafox.share.Constant.HOME_URL
+import com.example.doanthanhthai.mangafox.share.Constant.RELATED_URL
+import com.example.doanthanhthai.mangafox.share.Utils
 
-import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.select.Elements
 
-import java.io.IOException
 import java.util.ArrayList
-import java.util.StringTokenizer
 
 /**
  * Created by DOAN THANH THAI on 7/15/2018.
@@ -40,12 +38,20 @@ class AnimeParser : IBaseAnimeParser {
             val descriptionSubject = document.select("div.ah-pif-fcontent>p").first()
             val detailSubject = document.select("div.ah-pif-fdetails>ul>li")
             val buttonSubject = document.selectFirst("div.ah-pif-ftool>div.ah-float-left>span>a")
+            val relatedSubject = document.select("div.ah-pif-relation>a")
+            val titleSubject = document.selectFirst("h1>a")
+
 
             //Document don't have thumbnail -> is not anime page, that is confirm page
             if (thumbnailSubject != null) {
                 curAnime.image = thumbnailSubject.attr("src")
             } else {
                 return null
+            }
+
+            titleSubject?.let {
+                curAnime.title = it.text()
+                curAnime.url = it.attr("href")
             }
 
             if (coverSubject != null) {
@@ -99,6 +105,20 @@ class AnimeParser : IBaseAnimeParser {
                 }
             }
 
+            if (relatedSubject != null && relatedSubject.size > 0) {
+                var relatedContentList = mutableListOf<RelatedContent>()
+                for (element in relatedSubject) {
+                    val relatedContent = RelatedContent()
+                    relatedContent.name = element.text()
+                    relatedContent.url = RELATED_URL + element.attr("href")
+                    if (!Utils.isTextEmpty(element.className())) {
+                        relatedContent.isCurrent = true
+                    }
+                    relatedContentList.add(relatedContent)
+                }
+                curAnime.relatedContents = relatedContentList
+            }
+
             if (buttonSubject != null) {
                 val episodes = ArrayList<Episode>()
                 val item = Episode()
@@ -113,7 +133,7 @@ class AnimeParser : IBaseAnimeParser {
 
     override fun getDirectLinkPlayer(document: Document, webView: WebView, curAnime: Anime, indexPlayingItem: Int): Anime? {
         val videoSubject = document.selectFirst("div.film-player>div#ah-player>video>source")
-        val fullNameSubject = document.select("div.ah-wf-title>h1")
+        val fullNameSubject = document.select("div.ah-wf-name>h1")
 
 
         val episode = curAnime.episodeList[indexPlayingItem]
@@ -141,7 +161,7 @@ class AnimeParser : IBaseAnimeParser {
     override fun getDirectLinkDetail(document: Document, webView: WebView, curAnime: Anime): Anime? {
         val videoSubject = document.selectFirst("div.film-player>div#ah-player>video>source")
         val listEpisodeSubject = document.select("div.ah-wf-le>ul>li>a")
-        val fullNameSubject = document.select("div.ah-wf-title>h1")
+        val fullNameSubject = document.select("div.ah-wf-name>h1")
 
         val firstEpisode = curAnime.episodeList[0]
 

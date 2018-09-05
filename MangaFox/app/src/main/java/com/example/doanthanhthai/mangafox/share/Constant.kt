@@ -9,6 +9,7 @@ object Constant {
     const val SEARCH_URL = "http://animehay.tv/tim-kiem?q="
     const val LATEST_URL = "http://animehay.tv/phim-moi-cap-nhap"
     const val HOME_URL = "http://animehay.tv/"
+    const val RELATED_URL = "http://animehay.tv/phim/"
     const val PAGE_PARAM = "?page="
 
     val TIME_OUT = 8 * 1000

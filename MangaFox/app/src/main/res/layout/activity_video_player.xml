@@ -79,6 +79,7 @@
                 app:resize_mode="fill"
                 app:rewind_increment="10000" />
 
+
             <RelativeLayout
                 android:id="@+id/cast_overlay_view"
                 android:layout_width="match_parent"
