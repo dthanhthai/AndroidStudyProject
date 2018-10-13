@@ -266,12 +266,12 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
             AnimeDataManager.getInstance().setHomeList(null);
             AnimeDataManager.getInstance().setBannerList(null);
             //Scroll to top
-            new Handler().post(new Runnable() {
+            new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     nestedScrollView.scrollTo(0, 0);
                 }
-            });
+            },100);
             progressFullLayout.setVisibility(View.GONE);
         } else {
             mGetAnimeHomePageTask.startTask(Constant.HOME_URL);

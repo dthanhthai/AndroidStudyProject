@@ -161,7 +161,7 @@ class AnimeParser : IBaseAnimeParser {
     override fun getDirectLinkDetail(document: Document, webView: WebView, curAnime: Anime): Anime? {
         val videoSubject = document.selectFirst("div.film-player>div#ah-player>video>source")
         val listEpisodeSubject = document.select("div.ah-wf-le>ul>li>a")
-        val fullNameSubject = document.select("div.ah-wf-name>h1")
+        val fullNameSubject = document.select("div.ah-wf-title>h1")
 
         val firstEpisode = curAnime.episodeList[0]
 

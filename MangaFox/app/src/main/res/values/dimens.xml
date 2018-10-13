@@ -5,4 +5,8 @@
     <dimen name="min_width_item">150dp</dimen>
     <dimen name="max_spacing_item">3dp</dimen>
     <dimen name="min_spacing_item">1dp</dimen>
+    <dimen name="top_height">180dp</dimen>
+    <dimen name="poster_image_height">150dp</dimen>
+    <dimen name="poster_image_width">120dp</dimen>
+    <dimen name="margin_bottom_detail_info">15dp</dimen>
 </resources>

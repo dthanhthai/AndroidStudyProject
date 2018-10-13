@@ -234,17 +234,19 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
     private boolean checkFavoriteAnime() {
         boolean isFavorite = false;
         List<Anime> favoriteAnimeList = AnimeDataManager.getInstance().getFavoriteAnimeList();
-        for (int i = 0; i < favoriteAnimeList.size(); i++) {
-            Anime anime = favoriteAnimeList.get(i);
-            if (anime.getTitle().equalsIgnoreCase(mCurrentAnime.getTitle())) {
+        if (favoriteAnimeList != null) {
+            for (int i = 0; i < favoriteAnimeList.size(); i++) {
+                Anime anime = favoriteAnimeList.get(i);
+                if (anime.getTitle().equalsIgnoreCase(mCurrentAnime.getTitle())) {
 //                mCurrentAnime = anime;
 //                AnimeDataManager.getInstance().setAnime(mCurrentAnime);
-                AnimeDataManager.getInstance().setIndexFavoriteItem(i);
-                isFavorite = true;
-                break;
+                    AnimeDataManager.getInstance().setIndexFavoriteItem(i);
+                    isFavorite = true;
+                    break;
+                }
             }
+            setFavoriteUI(isFavorite);
         }
-        setFavoriteUI(isFavorite);
         return isFavorite;
     }
 
@@ -419,7 +421,7 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
             startSnapHelper.attachToRecyclerView(relatedContentRv);
 
             relatedContentRv.addItemDecoration(new RelatedItemDecoration());
-        }else{
+        } else {
             relatedContentRv.setVisibility(View.GONE);
         }
 
