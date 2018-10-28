@@ -589,6 +589,10 @@ public class VideoPlayerActivity extends BaseActivity implements NumberEpisodeAd
     public void onItemClick(Episode item, int position) {
         indexPlayingItem = position;
         stopVideo();
+
+//        mResumePosition = 0;
+        mResumeWindow = C.INDEX_UNSET;
+
         coverPlayerIv.setVisibility(View.VISIBLE);
         showProgressLayout();
         playbackControlView.hide();

@@ -84,8 +84,8 @@
                         android:queryHint="Tìm theo tên phim"
                         android:showAsAction="ifRoom|collapseActionView"
                         app:closeIcon="@drawable/ic_close_black_24dp"
-                        app:iconifiedByDefault="@drawable/ic_search_black"
-                        app:searchIcon="@drawable/ic_search_black" />
+                        app:iconifiedByDefault="false"
+                        app:searchIcon="@null"/>
                 </RelativeLayout>
             </RelativeLayout>
 
