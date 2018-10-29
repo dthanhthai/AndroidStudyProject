@@ -628,6 +628,24 @@ public class HomeActivity extends BaseActivity implements LatestEpisodeAdapter.O
         SlideBannerAdapter slideBannerAdapter = new SlideBannerAdapter(result, this);
         mSlideViewPager.setAdapter(slideBannerAdapter);
         mSlideIndicator.setViewPager(mSlideViewPager);
+
+        mSlideViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                mSlideCurrentPage = position;
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
         isAutoChangeBanner = true;
         final Handler handler = new Handler();
         Timer swipeTimer = new Timer();
