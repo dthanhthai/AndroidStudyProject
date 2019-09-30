@@ -12,26 +12,26 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 @Database(entities = {User.class}, version = 1)
 public abstract class UserDatabase extends RoomDatabase {
 
-    private static UserDatabase INSTANCE;
+    private static UserDatabase instance;
 
     public abstract UserDao userDao();
 
     public static  synchronized UserDatabase getInstance(Context context){
-        if(INSTANCE == null){
-            INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
+        if(instance == null){
+            instance = Room.databaseBuilder(context.getApplicationContext(),
                     UserDatabase.class, "user_database")
                     .fallbackToDestructiveMigration()
                     .addCallback(roomCallback)
                     .build();
         }
-        return INSTANCE;
+        return instance;
     }
 
     private static RoomDatabase.Callback roomCallback = new RoomDatabase.Callback(){
         @Override
         public void onCreate(@NonNull SupportSQLiteDatabase db) {
             super.onCreate(db);
-            new InitMockDataAsyncTask(INSTANCE).execute();
+            new InitMockDataAsyncTask(instance).execute();
         }
     };
 

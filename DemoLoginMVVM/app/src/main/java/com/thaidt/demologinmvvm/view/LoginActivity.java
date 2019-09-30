@@ -1,4 +1,4 @@
-package com.thaidt.demologinmvvm;
+package com.thaidt.demologinmvvm.view;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -10,8 +10,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.thaidt.demologinmvvm.R;
 import com.thaidt.demologinmvvm.databinding.ActivityLoginBinding;
 import com.thaidt.demologinmvvm.model.User;
+import com.thaidt.demologinmvvm.viewmodel.DataWrapper;
+import com.thaidt.demologinmvvm.viewmodel.LoginViewModel;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -36,21 +39,31 @@ public class LoginActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loginViewModel.showLoading(true);
                 loginViewModel.login();
             }
         });
     }
 
     public void observeData() {
-        loginViewModel.getUserLiveData().observe(this, new Observer<User>() {
+        loginViewModel.getUserLiveData().observe(this, new Observer<DataWrapper<User>>() {
             @Override
-            public void onChanged(User user) {
-                loginViewModel.showLoading(false);
-                if(user != null){
-                    Toast.makeText(LoginActivity.this, "Success", Toast.LENGTH_LONG).show();
-                }else{
-                    Toast.makeText(LoginActivity.this, "Fail", Toast.LENGTH_LONG).show();
+            public void onChanged(DataWrapper<User> data) {
+                View loadingView = findViewById(R.id.view_loading);
+                switch (data.getState()) {
+                    case LOADING:
+                        loadingView.setVisibility(View.VISIBLE);
+                        break;
+                    case SUCCESS:
+                        loadingView.setVisibility(View.GONE);
+                        Toast.makeText(LoginActivity.this, "Success: Username: " + data.getData().getUsername(), Toast.LENGTH_LONG).show();
+                        break;
+                    case ERROR:
+                        loadingView.setVisibility(View.GONE);
+                        Toast.makeText(LoginActivity.this, "Error: " +data.getMessage(), Toast.LENGTH_LONG).show();
+                        break;
+                    default:
+                        loadingView.setVisibility(View.GONE);
+                        break;
                 }
             }
         });
