@@ -4,12 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
 import com.thaidt.demologinmvvm.R;
 import com.thaidt.demologinmvvm.databinding.ActivityLoginBinding;
 import com.thaidt.demologinmvvm.model.User;
@@ -35,13 +33,13 @@ public class LoginActivity extends AppCompatActivity {
         binding.setLoginVM(loginViewModel);
         observeData();
 
-        Button button = findViewById(R.id.btn_login);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                loginViewModel.login();
-            }
-        });
+//        Button button = findViewById(R.id.btn_login);
+//        button.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                loginViewModel.login();
+//            }
+//        });
     }
 
     public void observeData() {
@@ -55,7 +53,7 @@ public class LoginActivity extends AppCompatActivity {
                         break;
                     case SUCCESS:
                         loadingView.setVisibility(View.GONE);
-                        Toast.makeText(LoginActivity.this, "Success: Username: " + data.getData().getUsername(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, "Welcome " + data.getData().getUsername(), Toast.LENGTH_LONG).show();
                         break;
                     case ERROR:
                         loadingView.setVisibility(View.GONE);
@@ -68,4 +66,5 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
+
 }
