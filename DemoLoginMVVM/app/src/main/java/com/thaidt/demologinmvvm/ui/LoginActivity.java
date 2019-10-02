@@ -1,4 +1,4 @@
-package com.thaidt.demologinmvvm.view;
+package com.thaidt.demologinmvvm.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -6,7 +6,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 import com.thaidt.demologinmvvm.R;
 import com.thaidt.demologinmvvm.databinding.ActivityLoginBinding;
