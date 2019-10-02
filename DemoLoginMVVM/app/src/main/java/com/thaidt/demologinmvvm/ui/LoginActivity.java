@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -52,6 +54,7 @@ public class LoginActivity extends AppCompatActivity {
                         break;
                     case SUCCESS:
                         loadingView.setVisibility(View.GONE);
+                        goToMainActivity();
                         Toast.makeText(LoginActivity.this, "Welcome " + data.getData().getUsername(), Toast.LENGTH_LONG).show();
                         break;
                     case ERROR:
@@ -64,6 +67,12 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void goToMainActivity(){
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
 }

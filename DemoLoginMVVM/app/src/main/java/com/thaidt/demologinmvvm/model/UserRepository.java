@@ -8,7 +8,6 @@ import androidx.lifecycle.LiveData;
 public class UserRepository {
 
     private UserDao userDao;
-//    private LiveData<User> loginUser;
 
     public UserRepository(Application application){
         UserDatabase database = UserDatabase.getInstance(application);

@@ -45,9 +45,9 @@ public abstract class UserDatabase extends RoomDatabase {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            userDao.insert(new User("abc","111"));
-            userDao.insert(new User("xyz","111"));
-            userDao.insert(new User("aaa","111"));
+            userDao.insert(new User("abc@aaa.com","111111"));
+            userDao.insert(new User("xyz@aaa.com","111111"));
+            userDao.insert(new User("aaa@aaa.com","111111"));
             return null;
         }
     }

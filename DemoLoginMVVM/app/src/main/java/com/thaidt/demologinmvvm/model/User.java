@@ -1,6 +1,5 @@
 package com.thaidt.demologinmvvm.model;
 
-
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 

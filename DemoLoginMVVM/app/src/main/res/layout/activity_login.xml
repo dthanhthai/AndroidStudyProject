@@ -12,60 +12,64 @@
             type="com.thaidt.demologinmvvm.viewmodel.LoginViewModel" />
     </data>
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+        <EditText
+            android:id="@+id/edt_username"
+            android:ems="10"
+            android:hint="@string/email_hint"
+            android:inputType="text"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="32dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
+            android:layout_width="0dp"
+            android:text="@={loginVM.usernameInput}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:importantForAutofill="no">
+
+            <requestFocus />
+        </EditText>
+
+        <EditText
+            android:id="@+id/edt_password"
+            android:ems="10"
+            android:hint="@string/password_hint"
+            android:inputType="textPassword"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="32dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="16dp"
+            android:layout_width="0dp"
+            android:text="@={loginVM.passwordInput}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/edt_username"
+            android:importantForAutofill="no" />
 
         <Button
             android:id="@+id/btn_login"
-            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="32dp"
             android:layout_marginStart="32dp"
             android:layout_marginTop="32dp"
-            android:layout_marginEnd="32dp"
-            android:text="Click to Login"
-            android:textSize="18sp"
+            android:layout_width="0dp"
             android:onClick="@{() -> loginVM.login()}"
+            android:text="@string/login_button"
+            android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/edt_password" />
 
-        <EditText
-            android:id="@+id/edt_password"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="32dp"
-            android:ems="10"
-            android:hint="Password"
-            android:inputType="textPassword"
-            android:text="@={loginVM.passwordInput}"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/edt_username" />
-
-        <EditText
-            android:id="@+id/edt_username"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginEnd="32dp"
-            android:ems="10"
-            android:hint="Username"
-            android:inputType="text"
-            android:text="@={loginVM.usernameInput}"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <FrameLayout
             android:id="@+id/view_loading"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
             android:background="#1A000000"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -75,9 +79,9 @@
 
             <ProgressBar
                 style="?android:attr/progressBarStyleLarge"
-                android:layout_width="wrap_content"
+                android:layout_gravity="center"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center" />
+                android:layout_width="wrap_content" />
 
         </FrameLayout>
 

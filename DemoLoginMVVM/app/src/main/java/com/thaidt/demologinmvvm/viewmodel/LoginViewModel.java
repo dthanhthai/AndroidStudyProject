@@ -1,6 +1,5 @@
 package com.thaidt.demologinmvvm.viewmodel;
 
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -9,6 +8,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.thaidt.demologinmvvm.model.User;
 import com.thaidt.demologinmvvm.model.UserRepository;
+import com.thaidt.demologinmvvm.utils.ValidateData;
 
 public class LoginViewModel extends AndroidViewModel {
     public MutableLiveData<String> usernameInput = new MutableLiveData<>();
@@ -16,21 +16,11 @@ public class LoginViewModel extends AndroidViewModel {
 
     private MutableLiveData<DataWrapper<User>> loginLiveData;
 
-    private MutableLiveData<Boolean> isShowLoading;
-
     private UserRepository userRepository;
 
     public LoginViewModel(@NonNull Application application) {
         super(application);
         userRepository = new UserRepository(application);
-    }
-
-    private MutableLiveData<Boolean> getShowLoading() {
-        if (isShowLoading == null) {
-            isShowLoading = new MutableLiveData<>();
-            isShowLoading.setValue(false);
-        }
-        return isShowLoading;
     }
 
     public LiveData<DataWrapper<User>> getUserLiveData() {
@@ -40,22 +30,42 @@ public class LoginViewModel extends AndroidViewModel {
         return loginLiveData;
     }
 
-    @SuppressLint("StaticFieldLeak")
     public void login() {
         loginLiveData.setValue(new DataWrapper<User>(DataWrapper.State.LOADING));
-//        new LoginUserAsyncTask(userRepository).execute(usernameInput.getValue(), passwordInput.getValue());
         new Thread(new Runnable() {
             @Override
             public void run() {
+                String email = usernameInput.getValue();
+                String password = passwordInput.getValue();
+
+                if(email == null || email.isEmpty()){
+                    loginLiveData.postValue(new DataWrapper<User>(DataWrapper.State.ERROR, "email is empty"));
+                    return;
+                }
+
+                if(!ValidateData.validateEmail(email)){
+                    loginLiveData.postValue(new DataWrapper<User>(DataWrapper.State.ERROR, "email is invalid"));
+                    return;
+                }
+
+                if(password == null || password.isEmpty()){
+                    loginLiveData.postValue(new DataWrapper<User>(DataWrapper.State.ERROR, "password is empty"));
+                    return;
+                }
+
+                if(!ValidateData.validatePassword(password)){
+                    loginLiveData.postValue(new DataWrapper<User>(DataWrapper.State.ERROR, "password is invalid"));
+                    return;
+                }
+
                 try {
-                    Thread.sleep(1500);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     loginLiveData.postValue(new DataWrapper<User>(DataWrapper.State.ERROR, ""));
                     Log.e("Error", e.getMessage(), e);
                 }
 
-                User result = userRepository.login(usernameInput.getValue(), passwordInput.getValue());
-
+                User result = userRepository.login(email, password);
                 if (result != null) {
                     loginLiveData.postValue(new DataWrapper<User>(DataWrapper.State.SUCCESS, result));
                 } else {
@@ -64,34 +74,5 @@ public class LoginViewModel extends AndroidViewModel {
             }
         }).start();
     }
-
-//    private class LoginUserAsyncTask extends AsyncTask<String, Void, User> {
-//
-//        private UserRepository userRepo;
-//
-//        private LoginUserAsyncTask(UserRepository userRepo) {
-//            this.userRepo = userRepo;
-//        }
-//
-//        @Override
-//        protected User doInBackground(String... params) {
-//            try {
-//                Thread.sleep(1500);
-//            } catch (InterruptedException e) {
-//                loginLiveData.postValue(new DataWrapper<User>(DataWrapper.State.ERROR, ""));
-//                Log.e("Error", e.getMessage(), e);
-//            }
-//            return userRepo.login(params[0], params[1]);
-//        }
-//
-//        @Override
-//        protected void onPostExecute(User user) {
-//            if (user != null) {
-//                loginLiveData.setValue(new DataWrapper<User>(DataWrapper.State.SUCCESS, user));
-//            } else {
-//                loginLiveData.setValue(new DataWrapper<User>(DataWrapper.State.ERROR, "Wrong email or password"));
-//            }
-//        }
-//    }
 
 }
