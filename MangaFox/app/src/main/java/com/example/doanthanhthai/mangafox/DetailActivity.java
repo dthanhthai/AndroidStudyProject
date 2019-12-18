@@ -576,9 +576,11 @@ public class DetailActivity extends BaseActivity implements View.OnClickListener
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
             if (isRunGetSourceWeb) {
+//                webView.loadUrl(
+//                        "javascript:changeHtml5();" +
+//                                "javascript:this.document.location.href = 'source://' + encodeURI(document.documentElement.outerHTML);");
                 webView.loadUrl(
-                        "javascript:changeHtml5();" +
-                                "javascript:this.document.location.href = 'source://' + encodeURI(document.documentElement.outerHTML);");
+                        "javascript:this.document.location.href = 'source://' + encodeURI(document.documentElement.outerHTML);");
                 isRunGetSourceWeb = false;
             }
         }
